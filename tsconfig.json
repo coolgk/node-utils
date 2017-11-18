@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
-        "declaration": true
+        "declaration": true,
+		"target": "ES6",
+		"module": "commonjs"
     }
 }
