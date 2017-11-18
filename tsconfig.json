@@ -2,6 +2,7 @@
     "compilerOptions": {
         "declaration": true,
 		"target": "ES6",
-		"module": "commonjs"
+		"module": "commonjs",
+		"strict": true
     }
 }

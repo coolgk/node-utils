@@ -8,7 +8,8 @@
     "@types/node": "^8.0.52",
     "@types/redis": "^2.8.1",
     "bcrypt-nodejs": "0.0.3",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "tmp": "0.0.33"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
