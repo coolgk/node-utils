@@ -1,0 +1,26 @@
+{
+  "name": "ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/bcrypt-nodejs": "0.0.30",
+    "@types/es6-promise": "0.0.33",
+    "@types/node": "^8.0.52",
+    "@types/redis": "^2.8.1",
+    "bcrypt-nodejs": "0.0.3",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-typescript": "^3.2.3",
+    "merge2": "^1.2.0",
+    "typescript": "^2.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
