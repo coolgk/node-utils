@@ -13,8 +13,8 @@ captcha.verify('input_response', 'ip').then((response) => {
 import * as request from './request';
 
 export interface CaptchaConfig {
-	request?: typeof request;
-	secret: string;
+	readonly request?: typeof request;
+	readonly secret: string;
 };
 
 export class Captcha {

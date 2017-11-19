@@ -4,16 +4,20 @@ const gulp = require('gulp');
 const ts = require('gulp-typescript');
 // var merge = require('merge2');
 const sourcemaps = require('gulp-sourcemaps');
+const changed = require('gulp-changed');
 
 const tsProject = ts.createProject('./tsconfig.json');
 
+const distFolder = 'dist';
+
 gulp.task('scripts', function() {
     const tsResult = gulp.src('src/*.ts')
+		.pipe(changed(distFolder)) // , {extension: '.js'}
         .pipe(sourcemaps.init()) // This means sourcemaps will be generated
         .pipe(tsProject())
         .js
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest(distFolder));
 
     // tsResult.js
         // .pipe(sourcemaps.write())

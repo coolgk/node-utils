@@ -25,22 +25,6 @@ console.log(urlHash);
 console.log(decodeUrl(urlHash));
 ```
 
-## bcrypt
-
-```TypeScript
-import { encrypt, verify } from './bcrypt';
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log);
-    
-    verify(password, 'invalidhash').then(console.log, console.error);
-    
-    verify('invalidpass', hash).then(console.log);
-});
-```
-
 ## blockingCall
 
 ```TypeScript

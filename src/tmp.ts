@@ -45,7 +45,9 @@ export function generate (action: string, options: TmpConfig = {}): Promise<TmpR
 				tries: 10,
 				...options
 			},
-            (error, path, fd, cleanupCallback) => error ? reject(error) : resolve({path, fd, cleanupCallback})
+            (error: Error, path: string, fd: string, cleanupCallback: Function): void => {
+				error ? reject(error) : resolve({path, fd, cleanupCallback})
+			}
         );
     });
 }

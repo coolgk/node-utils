@@ -64,7 +64,7 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
             });
         });
 
-        request.on('error', (error) => {
+        request.on('error', (error: Error) => {
             reject(error);
         });
 

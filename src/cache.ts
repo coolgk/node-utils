@@ -34,12 +34,16 @@ cache.getSetIfNull(
 
 import { RedisClient } from 'redis';
 
+export interface CacheClient extends RedisClient {
+	[key: string]: any;
+}
+
 export interface CacheConfig {
-    readonly redisClient: RedisClient;
+    readonly redisClient: CacheClient;
 }
 
 export class Cache {
-    private _redisClient: RedisClient;
+    private _redisClient: CacheClient;
     /**
      * @param {object} options -
      * @param {object} options.redisClient - redis client
@@ -54,7 +58,7 @@ export class Cache {
      */
     command (command: string, ...params: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
-            params.push((error, response) => {
+            params.push((error: Error, response: any) => {
                 error ? reject(error) : resolve(response);
             });
             this._redisClient[command](...params);
