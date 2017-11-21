@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/bcrypt-nodejs": "0.0.30",
     "@types/csv-parse": "^1.1.11",
     "@types/csv-stringify": "^1.4.1",
     "@types/node": "^8.0.52",
