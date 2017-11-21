@@ -2,11 +2,12 @@
 
 - [base64](#base64)
 - [bcrypt](#bcrypt)
-- blockingCall
-- cache
-- captcha
-- request
+- [blockingCall] (#blockingCall)
+- [cache] (#cache)
+- [captcha] (#captcha)
+- [request] (#request)
 - [tmp](#tmp)
+- [csv] (#csv)
 
 ## base64
 
@@ -34,9 +35,9 @@ const password = 'abc123';
 
 encrypt(password).then((hash) => {
     verify(password, hash).then(console.log);
-    
+
     verify(password, 'invalidhash').then(console.log, console.error);
-    
+
     verify('invalidpass', hash).then(console.log);
 });
 ```

@@ -7,6 +7,7 @@
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/csv-parse": "^1.1.11",
     "@types/csv-stringify": "^1.4.1",
+    "@types/mongodb": "^2.2.15",
     "@types/node": "^8.0.52",
     "@types/redis": "^2.8.1",
     "bcrypt-nodejs": "0.0.3",
