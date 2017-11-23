@@ -3,61 +3,71 @@
 /*
 example
 
-const csv = new CSV({
-    tmp: require('../core/tmp.js')
-});
+import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
 
-return model.query('find').then((cursor) =>
-    csv.createFile(
-        cursor,
-        {
-            headers: ['column 1', 'column 2', 'column 3'],
-            formatter: (row) => {
-                return [row.column, row.column2, 'formatted data'];
-            }
+const csv = new Csv();
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row: any[]) => {
+            return row.map((value) => 'formatted-' + value);
         }
-    ).then((csvFilePath) => {
-        console.log(csvFilePath);
-        return this._downloadFile(csvFilePath, 'filename.csv');
-    });
-);
-
-// {cursor: 1} below tells findAll() to return a cursor instead of an array
-return model.findAll({cursor: 1}).then((result) =>
-    csv.createFile(
-        result.data,
-        {
-            headers: ['column 1', 'column 2', 'column 3'],
-            formatter: (row) => {
-                return [row.column, row.column2, 'formatted data'];
-            }
-        }
-    ).then((csvFilePath) => {
-        console.log(csvFilePath);
-        return this._downloadFile(csvFilePath, 'filename.csv');
-    });
-);
-
-const lines = csv.readFile('largeFile.csv');
-lines.forEach((lineArray, index) => {
-    console.log(lineArray, index);
-});
-
-const lines = csv.readFile('largeFile.csv', {headers: ['id', 'name']});
-lines.forEach((lineObject, index) => {
-    console.log(lineObject, index);
-});
-
-
-const lines = csv.readFile('/var/www/tmp/test.csv', {delimiter: "\t", columns: ['first', 'second']});
-lines.forEach(
-    (lineArray, index) => {
-        console.log(lineArray, index);
-    },
-    (total) => {
-        console.log(total);
     }
-);
+).then((csvFilePath) => {
+    console.log(csvFilePath);
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row: {[propName: string]: any}) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath);
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+        },
+        (total) => {
+            console.log('read done, total:', total);
+        }
+    );
+
+    // without columns/headers
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+        },
+        (total) => {
+            console.log('read done, total:', total);
+        }
+    );
+}
 
 */
 
@@ -80,13 +90,14 @@ export interface CsvConfig {
 export interface CsvReadConfig {
     columns?: string[];
     limit?: number;
+    delimiter?: string;
 };
 
 export interface CsvWriteConfig {
     columns?: string[];
     delimiter?: string;
     filepath?: string;
-    formatter?: (data: {} | any[]) => string[];
+    formatter?: (data: {[propName: string]: any} | any[]) => string[];
 };
 
 export class Csv {

@@ -8,6 +8,7 @@
 - [request](#request)
 - [tmp](#tmp)
 - [csv](#csv)
+- [email](#email)
 
 ## base64
 
@@ -152,4 +153,113 @@ generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
 generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
 
 generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+```
+
+## csv
+```TypeScript
+import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
+
+const csv = new Csv();
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row: any[]) => {
+            return row.map((value) => 'formatted-' + value);
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath);
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row: {[propName: string]: any}) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath);
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+        },
+        (total) => {
+            console.log('read done, total:', total);
+        }
+    );
+
+    // without columns/headers
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+        },
+        (total) => {
+            console.log('read done, total:', total);
+        }
+    );
+}
+```
+
+## email
+```TypeScript
+import { Email } from './email';
+
+let email = new Email({
+    host: 'localhost'
+});
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.gong@carboncredentials.com'
+    },
+    to: [
+        {
+            name: 'Cian Duggan',
+            email: 'daniel.gong+abc@carboncredentials.com'
+        },
+        'dev@carboncredentials.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/var/www/clientportalapi/uploads/portal2.png',
+            name: 'screenshot.png',
+            type: 'image/png'
+        },
+        {
+            path:"/var/www/clientportalapi/uploads/portal2.png",
+            type:"image/png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
+});
 ```
