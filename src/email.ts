@@ -88,15 +88,15 @@ export class Email {
 
     /**
      * @param {object} options
-     * @param {function} options.stripTags - lib/stripTags.js
-     * @param {string} options.user - username for logging into smtp
-     * @param {string} options.password - password for logging into smtp
+     * @param {function} [options.stripTags] - ./stripTags.js
+     * @param {string} [options.user] - username for logging into smtp
+     * @param {string} [options.password] - password for logging into smtp
      * @param {string} options.host - smtp host
-     * @param {string} options.port - smtp port (if null a standard port number will be used)
-     * @param {boolean} options.ssl - boolean (if true or object, ssl connection will be made)
-     * @param {boolean} options.tls - boolean (if true or object, starttls will be initiated)
-     * @param {string} options.domain - domain to greet smtp with (defaults to os.hostname)
-     * @param {string[]} options.authentication - authentication methods (ex: email.authentication.PLAIN, email.authentication.XOAUTH2)
+     * @param {string} [options.port] - smtp port (if null a standard port number will be used)
+     * @param {boolean} [options.ssl] - boolean (if true or object, ssl connection will be made)
+     * @param {boolean} [options.tls] - boolean (if true or object, starttls will be initiated)
+     * @param {string} [options.domain] - domain to greet smtp with (defaults to os.hostname)
+     * @param {string[]} [options.authentication] - authentication methods (ex: email.authentication.PLAIN, email.authentication.XOAUTH2)
      */
     constructor (options: EmailConfig) {
         this._options = options;
@@ -106,21 +106,22 @@ export class Email {
     }
 
     /**
-     * @param {object} options - email options
+     * @param {object} options
      * @param {string} options.subject - email subject
-     * @param {string} options.message - html email message
-     * @param {object[]} options.to - to email address
+     * @param {string} [options.message] - html email message
+     * @param {(string|object)[]} options.to - to email address
      * @param {string} options.to[].name - name of the recipient
      * @param {string} options.to[].email - email address of the recipient
-     * @param {object[]} options.from - see options.to
-     * @param {object[]} options.cc - see options.to
-     * @param {object[]} options.bcc - see options.to
-     * @param {object[]} attachments - email attachments
+     * @param {string | object} [options.from] - see options.to
+     * @param {(string|object)[]} [options.cc] - see options.to
+     * @param {(string|object)[]} [options.bcc] - see options.to
+     * @param {object[]} [attachments] - email attachments
      * @param {string} attachments.path - file path
-     * @param {string} attachments.name - file name
+     * @param {string} [attachments.name] - file name
      * @param {string} [attachments.type] - file mime type
-     * @param {string} attachments.method - method to send attachment as (used by calendar invites)
-     * @param {object} attachments.headers - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
+     * @param {string} [attachments.method] - method to send attachment as (used by calendar invites)
+     * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
+     * @return {promise}
      */
     send (options: SendConfig): Promise<{}> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
@@ -160,6 +161,12 @@ export class Email {
         });
     }
 
+    /**
+     * @param {(string|object)[]} emails - to email address
+     * @param {string} emails[].name - name of the recipient
+     * @param {string} emails[].email - email address of the recipient
+     * @return {string} - "name name" <email@email.com>, "name2" <email@email.com> ...
+     */
     private _formatEmailAddress (emails: (string | EmailAddress)[]): string {
         let formattedEmails = [];
         emails.forEach((email: string | EmailAddress) => {

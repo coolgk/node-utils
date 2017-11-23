@@ -36,6 +36,8 @@ export interface TmpResponse {
  * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
  * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default (guesses from environment)
+ * @param {boolean} [options.keep] - if to keep the file
+ * @return {promise}
  */
 export function generate (action: string, options: TmpConfig = {}): Promise<TmpResponse> {
     return new Promise((resolve, reject) => {
@@ -52,14 +54,40 @@ export function generate (action: string, options: TmpConfig = {}): Promise<TmpR
     });
 }
 
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, it fallbacks to 0600 on file creation and 0700 on directory creation
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default (guesses from environment)
+ * @param {boolean} [options.keep] - if to keep the file
+ * @return {promise}
+ */
 export function generateFile (options?: TmpConfig): Promise<TmpResponse> {
     return generate('file', options);
 }
 
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, it fallbacks to 0600 on file creation and 0700 on directory creation
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default (guesses from environment)
+ * @param {boolean} [options.keep] - if to keep the file
+ * @return {promise}
+ */
 export function generateDir (options?: TmpConfig): Promise<TmpResponse> {
     return generate('dir', options);
 }
 
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, it fallbacks to 0600 on file creation and 0700 on directory creation
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default (guesses from environment)
+ * @return {promise}
+ */
 export function generateTmpName (options?: TmpConfig): Promise<TmpResponse> {
     return generate('tmpName', options);
 }

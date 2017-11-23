@@ -1,6 +1,4 @@
 /*
-example:
-
 import {send, get, post} from './request';
 
 get('https://httpbin.org/get?a=b').then((respose) => {
@@ -24,24 +22,26 @@ import * as url from 'url';
 import { stringify } from 'querystring';
 
 export interface RequestConfig {
-    data?: any;
-    headers?: {};
+    data?: {};
+    headers?: {[propName: string]: string};
     method?: string;
-	protocol?: string;
+    protocol?: string;
 };
 
 export interface RequestResponse {
-	statusCode: number;
-	headers: {}[];
-	data: string;
-	json: {};
+    statusCode: number;
+    headers: {[propName: string]: string}[];
+    data: string;
+    json: {};
 }
 
 /**
- * @param {object} options
- * @param {object} options.data - post data e.g. form data or files
- * @param {object} options.headers - http headers
- * @param {string} options.method - POST GET etc
+ * @param {string} urlString - e.g. http://abc.com or https://xyz.com
+ * @param {object} [options]
+ * @param {object} [options.data] - post data e.g. form data or files
+ * @param {object} [options.headers] - http headers
+ * @param {string} [options.method='GET'] - POST GET etc
+ * @return {promise}
  */
 export function send (urlString: string, options: RequestConfig = {}): Promise<RequestResponse> {
     return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
             let data = '';
             response.on('data', (chunk) => data += chunk);
             response.on('end', () => {
-				const requestResponse: RequestResponse = {
+                const requestResponse: RequestResponse = {
                     statusCode: response.statusCode,
                     headers: response.headers,
                     data: data,
@@ -69,7 +69,7 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
         });
 
         if (options.data) {
-            request.write(options.data);
+            request.write(JSON.stringify(options.data));
         }
 
         request.end();
@@ -77,25 +77,29 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
 }
 
 /**
- * @param {object} options
- * @param {object} options.headers - http headers
+ * @param {string} url - e.g. http://abc.com or https://xyz.com
+ * @param {object} [options]
+ * @param {object} [options.headers] - http headers
+ * @return {promise}
  */
 export function get (url: string, options: RequestConfig = {}): Promise<RequestResponse> {
-	delete options.data;
-	return send(url, options);
+    delete options.data;
+    return send(url, options);
 }
 
 /**
- * @param {object} options
- * @param {object} options.data - post data e.g. form data or files
- * @param {object} options.headers - http headers
+ * @param {string} url - e.g. http://abc.com or https://xyz.com
+ * @param {object} [options]
+ * @param {object} [options.data] - post data e.g. form data or files
+ * @param {object} [options.headers] - http headers
+ * @return {promise}
  */
 export function post (url: string, options: RequestConfig = {}): Promise<RequestResponse> {
-	options.data = stringify(options.data || {});
-	options.headers = Object.assign(options.headers || {}, {
-		'Content-Type': 'application/x-www-form-urlencoded',
-		'Content-Length': Buffer.byteLength(options.data)
-	});
-	options.method = 'POST';
-	return send(url, options);
+    options.data = stringify(options.data || {});
+    options.headers = Object.assign(options.headers || {}, {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(JSON.stringify(options.data))
+    });
+    options.method = 'POST';
+    return send(url, options);
 }
