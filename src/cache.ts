@@ -43,6 +43,7 @@ export interface CacheConfig {
 }
 
 export class Cache {
+
     private _redisClient: CacheClient;
     /**
      * @param {object} options -
@@ -54,7 +55,8 @@ export class Cache {
 
     /**
      * @param {string} command - redis command to run
-     * @param {*} params - params for the command
+     * @param {*[]} params - params for the command
+     * @return {promise}
      */
     command (command: string, ...params: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -69,6 +71,7 @@ export class Cache {
      * @param {string} name - name of the variable
      * @param {*} value - value is always JSON.stringify'ed
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
+     * @return {promise}
      */
     set (name: string, value: any, expiry = 0): Promise<any> {
         return expiry ? this.command('setex', name, expiry, JSON.stringify(value)) : this.command('set', name, JSON.stringify(value));
@@ -76,6 +79,7 @@ export class Cache {
 
     /**
      * @param {string} name - name of the variable
+     * @return {promise}
      */
     get (name: string): Promise<{}> {
         return this.command('get', name).then((value) => {

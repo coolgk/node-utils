@@ -1,5 +1,3 @@
-'use strict';
-
 /*
 Example:
 blocking call functions in order
@@ -32,6 +30,7 @@ blockingCall(c);
 let promise = Promise.resolve();
 /**
  * @param {function} callback - callback function that returns a promise
+ * @return {promise}
  */
 export function blockingCall (callback: Function): Promise<any> {
     return promise = promise.then((data) => callback(data));

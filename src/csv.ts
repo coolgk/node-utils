@@ -1,5 +1,3 @@
-'use strict';
-
 /*
 example
 
@@ -68,7 +66,6 @@ function read (file, columns) {
         }
     );
 }
-
 */
 
 // npm i -S csv-stringify @types/csv-stringify csv-parse @types/csv-parse @types/mongodb
@@ -100,6 +97,13 @@ export interface CsvWriteConfig {
     formatter?: (data: {[propName: string]: any} | any[]) => string[];
 };
 
+export interface ReadFileResponse {
+    forEach: (
+        callback: (row: any, index: number) => void,
+        endCallback: (rowCount: number) => void
+    ) => void;
+}
+
 export class Csv {
 
     private _csvParse: typeof csvParse;
@@ -108,7 +112,11 @@ export class Csv {
     private _tmpConfig: TmpConfig;
 
     /**
-     * @param {object} tmp - tmp class ./core/tmp.js
+     * @param {object} options
+     * @param {function} [options.generateFile] - generateFile function from ./tmp
+     * @param {function} [options.csvStringify] - require('csv-stringify')
+     * @param {function} [options.csvParse] - require('csv-parse')
+     * @param {object} [options.tmpConfig] - see generate() in ./tmp
      */
     constructor (options: CsvConfig = {}) {
         this._csvStringify = options.csvStringify || csvStringify;
@@ -120,8 +128,11 @@ export class Csv {
     /**
      * parse a string as csv data and returns an array
      * @param {string} string - csv string
-     * @param {object} options -
-     * @param {string[]} options.columns - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
+     * @param {object} options
+     * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
+     * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
+     * @param {string} [options.delimiter=','] - csv delimiter
+     * @return {promise}
      */
     parse (string: string, options: CsvReadConfig = {}): Promise<any[]> {
         return new Promise(
@@ -133,11 +144,13 @@ export class Csv {
      * read a csv file. the return value can ONLY be used in a forEach() loop
      * e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
      * @param {string} file - file path
-     * @param {string[]} options.columns - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
-     * @param {number} options.limit - number of lines to return. 0 = unlimited
-     * @return {function} forEach
+     * @param {object} options
+     * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
+     * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
+     * @param {string} [options.delimiter=','] - csv delimiter
+     * @return {object} { forEach: ((row, index) => void, (totalCount) => void) => void }
      */
-    readFile (file: string, options: CsvReadConfig = {}): { forEach: Function } {
+    readFile (file: string, options: CsvReadConfig = {}): ReadFileResponse {
         const fileStream = createReadStream(file);
         const readline = require('readline').createInterface({
             input: fileStream
@@ -174,8 +187,9 @@ export class Csv {
      * @param {function} [options.formatter] - callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'],
      * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.
      * @param {string} [options.filepath] - file path is automatically generated if empty
+     * @return {promise}
      */
-    createFile (data: any[] | Cursor, options: CsvWriteConfig = {}) {
+    createFile (data: any[] | Cursor, options: CsvWriteConfig = {}): Promise<string> {
         return (
             options.filepath ? Promise.resolve({path: options.filepath}) : this._generateFile({...this._tmpConfig, postfix: '.csv'})
         ).then(({path}) => {
@@ -218,9 +232,16 @@ export class Csv {
     }
 
     /**
-     * @param {bool} [isHeader=false] - if data is header, if header is true, options.formatter is not called on data
+     * @param {stream} writableStream
+     * @param {promise|*[]} rowData
+     * @param {object} options
+     * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', 'email']
+     * @param {function} [options.formatter] - callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'],
+     * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.
+     * @param {string} [options.filepath] - file path is automatically generated if empty
+     * @return {promise}
      */
-    _writeCsvStream (
+    private _writeCsvStream (
         writableStream: WriteStream, rowData: Promise<any[]> | any[], options: CsvWriteConfig, isHeader: boolean = false
     ): Promise<void> {
         // write onece at a time

@@ -16,17 +16,17 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 import tmp = require('tmp');
 
 export interface TmpConfig {
-	mode?: number,
-	prefix?: string,
-	postfix?: string,
-	dir?: string,
-	keep?: boolean
+    mode?: number,
+    prefix?: string,
+    postfix?: string,
+    dir?: string,
+    keep?: boolean
 };
 
 export interface TmpResponse {
-	path: string,
-	fd?: string,
-	cleanupCallback?: Function
+    path: string,
+    fd?: string,
+    cleanupCallback?: Function
 }
 
 /**
@@ -38,28 +38,28 @@ export interface TmpResponse {
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default (guesses from environment)
  */
 export function generate (action: string, options: TmpConfig = {}): Promise<TmpResponse> {
-	return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         tmp[action](
-			{
-				prefix: Date.now(),
-				tries: 10,
-				...options
-			},
+            {
+                prefix: Date.now(),
+                tries: 10,
+                ...options
+            },
             (error: Error, path: string, fd: string, cleanupCallback: Function): void => {
-				error ? reject(error) : resolve({path, fd, cleanupCallback})
-			}
+                error ? reject(error) : resolve({path, fd, cleanupCallback})
+            }
         );
     });
 }
 
 export function generateFile (options?: TmpConfig): Promise<TmpResponse> {
-	return generate('file', options);
+    return generate('file', options);
 }
 
 export function generateDir (options?: TmpConfig): Promise<TmpResponse> {
-	return generate('dir', options);
+    return generate('dir', options);
 }
 
 export function generateTmpName (options?: TmpConfig): Promise<TmpResponse> {
-	return generate('tmpName', options);
+    return generate('tmpName', options);
 }
