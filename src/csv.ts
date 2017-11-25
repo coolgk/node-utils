@@ -74,7 +74,7 @@ import { createWriteStream, createReadStream, WriteStream } from 'fs';
 import csvStringify = require('csv-stringify');
 import csvParse = require('csv-parse');
 import { generateFile, TmpConfig } from './tmp';
-import { blockingCall } from './blockingCall';
+import { queue } from './queue';
 import { Cursor } from 'mongodb';
 
 export interface CsvConfig {
@@ -163,7 +163,7 @@ export class Csv {
                     (line) => {
                         if (!options.limit || index < options.limit) {
                             ((callbackIndex) => {
-                                blockingCall(
+                                queue(
                                     () => this.parse(line, options).then(
                                         ([row]) => callback(row, callbackIndex)
                                     )
@@ -245,7 +245,7 @@ export class Csv {
         writableStream: WriteStream, rowData: Promise<any[]> | any[], options: CsvWriteConfig, isHeader: boolean = false
     ): Promise<void> {
         // write onece at a time
-        return blockingCall(
+        return queue(
             () => new Promise((resolve, reject) =>
                 Promise.resolve(rowData).then( // for cursor version of findAll()
                     (data) => this._csvStringify(
