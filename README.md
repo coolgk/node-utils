@@ -2,7 +2,7 @@
 
 - [base64](#base64)
 - [bcrypt](#bcrypt)
-- [blockingCall](#blockingCall)
+- [queue](#queue)
 - [cache](#cache)
 - [captcha](#captcha)
 - [request](#request)
@@ -43,31 +43,39 @@ encrypt(password).then((hash) => {
 });
 ```
 
-## blockingCall
+## queue
 
 ```TypeScript
-const blockingCall = require('blockingCall.js');
+import { queue } from './queue';
 
 function a (x) {
-    return new Promise((resolve) => setTimeout(() => { console.log('a', x); resolve('a') }, 300));
+	console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
 }
 
 function b (x) {
-    return new Promise((resolve) => setTimeout(() => { console.log('b', x); resolve('b') }, 200));
+	console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
 }
 
 function c (x) {
-    return new Promise((resolve) => setTimeout(() => { console.log('c', x); resolve('c') }, 100));
+	console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
 }
 
 // call a, b, c in order i.e. b will not start until a resolves
-blockingCall(a);
-blockingCall(b);
-blockingCall(c);
+queue(a);
+queue(b);
+queue(c);
 
 // call a 5 times, each will wait until previous call resolves
 [1,2,3,4,5].forEach(() => {
-    blockingCall(a)
+    queue(a)
+});
+
+// run limit to run two jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
 });
 ```
 
