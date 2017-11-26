@@ -241,25 +241,23 @@ email.send({
     subject: 'hello this is email subject',
     from: {
             name: 'Daniel Gong',
-            email: 'daniel.gong@carboncredentials.com'
+            email: 'danie.gong@example.com`'
     },
     to: [
         {
             name: 'Cian Duggan',
-            email: 'daniel.gong+abc@carboncredentials.com'
+            email: 'danie.gong+label@example.com`'
         },
-        'dev@carboncredentials.com'
+        'danie.gong+3@example.com`'
     ],
     message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
     attachments: [
         {
             path: '/var/www/clientportalapi/uploads/portal2.png',
-            name: 'screenshot.png',
-            type: 'image/png'
+            name: 'screenshot.png'
         },
         {
             path:"/var/www/clientportalapi/uploads/portal2.png",
-            type:"image/png",
             headers:{"Content-ID": "<my-image>"}
         }
     ]
