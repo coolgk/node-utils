@@ -9,6 +9,9 @@
 - [tmp](#tmp)
 - [csv](#csv)
 - [email](#email)
+- [ampq](#ampq)
+- [string](#string)
+- [array](#array)
 
 ## base64
 
@@ -271,3 +274,60 @@ email.send({
     console.log(error);
 });
 ```
+
+## ampq
+```TypeScript
+import { Amqp } from './amqp';
+
+const amqp = new Amqp({
+	url: 'amqp://cpbmqvjl:Df8PA7nGmW5wWrKpoINIDP9OowpMf0YA@gopher.rmq.cloudamqp.com/cpbmqvjl'
+});
+
+const message = {
+	a: 1,
+	b: 'b'
+};
+
+amqp.publish('ignore no response');
+
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+	console.log('response from consumer', responseMessage);
+});
+
+amqp.consume(({rawMessage, message}) => {
+	console.log('consumer received', message);
+	return {
+		response: 123123
+	}
+});
+```
+
+## string
+```TypeScript
+import { stripTags, escapeHtml, unescapeHtml } from './string';
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str));
+console.log(escapeHtml(str));
+console.log(unescapeHtml(escapeHtml(str)));
+```
+
+## array
+```TypeScript
+import { toArray } from './array';
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a));
+console.log(toArray(b));
+console.log(toArray(c));
+console.log(toArray(d));
+console.log(toArray(e));
+```
+
+
