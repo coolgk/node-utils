@@ -1,6 +1,7 @@
 /*
 import { Amqp } from './amqp';
 
+// cloudamqp.com
 const amqp = new Amqp({
 	url: 'amqp://localhost/vhost'
 });
