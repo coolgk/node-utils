@@ -31,7 +31,6 @@ console.log(decodeUrl(urlHash));
 ```
 
 ## bcrypt
-
 ```TypeScript
 import { encrypt, verify } from './bcrypt';
 
@@ -47,22 +46,21 @@ encrypt(password).then((hash) => {
 ```
 
 ## queue
-
 ```TypeScript
 import { queue } from './queue';
 
 function a (x) {
-	console.log('start a');
+    console.log('start a');
     return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
 }
 
 function b (x) {
-	console.log('start b');
+    console.log('start b');
     return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
 }
 
 function c (x) {
-	console.log('start c');
+    console.log('start c');
     return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
 }
 
@@ -76,14 +74,13 @@ queue(c);
     queue(a)
 });
 
-// run limit to run two jobs at a time
+// run 3 jobs at a time
 [1,2,3,4,5,6,7,8,9,10].forEach(() => {
     queue(a, 3)
 });
 ```
 
 ## cache
-
 ```TypeScript
 import { Cache, CacheConfig } from './cache';
 import { createClient } from 'redis';
@@ -119,7 +116,6 @@ cache.getSetIfNull(
 ```
 
 ## captcha
-
 ```TypeScript
 import { Captcha } from './captcha';
 
@@ -155,7 +151,6 @@ post('https://httpbin.org/post?a=b').then((respose) => {
 ```
 
 ## tmp
-
 ```TypeScript
 import { generateFile, generateDir, generateTmpName } from './tmp';
 
@@ -329,5 +324,3 @@ console.log(toArray(c));
 console.log(toArray(d));
 console.log(toArray(e));
 ```
-
-
