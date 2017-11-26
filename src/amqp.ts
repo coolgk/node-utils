@@ -2,7 +2,7 @@
 import { Amqp } from './amqp';
 
 const amqp = new Amqp({
-	url: 'amqp://cpbmqvjl:Df8PA7nGmW5wWrKpoINIDP9OowpMf0YA@gopher.rmq.cloudamqp.com/cpbmqvjl'
+	url: 'amqp://localhost/vhost'
 });
 
 const message = {
