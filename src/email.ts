@@ -43,12 +43,12 @@ import emailjs = require('emailjs');
 import { getType } from 'mime';
 
 export interface EmailConfig {
+    readonly host: string;
     readonly stripTags?: typeof stripTags;
     readonly emailClient?: typeof emailjs;
     readonly getMimeType?: typeof getType;
     readonly user?: string;
     readonly password?: string;
-    readonly host: string;
     readonly port?: number;
     readonly ssl?: boolean;
     readonly tls?: boolean;
@@ -62,8 +62,8 @@ export interface EmailAddress {
 }
 
 export interface EmailAttachment {
-    readonly name?: string;
     readonly path: string;
+    readonly name?: string;
     type?: string;
     readonly method?: string;
     readonly headers?: {[propName: string]: string};
