@@ -245,7 +245,7 @@ email.send({
     },
     to: [
         {
-            name: 'Cian Duggan',
+            name: 'Dan Go',
             email: 'danie.gong+label@example.com`'
         },
         'danie.gong+3@example.com`'
