@@ -34,6 +34,7 @@ cache.getSetIfNull(
 
 import { RedisClient } from 'redis';
 
+// for this._redisClient[command]
 export interface CacheClient extends RedisClient {
 	[key: string]: any;
 }
