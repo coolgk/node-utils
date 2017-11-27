@@ -3,7 +3,11 @@ example
 
 import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
 
-const csv = new Csv();
+const csv = new Csv({
+    tmpConfig: { // optional
+        dir: '/tmp/csv'
+    }
+});
 
 const arrayData = [
     [1,2,3,4,5],
@@ -191,7 +195,11 @@ export class Csv {
      */
     createFile (data: any[] | Cursor, options: CsvWriteConfig = {}): Promise<string> {
         return (
-            options.filepath ? Promise.resolve({path: options.filepath}) : this._generateFile({...this._tmpConfig, postfix: '.csv'})
+            options.filepath ? Promise.resolve({path: options.filepath}) : this._generateFile({
+                ...this._tmpConfig,
+                keep: true,
+                postfix: '.csv'
+            })
         ).then(({path}) => {
             const fileStream = createWriteStream(path);
             const fileStreamPromise = new Promise((resolve, reject) => {

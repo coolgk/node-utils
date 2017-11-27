@@ -10,8 +10,12 @@
 - [csv](#csv)
 - [email](#email)
 - [ampq](#ampq)
+- [pdf](#pdf)
+- [unit](#unit)
+- [url](#url)
 - [string](#string)
 - [array](#array)
+- [number](#number)
 
 ## base64
 
@@ -120,11 +124,11 @@ cache.getSetIfNull(
 import { Captcha } from './captcha';
 
 const captcha = new Captcha({
-	secret: '---'
+    secret: '---'
 });
 
 captcha.verify('input_response', 'ip').then((response) => {
-	console.log(response);
+    console.log(response);
 });
 ```
 
@@ -165,7 +169,11 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 ```TypeScript
 import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
 
-const csv = new Csv();
+const csv = new Csv({
+    tmpConfig: { // optional
+        dir: '/tmp/csv'
+    }
+});
 
 const arrayData = [
     [1,2,3,4,5],
@@ -273,26 +281,130 @@ email.send({
 import { Amqp } from './amqp';
 
 const amqp = new Amqp({
-	url: 'amqp://localhost/vhost'
+    url: 'amqp://localhost/vhost'
 });
 
 const message = {
-	a: 1,
-	b: 'b'
+    a: 1,
+    b: 'b'
 };
 
 amqp.publish('ignore no response');
 
 amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-	console.log('response from consumer', responseMessage);
+    console.log('response from consumer', responseMessage);
 });
 
 amqp.consume(({rawMessage, message}) => {
-	console.log('consumer received', message);
-	return {
-		response: 123123
-	}
+    console.log('consumer received', message);
+    return {
+        response: 123123
+    }
 });
+```
+
+## pdf
+```TypeScript
+import { Pdf } from './pdf';
+
+const pdf = new Pdf({
+    tmpConfig: {
+        dir: '/tmp/pdf'
+    }
+});
+
+pdf.createFromHtmlFile(
+    '/tmp/test.html',
+    {
+        header: {
+            height: '1cm',
+            contents: "header <strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
+        },
+        footer: {
+            height: '1cm',
+            contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
+        },
+        margin: '0.5cm'
+    }
+).then((pdfFile) => {
+    console.log(pdfFile);
+});
+
+const htmlCode = `<!DOCTYPE html><html><head>
+        <title>CCES</title>
+        <style>
+            .pagebreak { page-break-after: always; }
+            h2, h1 { color: red }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>page 1</h1>
+            <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
+        </div>
+        <div class="pagebreak"></div>
+        <div>
+            <h2>page 2</h2>
+            <table>
+                <tr>
+                    <td>texgt</td>
+                    <td>text</td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>`;
+
+pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
+    console.log(pdfFile);
+});
+```
+
+## unit
+```TypeScript
+import { bytesToString, millisecondsToString } from './unit';
+
+console.log(
+    bytesToString(500),
+    bytesToString(5000),
+    bytesToString(5000000),
+    bytesToString(5000000000),
+    bytesToString(5000000000000),
+    bytesToString(5000000000000000),
+    bytesToString(5000000000000000000),
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000));
+console.log('1 min', millisecondsToString(60 * 1000));
+console.log('100 sec', millisecondsToString(100 * 1000));
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000));
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000));
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000));
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000));
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000));
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000));
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000));
+```
+
+## url
+```TypeScript
+import { getParams } from './url';
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern));
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2));
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3));
 ```
 
 ## string
@@ -304,6 +416,12 @@ const str = '<h1>test</h1><script>alert(1)</script>'
 console.log(stripTags(str));
 console.log(escapeHtml(str));
 console.log(unescapeHtml(escapeHtml(str)));
+
+console.log(prepad0(7, 2));
+console.log(prepad0(70, 3));
+console.log(prepad0(70, 4));
+console.log(prepad0(1, 4));
+console.log(prepad0(1000, 2));
 ```
 
 ## array
@@ -321,4 +439,14 @@ console.log(toArray(b));
 console.log(toArray(c));
 console.log(toArray(d));
 console.log(toArray(e));
+```
+
+## number
+```TypeScript
+import { round } from './number';
+
+console.log(round(1.3923, 2));
+console.log(round(100, 2));
+console.log(round(100.1264, 2));
+console.log(round(100.958747, 4));
 ```

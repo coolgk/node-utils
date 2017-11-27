@@ -33,20 +33,21 @@ email.send({
 }).catch((error) => {
     console.log(error);
 });
-
 */
 
-// npm i -S emailjs mime @types/mime
+// mime package (https://www.npmjs.com/package/mime) does not work in node 8 using mime-types instead
+// npm i -S emailjs mime-types
 
+import { basename } from 'path';
 import { stripTags } from './string';
 import emailjs = require('emailjs');
-import { getType } from 'mime';
+import mimeTypes = require('mime-types');
 
 export interface EmailConfig {
     readonly host: string;
     readonly stripTags?: typeof stripTags;
     readonly emailClient?: typeof emailjs;
-    readonly getMimeType?: typeof getType;
+    readonly getMimeType?: typeof mimeTypes.lookup;
     readonly user?: string;
     readonly password?: string;
     readonly port?: number;
@@ -63,7 +64,7 @@ export interface EmailAddress {
 
 export interface EmailAttachment {
     readonly path: string;
-    readonly name?: string;
+    name?: string;
     type?: string;
     readonly method?: string;
     readonly headers?: {[propName: string]: string};
@@ -83,7 +84,7 @@ export class Email {
     private _options: EmailConfig;
     private _emailClient: typeof emailjs;
     private _stripTags: typeof stripTags;
-    private _getMimeType: typeof getType;
+    private _getMimeType: typeof mimeTypes.lookup;
 
     /**
      * @param {object} options
@@ -101,7 +102,7 @@ export class Email {
         this._options = options;
         this._emailClient = options.emailClient || emailjs;
         this._stripTags = options.stripTags || stripTags;
-        this._getMimeType = options.getMimeType || getType;
+        this._getMimeType = options.getMimeType || mimeTypes.lookup;
     }
 
     /**
@@ -131,6 +132,9 @@ export class Email {
 
         if (options.attachments) {
             options.attachments.forEach((attachment: EmailAttachment) => {
+                if (!attachment.name) {
+                    attachment.name = basename(attachment.path);
+                }
                 if (!attachment.type) {
                     attachment.type = this._getMimeType(attachment.path);
                 }
