@@ -31,7 +31,7 @@ export class Token {
 
     /**
      * @param {object} options
-     * @param {object} [options.jwtConfig] - jwtConfig in ./jwt
+     * @param {object} [options.jwtConfig={secret: process.env.secret}] - jwtConfig in ./jwt
      * @param {object} options.cacheConfig - cacheConfig in ./cache
      * @param {string} [options.name='token'] - prefix used in redis e.g. token:[TOKEN_STRING...]
      * @param {number} [options.expiry=0] - in seconds. 0 = never expire
