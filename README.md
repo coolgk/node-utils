@@ -101,12 +101,12 @@ const config: CacheConfig = {
 
 const cache = new Cache(config);
 
-cache.set('abc', {a: 1}, 1).then(console.log);
+cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
 
-cache.get('abc').then(console.log);
+cache.get('abc').then(console.log); // { a: 1 }
 
 setTimeout(() => {
-    cache.get('abc').then(console.log);
+    cache.get('abc').then(console.log); // null
     client.quit();
 }, 1500);
 
@@ -115,7 +115,7 @@ cache.getSetIfNull(
     () => Promise.resolve('data'),
     10
 ).then((v) => {
-    console.log('-----', v);
+    console.log(v); // { a: 1 }
 });
 ```
 

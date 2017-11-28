@@ -14,12 +14,12 @@ const config: CacheConfig = {
 
 const cache = new Cache(config);
 
-cache.set('abc', {a: 1}, 1).then(console.log);
+cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
 
-cache.get('abc').then(console.log);
+cache.get('abc').then(console.log); // { a: 1 }
 
 setTimeout(() => {
-    cache.get('abc').then(console.log);
+    cache.get('abc').then(console.log); // null
     client.quit();
 }, 1500);
 
@@ -28,7 +28,7 @@ cache.getSetIfNull(
     () => Promise.resolve('data'),
     10
 ).then((v) => {
-    console.log('-----', v);
+    console.log(v); // { a: 1 }
 });
 */
 
@@ -36,7 +36,7 @@ import { RedisClient } from 'redis';
 
 // for this._redisClient[command]
 export interface CacheClient extends RedisClient {
-	[key: string]: any;
+    [key: string]: any;
 }
 
 export interface CacheConfig {
@@ -47,8 +47,9 @@ export class Cache {
 
     private _redisClient: CacheClient;
     /**
-     * @param {object} options -
-     * @param {object} options.redisClient - redis client
+     * @param {object} options
+     * @param {object} [options.redisClient] - redis client from redis.createClient()
+     * redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class
      */
     constructor (options: CacheConfig) {
         this._redisClient = options.redisClient;

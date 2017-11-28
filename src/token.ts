@@ -1,19 +1,42 @@
+/*
+import { Token } from './token';
 
+const token = new Token({
+    cacheConfig: {
+        host: 'localhost',
+        port: 6379,
+        password: 'cQ4j3bJdfZtSQmzS7wTwJuxB3CSuhRUnLGEFANADkFmXUKXT8PxQKtpm92TeUH4AqJeyWaw%Rg9Q@kn@_qR%M`zs,$3v:Cj>ye5S{Q%q@84w'
+    },
+    expiry: 30
+});
+
+token.verify().then((result) => {
+    console.log(result); //
+})
+
+token.set();
+token.get();
+token.getAll();
+token.delete();
+
+token.verify();
+token.destroy();
+
+token.renew();
+
+*/
 
 /**
  * a secure token can be manually revoked from db (jwt itself by default cannot be revoked until expired)
  */
 
-import { Jwt, JwtConfig } from './jwt';
-import { Cache, CacheConfig } from './cache';
+import { Cache } from './cache';
 
 export interface TokenConfig {
+    token: string;
+    cache: Cache;
     expiry?: number;
-    token?: string;
-    data?: any;
-    name?: string;
-    jwtConfig?: JwtConfig;
-    cacheConfig: CacheConfig;
+    prefix?: string;
 };
 
 export enum Errors {
@@ -23,7 +46,6 @@ export enum Errors {
 
 export class Token {
 
-    private _jwt: Jwt;
     private _cache: Cache;
     private _expiry: number;
     private _name: string;
@@ -39,27 +61,15 @@ export class Token {
      * @param {string} [options.token] - create a token based on this preloaded token string
      */
     constructor ({
-        jwtConfig = {secret: process.env.secret},
-        cacheConfig,
+        cache,
         expiry = 0,
         token,
-        data,
-        name
+        prefix = 'token'
     }: TokenConfig) {
-        this._jwt = new Jwt(jwtConfig);
         this._cache = new Cache(cacheConfig);
         this._expiry = expiry;
-
-        if (token) {
-            this._token = token;
-        } else {
-            this._token = this._jwt.generate(data, 0);
-            this.set('id', this._token).then(() => {
-                this.renew();
-            });
-        }
-
-        this._name = `${name || 'token'}:${this._token}`;
+        this._token = token;
+        this._name = `${prefix}:${this._token}`;
     }
 
     /**
@@ -70,6 +80,7 @@ export class Token {
         if (!this._token) {
             return {error: Errors.DESTROYED_TOKEN};
         }
+        await this.set('_timestamp', new Date());
         return expiry ? this._cache.command('expire', this._name, expiry) : true;
     }
 
@@ -92,8 +103,8 @@ export class Token {
         if (this._token) {
             const tokenData = this._jwt.verify(this._token);
             if (tokenData) {
-                const id = await this.get('id');
-                if (id) {
+                const timestamp = await this.get('_timestamp');
+                if (timestamp) {
                     return tokenData;
                 }
             }
