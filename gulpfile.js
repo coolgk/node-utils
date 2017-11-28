@@ -2,35 +2,30 @@
 
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
-// var merge = require('merge2');
 const sourcemaps = require('gulp-sourcemaps');
 const changed = require('gulp-changed');
+const merge = require('merge2');
 
 const tsProject = ts.createProject('./tsconfig.json');
 
 const distFolder = 'dist';
 
-gulp.task('scripts', function() {
+gulp.task('ts', async () => {
     const tsResult = gulp.src('src/*.ts')
-		.pipe(changed(distFolder)) // , {extension: '.js'}
+		.pipe(
+            changed(distFolder, {extension: '.js'})
+        )
         .pipe(sourcemaps.init()) // This means sourcemaps will be generated
-        .pipe(tsProject())
-        .js
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(distFolder));
+        .pipe(tsProject());
 
-    // tsResult.js
-        // .pipe(sourcemaps.write())
-        // .pipe(gulp.dest('dist'));
-
-    // return merge([ // Merge the two output streams, so this task is finished when the IO of both operations is done.
-        // tsResult.dts.pipe(gulp.dest('dist/definitions')),
-        // tsResult.js
-        // .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-        // .pipe(gulp.dest('dist/js'))
-    // ]);
+    return merge([ // Merge the two output streams, so this task is finished when the IO of both operations is done.
+        tsResult.dts.pipe(gulp.dest(`${distFolder}/types`)),
+        tsResult.js
+        .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+        .pipe(gulp.dest(`${distFolder}/js`))
+    ]);
 });
 
-gulp.task('watch', ['scripts'], function() {
-    gulp.watch('src/*.ts', ['scripts']);
+gulp.task('watch', ['ts'], () => {
+    gulp.watch('src/*.ts', ['ts']);
 });

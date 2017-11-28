@@ -66,7 +66,7 @@ export class Token {
         token,
         prefix = 'token'
     }: TokenConfig) {
-        this._cache = new Cache(cacheConfig);
+        // this._cache = new Cache(cacheConfig);
         this._expiry = expiry;
         this._token = token;
         this._name = `${prefix}:${this._token}`;
@@ -101,13 +101,13 @@ export class Token {
      */
     async verify (): Promise<{}> {
         if (this._token) {
-            const tokenData = this._jwt.verify(this._token);
-            if (tokenData) {
+            // const tokenData = this._jwt.verify(this._token);
+            // if (tokenData) {
                 const timestamp = await this.get('_timestamp');
                 if (timestamp) {
                     return tokenData;
                 }
-            }
+            // }
         }
         return {error: Errors.INVALID_TOKEN}
     }

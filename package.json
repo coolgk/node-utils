@@ -1,7 +1,7 @@
 {
-  "name": "ts",
+  "name": "utils",
   "version": "1.0.0",
-  "description": "",
+  "description": "utility functions",
   "main": "index.js",
   "dependencies": {
     "@types/amqplib": "^0.5.5",
@@ -28,12 +28,13 @@
     "gulp": "^3.9.1",
     "gulp-changed": "^3.1.1",
     "gulp-sourcemaps": "^2.6.1",
+    "merge2": "^1.2.0",
     "gulp-typescript": "^3.2.3",
     "typescript": "^2.6.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Daniel Gong",
   "license": "ISC"
 }
