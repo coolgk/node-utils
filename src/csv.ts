@@ -1,7 +1,7 @@
 /*
 example
 
-import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
+import { ICsvConfig, ICsvReadConfig, ICsvWriteConfig, Csv } from './csv';
 
 const csv = new Csv({
     tmpConfig: { // optional
@@ -74,34 +74,34 @@ function read (file, columns) {
 
 // npm i -S csv-stringify @types/csv-stringify csv-parse @types/csv-parse @types/mongodb
 
-import { createWriteStream, createReadStream, WriteStream } from 'fs';
-import csvStringify = require('csv-stringify');
 import csvParse = require('csv-parse');
-import { generateFile, TmpConfig } from './tmp';
+import csvStringify = require('csv-stringify');
 import { queue } from './queue';
+import { generateFile, ITmpConfig } from './tmp';
+import { createReadStream, createWriteStream, WriteStream } from 'fs';
 import { Cursor } from 'mongodb';
 
-export interface CsvConfig {
+export interface ICsvConfig {
     readonly generateFile?: typeof generateFile;
     readonly csvStringify?: typeof csvStringify;
     readonly csvParse?: typeof csvParse;
-    readonly tmpConfig?: TmpConfig;
-};
+    readonly tmpConfig?: ITmpConfig;
+}
 
-export interface CsvReadConfig {
+export interface ICsvReadConfig {
     columns?: string[];
     limit?: number;
     delimiter?: string;
-};
+}
 
-export interface CsvWriteConfig {
+export interface ICsvWriteConfig {
     columns?: string[];
     delimiter?: string;
     filepath?: string;
     formatter?: (data: {[propName: string]: any} | any[]) => string[];
-};
+}
 
-export interface ReadFileResponse {
+export interface IReadFileResponse {
     forEach: (
         callback: (row: any, index: number) => void,
         endCallback: (rowCount: number) => void
@@ -113,7 +113,7 @@ export class Csv {
     private _csvParse: typeof csvParse;
     private _csvStringify: typeof csvStringify;
     private _generateFile: typeof generateFile;
-    private _tmpConfig: TmpConfig;
+    private _tmpConfig: ITmpConfig;
 
     /**
      * @param {object} options
@@ -122,39 +122,45 @@ export class Csv {
      * @param {function} [options.csvParse] - require('csv-parse')
      * @param {object} [options.tmpConfig] - see generate() in ./tmp
      */
-    constructor (options: CsvConfig = {}) {
+    public constructor (options: ICsvConfig = {}) {
         this._csvStringify = options.csvStringify || csvStringify;
         this._csvParse = options.csvParse || csvParse;
         this._generateFile = options.generateFile || generateFile;
         this._tmpConfig = options.tmpConfig || {};
     }
 
+    /* tslint:disable */
     /**
      * parse a string as csv data and returns an array
-     * @param {string} string - csv string
+     * @param {string} value - csv string
      * @param {object} options
      * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
      * @return {promise}
      */
-    parse (string: string, options: CsvReadConfig = {}): Promise<any[]> {
+    /* tslint:enable */
+    public parse (value: string, options: ICsvReadConfig = {}): Promise<any[]> {
         return new Promise(
-            (resolve, reject) => this._csvParse(string, options, (error, output) => error ? reject(error) : resolve(output))
+            (resolve, reject) => this._csvParse(
+                value, options, (error, output) => error ? reject(error) : resolve(output)
+            )
         );
     }
 
+    /* tslint:disable */
     /**
      * read a csv file. the return value can ONLY be used in a forEach() loop
      * e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
      * @param {string} file - file path
      * @param {object} options
-     * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
+     * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, row values becomes objects
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
      * @return {object} { forEach: ((row, index) => void, (totalCount) => void) => void }
      */
-    readFile (file: string, options: CsvReadConfig = {}): ReadFileResponse {
+    /* tslint:enable */
+    public readFile (file: string, options: ICsvReadConfig = {}): IReadFileResponse {
         const fileStream = createReadStream(file);
         const readline = require('readline').createInterface({
             input: fileStream
@@ -172,7 +178,7 @@ export class Csv {
                                         ([row]) => callback(row, callbackIndex)
                                     )
                                 );
-                            })(index++)
+                            })(index++);
                         } else {
                             readline.close();
                             fileStream.destroy();
@@ -184,6 +190,7 @@ export class Csv {
         };
     }
 
+    /* tslint:disable */
     /**
      * @param {array|cursor} data - mongo cursor or array of data
      * @param {object} options
@@ -193,7 +200,8 @@ export class Csv {
      * @param {string} [options.filepath] - file path is automatically generated if empty
      * @return {promise}
      */
-    createFile (data: any[] | Cursor, options: CsvWriteConfig = {}): Promise<string> {
+    /* tslint:enable */
+    public createFile (data: any[] | Cursor, options: ICsvWriteConfig = {}): Promise<string> {
         return (
             options.filepath ? Promise.resolve({path: options.filepath}) : this._generateFile({
                 ...this._tmpConfig,
@@ -239,6 +247,7 @@ export class Csv {
         });
     }
 
+    /* tslint:disable */
     /**
      * @param {stream} writableStream
      * @param {promise|*[]} rowData
@@ -249,8 +258,12 @@ export class Csv {
      * @param {string} [options.filepath] - file path is automatically generated if empty
      * @return {promise}
      */
+    /* tslint:enable */
     private _writeCsvStream (
-        writableStream: WriteStream, rowData: Promise<any[]> | any[], options: CsvWriteConfig, isHeader: boolean = false
+        writableStream: WriteStream,
+        rowData: Promise<any[]> | any[],
+        options: ICsvWriteConfig,
+        isHeader: boolean = false
     ): Promise<void> {
         // write onece at a time
         return queue(

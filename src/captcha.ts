@@ -12,14 +12,14 @@ captcha.verify('input_response', 'ip').then((response) => {
 
 import * as request from './request';
 
-export interface CaptchaConfig {
+export interface ICaptchaConfig {
     readonly request?: typeof request;
     readonly secret: string;
-};
+}
 
 export class Captcha {
 
-    static readonly RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
+    private static readonly _RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     protected _secret: string;
     protected _request: typeof request;
@@ -29,7 +29,7 @@ export class Captcha {
      * @param {object} [options.request] - ./request
      * @param {object} options.secret - google captcha secret https://www.google.com/recaptcha/admin#site/337294176
      */
-    constructor (options: CaptchaConfig) {
+    public constructor (options: ICaptchaConfig) {
         this._request = options.request || request;
         this._secret = options.secret;
     }
@@ -39,9 +39,9 @@ export class Captcha {
      * @param {string} remoteip - ip address
      * @param {promise}
      */
-    verify (response: string, remoteip: string): Promise<{}> {
+    public verify (response: string, remoteip: string): Promise<{}> {
         return this._request.post(
-            Captcha.RECAPTCHA_URL,
+            Captcha._RECAPTCHA_URL,
             {
                 data: {
                     secret: this._secret,
@@ -50,7 +50,7 @@ export class Captcha {
                 }
             }
         ).then(
-            (response) => response.json
+            (requestResponse) => requestResponse.json
         );
     }
 }

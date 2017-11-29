@@ -9,11 +9,11 @@ console.log(round(100.958747, 4));
 */
 
 /**
- * @param {number} number - number to round
+ * @param {number} value - number to round
  * @param {number} precision - precision
  * @return {number}
  */
-export function round (number: number, precision: number = 2): number {
+export function round (value: number, precision: number = 2): number {
     const factor = Math.pow(10, precision);
-    return Math.round(number * factor) / factor;
-};
+    return Math.round(value * factor) / factor;
+}

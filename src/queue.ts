@@ -36,7 +36,7 @@ queue(c);
 */
 
 let promise = Promise.resolve(undefined);
-let backlogs = [];
+const backlogs = [];
 
 /**
  * @param {function} callback - callback function that returns a promise or any other types

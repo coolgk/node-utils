@@ -21,25 +21,25 @@ console.log(prepad0(1000, 2));
  * @param {string} a string
  * @return {string} string with tags stripped
  */
-export function stripTags (string: string = ''): string {
-    return (string + '').replace(/(<([^>]+)>)/ig, ' ').replace(/\s+/g, ' ');
+export function stripTags (value: string = ''): string {
+    return (value + '').replace(/(<([^>]+)>)/ig, ' ').replace(/\s+/g, ' ');
 }
 
 /**
  * escaping user input e.g. html code in a message box
- * @param {string} string - string to escape
+ * @param {string} value - string to escape
  * @return {string}
  */
-export function escapeHtml (string: string = ''): string {
-    return string ? (string + '').replace(
+export function escapeHtml (value: string = ''): string {
+    return value ? (value + '').replace(
         /[&<>"']/g,
-        (match) => ({
+        (matches) => ({
             '&': '&amp;',
             '<': '&lt;',
             '>': '&gt;',
             '"': '&quot;',
             "'": '&#039;'
-        }[match])
+        }[matches])
     ) : '';
 }
 
@@ -48,24 +48,24 @@ export function escapeHtml (string: string = ''): string {
  * @param {string} string - string to unescape
  * @return {string}
  */
-export function unescapeHtml (string: string = ''): string {
-    return string ? (string + '').replace(
+export function unescapeHtml (value: string = ''): string {
+    return value ? (value + '').replace(
         /&.+?;/g,
-        (match) => ({
+        (matches) => ({
             '&amp;': '&',
             '&lt;': '<',
             '&gt;': '>',
             '&quot;': '"',
             '&#039;': "'"
-        }[match] || match)
+        }[matches] || matches)
     ) : '';
 }
 
 /**
- * @param {number} number - an integer in string or number format
+ * @param {number} value - an integer in string or number format
  * @param {number} length - length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070.
  * @return {string}
  */
-export function prepad0 (number: number | string, length: number = 2): string {
-    return (number + '').length > length ? number + '' : ('0'.repeat(length) + number).substr(-length);
+export function prepad0 (value: number | string, length: number = 2): string {
+    return (value + '').length > length ? value + '' : ('0'.repeat(length) + value).substr(-length);
 }

@@ -1,30 +1,35 @@
 /*
 import { Email } from './email';
 
-let email = new Email({
-    host: 'localhost'
-});
+const email = new Email({host: 'localhost'});
+
+// OR
+// import emailjs = require('emailjs');
+// const email = new Email({
+    // emailClient: emailjs.server.connect({host: 'localhost'})
+// });
+
 email.send({
     subject: 'hello this is email subject',
     from: {
             name: 'Daniel Gong',
-            email: 'danie.gong@example.com'
+            email: 'daniel.gong@example.com'
     },
     to: [
         {
             name: 'Dan Go',
-            email: 'danie.gong+label@example.com'
+            email: 'daniel.gong@example.com'
         },
-        'danie.gong+3@example.com'
+        'daniel.gong@example.com'
     ],
-    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    message: '<html><body><h1>test</h1>some message <img src="cid:my-image" width="500" height="250"></body></html>',
     attachments: [
         {
-            path: '/var/www/clientportalapi/uploads/portal2.png',
+            path: '/file/path/image.png',
             name: 'screenshot.png'
         },
         {
-            path:"/var/www/clientportalapi/uploads/portal2.png",
+            path:"/file/path/image.png",
             headers:{"Content-ID": "<my-image>"}
         }
     ]
@@ -38,15 +43,14 @@ email.send({
 // mime package (https://www.npmjs.com/package/mime) does not work in node 8 using mime-types instead
 // npm i -S emailjs mime-types
 
-import { basename } from 'path';
-import { stripTags } from './string';
 import emailjs = require('emailjs');
 import mimeTypes = require('mime-types');
+import { basename } from 'path';
+import { stripTags } from './string';
 
-export interface EmailConfig {
+export interface IEmailConfig {
     readonly host: string;
     readonly stripTags?: typeof stripTags;
-    readonly emailClient?: typeof emailjs;
     readonly getMimeType?: typeof mimeTypes.lookup;
     readonly user?: string;
     readonly password?: string;
@@ -55,14 +59,24 @@ export interface EmailConfig {
     readonly tls?: boolean;
     readonly domain?: string;
     readonly authentication?: string[];
-};
+}
 
-export interface EmailAddress {
+export interface IEmailClient {
+    send: (param1: any, param2: any) => any;
+}
+
+export interface IEmailConfigWithClient {
+    readonly emailClient: IEmailClient;
+    readonly stripTags?: typeof stripTags;
+    readonly getMimeType?: typeof mimeTypes.lookup;
+}
+
+export interface IEmailAddress {
     name?: string;
     readonly email: string;
 }
 
-export interface EmailAttachment {
+export interface IEmailAttachment {
     readonly path: string;
     name?: string;
     type?: string;
@@ -70,19 +84,18 @@ export interface EmailAttachment {
     readonly headers?: {[propName: string]: string};
 }
 
-export interface SendConfig {
+export interface ISendConfig {
     readonly subject: string;
     readonly message?: string;
-    readonly from: string | EmailAddress;
-    readonly to: (string | EmailAddress)[];
-    readonly cc?: (string | EmailAddress)[];
-    readonly bcc?: (string | EmailAddress)[];
-    readonly attachments?: EmailAttachment[];
+    readonly from: string | IEmailAddress;
+    readonly to: (string | IEmailAddress)[];
+    readonly cc?: (string | IEmailAddress)[];
+    readonly bcc?: (string | IEmailAddress)[];
+    readonly attachments?: IEmailAttachment[];
 }
 
 export class Email {
-    private _options: EmailConfig;
-    private _emailClient: typeof emailjs;
+    private _emailClient: IEmailClient;
     private _stripTags: typeof stripTags;
     private _getMimeType: typeof mimeTypes.lookup;
 
@@ -91,16 +104,17 @@ export class Email {
      * @param {function} [options.stripTags] - ./stripTags.js
      * @param {string} [options.user] - username for logging into smtp
      * @param {string} [options.password] - password for logging into smtp
-     * @param {string} options.host - smtp host
+     * @param {string} [options.host='localhost'] - smtp host
      * @param {string} [options.port] - smtp port (if null a standard port number will be used)
      * @param {boolean} [options.ssl] - boolean (if true or object, ssl connection will be made)
      * @param {boolean} [options.tls] - boolean (if true or object, starttls will be initiated)
      * @param {string} [options.domain] - domain to greet smtp with (defaults to os.hostname)
-     * @param {string[]} [options.authentication] - authentication methods (ex: email.authentication.PLAIN, email.authentication.XOAUTH2)
+     * @param {string[]} [options.authentication] - authentication methods
+     * @see https://www.npmjs.com/package/emailjs#emailserverconnectoptions
      */
-    constructor (options: EmailConfig) {
-        this._options = options;
-        this._emailClient = options.emailClient || emailjs;
+    public constructor (options: (IEmailConfig | IEmailConfigWithClient) = {host: 'localhost'}) {
+        this._emailClient = (options as IEmailConfigWithClient).emailClient ?
+            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailConfig);
         this._stripTags = options.stripTags || stripTags;
         this._getMimeType = options.getMimeType || mimeTypes.lookup;
     }
@@ -123,7 +137,7 @@ export class Email {
      * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
      * @return {promise}
      */
-    send (options: SendConfig): Promise<{}> {
+    public send (options: ISendConfig): Promise<{}> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
             if (options[field]) {
                 options[field] = this._formatEmailAddress(field === 'from' ? [options[field]] : options[field]);
@@ -131,7 +145,7 @@ export class Email {
         });
 
         if (options.attachments) {
-            options.attachments.forEach((attachment: EmailAttachment) => {
+            options.attachments.forEach((attachment: IEmailAttachment) => {
                 if (!attachment.name) {
                     attachment.name = basename(attachment.path);
                 }
@@ -158,7 +172,7 @@ export class Email {
             delete sendOptions.message;
             delete sendOptions.attachments;
 
-            this._emailClient.server.connect(this._options).send(sendOptions, (error, message) => {
+            this._emailClient.send(sendOptions, (error, message) => {
                 error ? reject(error) : resolve(message);
             });
         });
@@ -170,11 +184,11 @@ export class Email {
      * @param {string} emails[].email - email address of the recipient
      * @return {string} - "name name" <email@email.com>, "name2" <email@email.com> ...
      */
-    private _formatEmailAddress (emails: (string | EmailAddress)[]): string {
-        let formattedEmails = [];
-        emails.forEach((email: string | EmailAddress) => {
+    private _formatEmailAddress (emails: (string | IEmailAddress)[]): string {
+        const formattedEmails = [];
+        emails.forEach((email: string | IEmailAddress) => {
             if (typeof email === 'string') {
-                email = {email: email};
+                email = {email};
             }
             formattedEmails.push(`"${email.name || email.email}" <${email.email}>`);
         });

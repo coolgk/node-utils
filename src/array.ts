@@ -15,5 +15,5 @@ console.log(toArray(e));
 */
 
 export function toArray (data) {
-	return data instanceof Array ? data : data === undefined ? [] : [data];
+    return data instanceof Array ? data : data === undefined ? [] : [data];
 }

@@ -17,26 +17,26 @@ encrypt(password).then((hash) => {
 import { compare, hash } from 'bcrypt-nodejs';
 
 /**
- * @param {string} string - string to encrypt
+ * @param {string} value - string to encrypt
  * @return {promise}
  */
-export function encrypt (string: string): Promise<string> {
+export function encrypt (value: string): Promise<string> {
     return new Promise(
         (resolve, reject) => hash(
-            string, null, null, (error, hash) => error ? reject(error) : resolve(hash)
+            value, null, null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
         )
     );
 }
 
 /**
- * @param {string} string - string to check
- * @param {string} hash - encrypted hash
+ * @param {string} value - string to check
+ * @param {string} hashedString - encrypted hash
  * @return {promise}
  */
-export function verify (string: string, hash: string): Promise<boolean> {
+export function verify (value: string, hashedString: string): Promise<boolean> {
     return new Promise(
         (resolve, reject) => compare(
-            string, hash, (error, result) => error ? reject(error) : resolve(result)
+            value, hashedString, (error, result) => error ? reject(error) : resolve(result)
         )
-    )
+    );
 }

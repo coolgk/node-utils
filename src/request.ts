@@ -18,17 +18,17 @@ post('https://httpbin.org/post?a=b').then((respose) => {
 });
 */
 
-import * as url from 'url';
 import { stringify } from 'querystring';
+import * as url from 'url';
 
-export interface RequestConfig {
+export interface IRequestConfig {
     data?: {};
     headers?: {[propName: string]: string};
     method?: string;
     protocol?: string;
-};
+}
 
-export interface RequestResponse {
+export interface IRequestResponse {
     statusCode: number;
     headers: {[propName: string]: string}[];
     data: string;
@@ -43,7 +43,7 @@ export interface RequestResponse {
  * @param {string} [options.method='GET'] - POST GET etc
  * @return {promise}
  */
-export function send (urlString: string, options: RequestConfig = {}): Promise<RequestResponse> {
+export function send (urlString: string, options: IRequestConfig = {}): Promise<IRequestResponse> {
     return new Promise((resolve, reject) => {
         options = Object.assign(url.parse(urlString), options);
 
@@ -52,10 +52,10 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
             let data = '';
             response.on('data', (chunk) => data += chunk);
             response.on('end', () => {
-                const requestResponse: RequestResponse = {
+                const requestResponse: IRequestResponse = {
                     statusCode: response.statusCode,
                     headers: response.headers,
-                    data: data,
+                    data,
                     get json () {
                         return JSON.parse(data);
                     }
@@ -77,29 +77,29 @@ export function send (urlString: string, options: RequestConfig = {}): Promise<R
 }
 
 /**
- * @param {string} url - e.g. http://abc.com or https://xyz.com
+ * @param {string} urlString - e.g. http://abc.com or https://xyz.com
  * @param {object} [options]
  * @param {object} [options.headers] - http headers
  * @return {promise}
  */
-export function get (url: string, options: RequestConfig = {}): Promise<RequestResponse> {
+export function get (urlString: string, options: IRequestConfig = {}): Promise<IRequestResponse> {
     delete options.data;
-    return send(url, options);
+    return send(urlString, options);
 }
 
 /**
- * @param {string} url - e.g. http://abc.com or https://xyz.com
+ * @param {string} urlString - e.g. http://abc.com or https://xyz.com
  * @param {object} [options]
  * @param {object} [options.data] - post data e.g. form data or files
  * @param {object} [options.headers] - http headers
  * @return {promise}
  */
-export function post (url: string, options: RequestConfig = {}): Promise<RequestResponse> {
+export function post (urlString: string, options: IRequestConfig = {}): Promise<IRequestResponse> {
     options.data = stringify(options.data || {});
     options.headers = Object.assign(options.headers || {}, {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': Buffer.byteLength(JSON.stringify(options.data))
     });
     options.method = 'POST';
-    return send(url, options);
+    return send(urlString, options);
 }

@@ -1,0 +1,27 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "trailing-comma": false,
+        "object-literal-sort-keys": false,
+        "forin": false,
+        "ordered-imports": false,
+        "space-before-function-paren": true,
+        "quotemark": [true, "single", "avoid-escape", "avoid-template"],
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-module",
+            "check-typecast",
+            "check-separator",
+            "check-rest-spread",
+            "check-type",
+            "check-type-operator",
+            "check-preblock"
+        ],
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
+        "array-type": [true, "array"],
+        "no-unused-expression": [true, "allow-fast-null-checks"]
+    }
+}

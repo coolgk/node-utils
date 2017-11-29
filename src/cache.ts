@@ -1,5 +1,5 @@
 /*
-import { Cache, CacheConfig } from './cache';
+import { Cache, ICacheConfig } from './cache';
 import { createClient } from 'redis';
 
 const client = createClient({
@@ -8,7 +8,7 @@ const client = createClient({
     password: '---'
 });
 
-const config: CacheConfig = {
+const config: ICacheConfig = {
     redisClient: client
 };
 
@@ -35,23 +35,23 @@ cache.getSetIfNull(
 import { RedisClient } from 'redis';
 
 // for this._redisClient[command]
-export interface CacheClient extends RedisClient {
+export interface ICacheClient extends RedisClient {
     [key: string]: any;
 }
 
-export interface CacheConfig {
-    readonly redisClient: CacheClient;
+export interface ICacheConfig {
+    readonly redisClient: ICacheClient;
 }
 
 export class Cache {
 
-    private _redisClient: CacheClient;
+    private _redisClient: ICacheClient;
     /**
      * @param {object} options
      * @param {object} [options.redisClient] - redis client from redis.createClient()
      * redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class
      */
-    constructor (options: CacheConfig) {
+    constructor (options: ICacheConfig) {
         this._redisClient = options.redisClient;
     }
 
@@ -60,7 +60,7 @@ export class Cache {
      * @param {*[]} params - params for the command
      * @return {promise}
      */
-    command (command: string, ...params: any[]): Promise<any> {
+    public command (command: string, ...params: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
             params.push((error: Error, response: any) => {
                 error ? reject(error) : resolve(response);
@@ -75,15 +75,16 @@ export class Cache {
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
      * @return {promise}
      */
-    set (name: string, value: any, expiry = 0): Promise<any> {
-        return expiry ? this.command('setex', name, expiry, JSON.stringify(value)) : this.command('set', name, JSON.stringify(value));
+    public set (name: string, value: any, expiry = 0): Promise<any> {
+        const stringValue = JSON.stringify(value);
+        return expiry ? this.command('setex', name, expiry, stringValue) : this.command('set', name, stringValue);
     }
 
     /**
      * @param {string} name - name of the variable
      * @return {promise}
      */
-    get (name: string): Promise<{}> {
+    public get (name: string): Promise<{}> {
         return this.command('get', name).then((value) => {
             return Promise.resolve(JSON.parse(value));
         });
@@ -98,7 +99,7 @@ export class Cache {
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
      * @return {promise}
      */
-    getSetIfNull (name: string, callback: Function, expiry = 0): Promise<{}> {
+    public getSetIfNull (name: string, callback: () => any, expiry = 0): Promise<{}> {
         return this.get(name).then((cachedValue) => {
             if (null === cachedValue) {
                 return Promise.resolve(callback()).then(

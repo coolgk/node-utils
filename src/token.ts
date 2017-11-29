@@ -1,43 +1,103 @@
 /*
 import { Token } from './token';
+import { createClient } from 'redis';
+// OR
+// const Token = require('./token');
+// const createClient = require('redis').createClient;
 
-const token = new Token({
-    cacheConfig: {
+(async () => {
+
+    const redisClient = createClient({
         host: 'localhost',
         port: 6379,
-        password: 'cQ4j3bJdfZtSQmzS7wTwJuxB3CSuhRUnLGEFANADkFmXUKXT8PxQKtpm92TeUH4AqJeyWaw%Rg9Q@kn@_qR%M`zs,$3v:Cj>ye5S{Q%q@84w'
-    },
-    expiry: 30
-});
+        password: '----'
+    });
 
-token.verify().then((result) => {
-    console.log(result); //
-})
+    const token = new Token({
+        redisClient: redisClient,
+        expiry: 5,
+        token: 'abcde'
+    });
 
-token.set();
-token.get();
-token.getAll();
-token.delete();
+    console.log(
+        await token.verify()
+    ) // false
 
-token.verify();
-token.destroy();
+    await token.renew();
 
-token.renew();
+    console.log(
+        await token.verify()
+    ) // true
 
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    await token.set('var1', {a: 'var1', b: false});
+
+    console.log(
+        await token.get('var1');
+    ); // {a: 'var1', b: false}
+
+    await token.set('var2', 'string var 2');
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
+
+    await token.delete('var2');
+
+    console.log(
+        await token.get('var2');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false } }
+
+    await token.destroy();
+
+    console.log(
+        await token.verify()
+    ) // false
+
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    redisClient.quit();
+})()
 */
 
 /**
- * a secure token can be manually revoked from db (jwt itself by default cannot be revoked until expired)
+ * allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
+ * (./jwt cannot be renewed or revoked until expired)
  */
 
-import { Cache } from './cache';
+import { Cache, ICacheClient } from './cache';
 
-export interface TokenConfig {
-    token: string;
-    cache: Cache;
-    expiry?: number;
-    prefix?: string;
-};
+export interface IConfig {
+    readonly expiry?: number;
+    readonly prefix?: string;
+}
+
+export interface ITokenConfigWithCache extends IConfig {
+    readonly token: string;
+    readonly cache: Cache;
+}
+
+export interface ITokenConfig extends IConfig {
+    readonly token: string;
+    readonly redisClient: ICacheClient;
+}
 
 export enum Errors {
     INVALID_TOKEN = 'INVALID_TOKEN',
@@ -45,7 +105,6 @@ export enum Errors {
 }
 
 export class Token {
-
     private _cache: Cache;
     private _expiry: number;
     private _name: string;
@@ -53,30 +112,24 @@ export class Token {
 
     /**
      * @param {object} options
-     * @param {object} [options.jwtConfig={secret: process.env.secret}] - jwtConfig in ./jwt
-     * @param {object} options.cacheConfig - cacheConfig in ./cache
-     * @param {string} [options.name='token'] - prefix used in redis e.g. token:[TOKEN_STRING...]
+     * @param {string} options.token - token string for creating a token object
+     * @param {object} options.redisClient - cacheConfig in ./cache
+     * @param {string} [options.prefix='token'] - prefix used in redis e.g. token:[TOKEN_STRING...]
      * @param {number} [options.expiry=0] - in seconds. 0 = never expire
-     * @param {object} [options.data] - data to save in jwt
-     * @param {string} [options.token] - create a token based on this preloaded token string
      */
-    constructor ({
-        cache,
-        expiry = 0,
-        token,
-        prefix = 'token'
-    }: TokenConfig) {
-        // this._cache = new Cache(cacheConfig);
-        this._expiry = expiry;
-        this._token = token;
-        this._name = `${prefix}:${this._token}`;
+    public constructor (options: ITokenConfig | ITokenConfigWithCache) {
+        this._cache = (options as ITokenConfig).redisClient ?
+            new Cache(options as ITokenConfig) : (options as ITokenConfigWithCache).cache;
+        this._expiry = options.expiry || 0;
+        this._token = options.token;
+        this._name = `${options.prefix || 'token'}:${this._token}`;
     }
 
     /**
      * @param {number} expiry - in seconds
      * @return {promise}
      */
-    async renew (expiry: number = this._expiry): Promise<any> {
+    public async renew (expiry: number = this._expiry): Promise<any> {
         if (!this._token) {
             return {error: Errors.DESTROYED_TOKEN};
         }
@@ -90,7 +143,7 @@ export class Token {
      * @param {*} value - anything can be JSON.stringify'ed
      * @return {promise}
      */
-    async set (name: string, value: any): Promise<any> {
+    public async set (name: string, value: any): Promise<any> {
         return this._token ? this._cache.command(
             'hset', this._name, name, JSON.stringify(value)
         ) : {error: Errors.DESTROYED_TOKEN};
@@ -99,17 +152,9 @@ export class Token {
     /**
      * @return {promise}
      */
-    async verify (): Promise<{}> {
-        if (this._token) {
-            // const tokenData = this._jwt.verify(this._token);
-            // if (tokenData) {
-                const timestamp = await this.get('_timestamp');
-                if (timestamp) {
-                    return tokenData;
-                }
-            // }
-        }
-        return {error: Errors.INVALID_TOKEN}
+    public async verify (): Promise<boolean> {
+        const timestamp = await this.get('_timestamp');
+        return !!timestamp;
     }
 
     /**
@@ -117,28 +162,29 @@ export class Token {
      * @param {string} name - data field name
      * @return {promise}
      */
-    async get (name: string): Promise<any> {
+    public async get (name: string): Promise<any> {
         if (this._token) {
             const value = await this._cache.command('hget', this._name, name);
             return JSON.parse(value);
         }
-        return undefined;
+        return null;
     }
 
     /**
      * delete the token
      * @return {promise}
      */
-    destroy (): Promise<any> {
+    public destroy (): Promise<any> {
         this._token = '';
         return this._cache.command('del', this._name);
     }
 
     /**
      * delete a data field in the token
+     * @param {string} name - data field name
      * @return {promise}
      */
-    async delete (name: string): Promise<any> {
+    public async delete (name: string): Promise<any> {
         if (!this._token) {
             return {error: Errors.DESTROYED_TOKEN};
         }
@@ -149,16 +195,17 @@ export class Token {
      * get the values of all data fields in the token
      * @return {promise}
      */
-    async getAll (): Promise<boolean | {}> {
+    public async getAll (): Promise<{}> {
         if (this._token) {
             const values = await this._cache.command('hgetall', this._name);
             if (values) {
+                delete values._timestamp;
                 for (const property in values) {
                     values[property] = JSON.parse(values[property]);
                 }
                 return values;
             }
         }
-        return undefined;
+        return {};
     }
 }

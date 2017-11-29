@@ -1,5 +1,5 @@
 {
-  "name": "utils",
+  "name": "@coolgk/utils",
   "version": "1.0.0",
   "description": "utility functions",
   "main": "index.js",
@@ -28,8 +28,9 @@
     "gulp": "^3.9.1",
     "gulp-changed": "^3.1.1",
     "gulp-sourcemaps": "^2.6.1",
-    "merge2": "^1.2.0",
     "gulp-typescript": "^3.2.3",
+    "merge2": "^1.2.0",
+    "tslint": "^5.8.0",
     "typescript": "^2.6.1"
   },
   "scripts": {

@@ -40,7 +40,7 @@ export function getParams (url: string, pattern: string): {} {
         // params[1] = params[userId], params[2] = params[sectionId]
         // this is needed for updating param values from matching url
         Object.defineProperty(params, index + 1, {
-            set: function (value) {
+            set: (value) => {
                 params[name] = value;
             }
         });

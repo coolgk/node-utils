@@ -10,9 +10,9 @@ const tsProject = ts.createProject('./tsconfig.json');
 
 const distFolder = 'dist';
 
-gulp.task('ts', async () => {
+gulp.task('ts', () => {
     const tsResult = gulp.src('src/*.ts')
-		.pipe(
+        .pipe(
             changed(distFolder, {extension: '.js'})
         )
         .pipe(sourcemaps.init()) // This means sourcemaps will be generated
