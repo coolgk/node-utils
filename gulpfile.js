@@ -33,11 +33,11 @@ gulp.task('index.ts', () => {
         const writeStream = fs.createWriteStream('src/index.ts');
         fs.readdir('src', (error, files) => {
             files.forEach((file) => {
-                const filename = path.basename(file).replace('.ts', '');
+                const filename = file.replace('.ts', '');
                 if (filename !== 'index' && filename !== 'test') {
                     // const module = filename[0].toUpperCase() + filename.substr(1);
-                    writeStream.write(`import * as ${filename} from './${filename}';\n`);
-                    writeStream.write(`export const ${filename} = ${filename};\n`);
+                    writeStream.write(`import * as _${filename} from './${filename}';\n`);
+                    writeStream.write(`export const ${filename} = _${filename};\n`);
                 }
             });
             writeStream.end();
@@ -46,16 +46,13 @@ gulp.task('index.ts', () => {
     });
 });
 
-});
-
 gulp.task('prepublish', ['ts'], () => {
     return new Promise((resolve) => {
         const promises = [];
         fs.readdir('dist', (error, files) => {
             files.forEach((file) => {
-                const filename = path.basename(file);
                 promises.push(new Promise((res) => {
-                    fs.rename(filename, `./${filename}`, () => res())
+                    fs.rename(`dist/${file}`, `./${file}`, () => res())
                 }));
             });
             resolve(Promise.all(promises));
@@ -68,13 +65,13 @@ gulp.task('postpublish', () => {
         const promises = [];
         fs.readdir('src', (error, files) => {
             files.forEach((file) => {
-                const filename = path.basename(file).replace('.ts', '');
+                const filename = file.replace('.ts', '');
                 promises.push(
                     new Promise((res) => {
-                        fs.unlink(`./${filename}.js`, () => res())
+                        fs.rename(`./${filename}.js`, `dist/${filename}.js`, () => res())
                     }),
                     new Promise((res) => {
-                        fs.unlink(`./${filename}.d.ts`, () => res())
+                        fs.rename(`./${filename}.d.ts`, `dist/${filename}.d.ts`, () => res())
                     })
                 );
             });
