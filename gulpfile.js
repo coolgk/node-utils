@@ -35,7 +35,9 @@ gulp.task('index.ts', () => {
             files.forEach((file) => {
                 const filename = path.basename(file).replace('.ts', '');
                 if (filename !== 'index' && filename !== 'test') {
-                    writeStream.write(`export * from './${filename}';\n`);
+                    const module = filename[0].toUpperCase() + filename.substr(1);
+                    writeStream.write(`import * as ${filename} from './${filename}';\n`);
+                    writeStream.write(`export const ${module} = ${filename};\n`);
                 }
             });
             writeStream.end();
