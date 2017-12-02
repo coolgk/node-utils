@@ -61,7 +61,8 @@
     "typescript": "^2.6.1"
   },
   "scripts": {
-    "prepublishOnly": "tsc",
+    "prepublishOnly": "gulp prepublish",
+    "postpublish": "gulp postpublish",
     "publish-dryrun": "tar -tf $(npm pack)"
   },
   "main": "./dist/js/index.js",
