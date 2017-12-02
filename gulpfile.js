@@ -7,6 +7,7 @@ const changed = require('gulp-changed');
 const merge = require('merge2');
 const fs = require('fs');
 const path = require('path');
+const jsdoc = require('gulp-jsdoc3');
 
 const tsProject = ts.createProject('./tsconfig.json');
 
@@ -78,6 +79,12 @@ gulp.task('postpublish', () => {
             resolve(Promise.all(promises));
         });
     });
+});
+
+gulp.task('jsdoc', (done) => {
+    gulp.src(['dist/*.js'], {read: false}).pipe(
+        jsdoc(require('./jsdoc.json'), done)
+    );
 });
 
 gulp.task('watch', ['ts'], () => {

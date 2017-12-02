@@ -1,20 +1,3 @@
-/*
-Example
-
-import { encode, decode, encodeUrl, decodeUrl } from './base64';
-
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
-
-console.log(a);
-console.log(hash);
-console.log(decode(hash));
-
-console.log(urlHash);
-console.log(decodeUrl(urlHash));
-*/
-
 /**
  * @param {string} data - string to encode
  * @return {string}

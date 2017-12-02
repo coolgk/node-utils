@@ -18,25 +18,125 @@
 - [array](#array)
 - [number](#number)
 
-## base64
+## ampq
+a simple RabbitMQ class for publishing and consuming messages
+```JavaScript
+/**
+ * @param {object} options
+ * @param {string} options.url - connection string e.g. amqp://localhost
+ * @param {string} [options.sslPem] - pem file path
+ * @param {string} [options.sslCa] - sslCa file path
+ * @param {string} [options.sslPass] - password
+ */
+constructor(options) {}
 
-```TypeScript
-import { encode, decode, encodeUrl, decodeUrl } from './base64';
+closeConnection() {}
+
+/**
+ * @param {string} message - message string
+ * @param {function} [callback] - callback(message) for processing response from consumers
+ * @param {object} [options]
+ * @param {string} [options.route='#'] - route name
+ * @param {exchangeName} [options.route='defaultExchange'] - exchange name
+ * @return {promise}
+ */
+publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {}) {}
+
+/**
+ * @param {function} callback - consumer(message) function should returns a promise
+ * @param {object} [options]
+ * @param {string} [options.route='#'] - exchange route
+ * @param {string} [options.queueName='defaultQueue'] - queue name for processing request
+ * @param {string} [options.exchangeName='defaultExchange'] - exchange name
+ * @param {string} [options.exchangeType='topic'] - exchange type
+ * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
+ * @param {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+ * @return {promise}
+ */
+consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {}) {}
+
+// Example
+
+import { Amqp } from '@coolgk/utils/amqp';
+// OR
+// const { Amqp } = require('@coolgk/utils/amqp');
+
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
+});
+
+const message = {
+    a: 1,
+    b: 'b'
+};
+
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
+
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+});
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
+});
+```
+
+## base64
+base64 encoded decode functions
+```JavaScript
+/**
+ * @param {string} data - string to encode
+ * @return {string}
+ */
+function encode (data = '') {}
+
+/**
+ * @param {string} data - encoded hash
+ * @return {string}
+ */
+function decode (data = '') {}
+
+/**
+ * @param {string} data - string to encode
+ * @return {string}
+ */
+function encodeUrl (data = '') {}
+
+/**
+ * @param {string} data - base64 encoded url to decode
+ * @return {string}
+ */
+decodeUrl (data = '') {}
+
+// Example
+
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/utils/base64';
+// OR
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/utils/base64');
 
 const a = 'https://www.google.co.uk/?a=b'
 const hash = encode(a);
 const urlHash = encodeUrl(a);
 
-console.log(a);
-console.log(hash);
-console.log(decode(hash));
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
 
-console.log(urlHash);
-console.log(decodeUrl(urlHash));
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 ```
 
 ## bcrypt
-```TypeScript
+```JavaScript
 import { encrypt, verify } from './bcrypt';
 
 const password = 'abc123';
@@ -51,7 +151,7 @@ encrypt(password).then((hash) => {
 ```
 
 ## queue
-```TypeScript
+```JavaScript
 import { queue } from './queue';
 
 function a (x) {
@@ -86,7 +186,7 @@ queue(c);
 ```
 
 ## cache
-```TypeScript
+```JavaScript
 import { Cache, CacheConfig } from './cache';
 import { createClient } from 'redis';
 
@@ -121,7 +221,7 @@ cache.getSetIfNull(
 ```
 
 ## captcha
-```TypeScript
+```JavaScript
 import { Captcha } from './captcha';
 
 const captcha = new Captcha({
@@ -135,7 +235,7 @@ captcha.verify('input_response', 'ip').then((response) => {
 
 ## request
 
-```TypeScript
+```JavaScript
 import {send, get, post} from './request';
 
 get('https://httpbin.org/get?a=b').then((respose) => {
@@ -156,7 +256,7 @@ post('https://httpbin.org/post?a=b').then((respose) => {
 ```
 
 ## tmp
-```TypeScript
+```JavaScript
 import { generateFile, generateDir, generateTmpName } from './tmp';
 
 generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
@@ -167,7 +267,7 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 ```
 
 ## csv
-```TypeScript
+```JavaScript
 import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
 
 const csv = new Csv({
@@ -240,7 +340,7 @@ function read (file, columns) {
 ```
 
 ## email
-```TypeScript
+```JavaScript
 import { Email } from './email';
 
 const email = new Email({host: 'localhost'});
@@ -282,35 +382,8 @@ email.send({
 });
 ```
 
-## ampq
-```TypeScript
-import { Amqp } from './amqp';
-
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-amqp.publish('ignore no response');
-
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage);
-});
-
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message);
-    return {
-        response: 123123
-    }
-});
-```
-
 ## pdf
-```TypeScript
+```JavaScript
 import { Pdf } from './pdf';
 
 const pdf = new Pdf({
@@ -367,7 +440,7 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 ```
 
 ## token
-```TypeScript
+```JavaScript
 import { Token } from './token';
 import { createClient } from 'redis';
 // OR
@@ -447,7 +520,7 @@ import { createClient } from 'redis';
 ```
 
 ## unit
-```TypeScript
+```JavaScript
 import { bytesToString, millisecondsToString } from './unit';
 
 console.log(
@@ -474,7 +547,7 @@ console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000));
 ```
 
 ## url
-```TypeScript
+```JavaScript
 import { getParams } from './url';
 
 const url = '/123';
@@ -494,7 +567,7 @@ console.log(getParams(url3, pattern3));
 ```
 
 ## string
-```TypeScript
+```JavaScript
 import { stripTags, escapeHtml, unescapeHtml } from './string';
 
 const str = '<h1>test</h1><script>alert(1)</script>'
@@ -511,7 +584,7 @@ console.log(prepad0(1000, 2));
 ```
 
 ## array
-```TypeScript
+```JavaScript
 import { toArray } from './array';
 
 const a = undefined;
@@ -528,7 +601,7 @@ console.log(toArray(e));
 ```
 
 ## number
-```TypeScript
+```JavaScript
 import { round } from './number';
 
 console.log(round(1.3923, 2));

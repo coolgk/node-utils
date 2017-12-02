@@ -1,30 +1,3 @@
-/*
-import { Amqp } from './amqp';
-
-// cloudamqp.com
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-amqp.publish('ignore no response');
-
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage);
-});
-
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message);
-    return {
-        response: 123123
-    }
-});
-*/
-
 // npm install -S @types/amqplib amqplib @types/uuid uuid
 
 import { connect, Channel, Connection, Message, Replies } from 'amqplib';
