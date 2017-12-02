@@ -1,5 +1,7 @@
-# utils
+# npm i -S @coolgk/utils
 
+- [ampq](#ampq)
+- [array](#array)
 - [base64](#base64)
 - [bcrypt](#bcrypt)
 - [queue](#queue)
@@ -9,54 +11,17 @@
 - [tmp](#tmp)
 - [csv](#csv)
 - [email](#email)
-- [ampq](#ampq)
 - [pdf](#pdf)
 - [token](#token)
 - [unit](#unit)
 - [url](#url)
 - [string](#string)
-- [array](#array)
 - [number](#number)
 
 ## ampq
 a simple RabbitMQ class for publishing and consuming messages
+#### Example
 ```JavaScript
-/**
- * @param {object} options
- * @param {string} options.url - connection string e.g. amqp://localhost
- * @param {string} [options.sslPem] - pem file path
- * @param {string} [options.sslCa] - sslCa file path
- * @param {string} [options.sslPass] - password
- */
-constructor(options) {}
-
-closeConnection() {}
-
-/**
- * @param {string} message - message string
- * @param {function} [callback] - callback(message) for processing response from consumers
- * @param {object} [options]
- * @param {string} [options.route='#'] - route name
- * @param {exchangeName} [options.route='defaultExchange'] - exchange name
- * @return {promise}
- */
-publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {}) {}
-
-/**
- * @param {function} callback - consumer(message) function should returns a promise
- * @param {object} [options]
- * @param {string} [options.route='#'] - exchange route
- * @param {string} [options.queueName='defaultQueue'] - queue name for processing request
- * @param {string} [options.exchangeName='defaultExchange'] - exchange name
- * @param {string} [options.exchangeType='topic'] - exchange type
- * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
- * @param {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
- * @return {promise}
- */
-consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {}) {}
-
-// Example
-
 import { Amqp } from '@coolgk/utils/amqp';
 // OR
 // const { Amqp } = require('@coolgk/utils/amqp');
@@ -89,9 +54,92 @@ amqp.consume(({rawMessage, message}) => {
     }
 });
 ```
+#### Doc
+```JavaScript
+/**
+ * @param {object} options
+ * @param {string} options.url - connection string e.g. amqp://localhost
+ * @param {string} [options.sslPem] - pem file path
+ * @param {string} [options.sslCa] - sslCa file path
+ * @param {string} [options.sslPass] - password
+ */
+constructor(options) {}
+
+closeConnection() {}
+
+/**
+ * @param {*} message - message any type that can be JSON.stringify'ed
+ * @param {function} [callback] - callback(message) for processing response from consumers
+ * @param {object} [options]
+ * @param {string} [options.route='#'] - route name
+ * @param {string} [options.exchangeName='defaultExchange'] - exchange name
+ * @return {promise<boolean>}
+ */
+publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {}) {}
+
+/**
+ * @param {function} callback - consumer(message) function should returns a promise
+ * @param {object} [options]
+ * @param {string} [options.route='#'] - exchange route
+ * @param {string} [options.queueName='defaultQueue'] - queue name for processing request
+ * @param {string} [options.exchangeName='defaultExchange'] - exchange name
+ * @param {string} [options.exchangeType='topic'] - exchange type
+ * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
+ * @param {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+ * @return {promise}
+ */
+consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {}) {}
+```
+
+## array
+array utilities
+#### Example
+```JavaScript
+import { toArray } from '@coolgk/utils/array';
+// OR
+// const { toArray } = require('@coolgk/utils/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+```
+#### Doc
+```JavaScript
+/**
+ * @param {*} data - any data to be type cast to array
+ * @return {array}
+ */
+function toArray (data) {}
+```
 
 ## base64
 base64 encoded decode functions
+#### Example
+```JavaScript
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/utils/base64';
+// OR
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/utils/base64');
+
+const a = 'https://www.google.co.uk/?a=b'
+const hash = encode(a);
+const urlHash = encodeUrl(a);
+
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+```
+#### Doc
 ```JavaScript
 /**
  * @param {string} data - string to encode
@@ -116,37 +164,72 @@ function encodeUrl (data = '') {}
  * @return {string}
  */
 decodeUrl (data = '') {}
-
-// Example
-
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/utils/base64';
-// OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/utils/base64');
-
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
-
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
-
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 ```
 
 ## bcrypt
+bcrypt functions
+#### Example
 ```JavaScript
-import { encrypt, verify } from './bcrypt';
+import { encrypt, verify } from '@coolgk/utils/bcrypt';
 
 const password = 'abc123';
 
 encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log);
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
+```
+#### Doc
+```
+/**
+ * @param {string} value - string to encrypt
+ * @param {string} salt - salt
+ * @return {promise<string>}
+ */
+function encrypt (value, salt = null) {}
 
-    verify(password, 'invalidhash').then(console.log, console.error);
+/**
+ * @param {string} value - string to check
+ * @param {string} hashedString - encrypted hash
+ * @return {promise<boolean>}
+ */
+function verify (value, hashedString) {}
 
-    verify('invalidpass', hash).then(console.log);
+```
+
+## cache
+```JavaScript
+import { Cache, CacheConfig } from './cache';
+import { createClient } from 'redis';
+
+const client = createClient({
+    host: 'localhost',
+    port: 6379,
+    password: '---'
+});
+
+const config: CacheConfig = {
+    redisClient: client
+};
+
+const cache = new Cache(config);
+
+cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
+
+cache.get('abc').then(console.log); // { a: 1 }
+
+setTimeout(() => {
+    cache.get('abc').then(console.log); // null
+    client.quit();
+}, 1500);
+
+cache.getSetIfNull(
+    'abc',
+    () => Promise.resolve('data'),
+    10
+).then((v) => {
+    console.log(v); // { a: 1 }
 });
 ```
 
@@ -182,41 +265,6 @@ queue(c);
 // run 3 jobs at a time
 [1,2,3,4,5,6,7,8,9,10].forEach(() => {
     queue(a, 3)
-});
-```
-
-## cache
-```JavaScript
-import { Cache, CacheConfig } from './cache';
-import { createClient } from 'redis';
-
-const client = createClient({
-    host: 'localhost',
-    port: 6379,
-    password: '---'
-});
-
-const config: CacheConfig = {
-    redisClient: client
-};
-
-const cache = new Cache(config);
-
-cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
-
-cache.get('abc').then(console.log); // { a: 1 }
-
-setTimeout(() => {
-    cache.get('abc').then(console.log); // null
-    client.quit();
-}, 1500);
-
-cache.getSetIfNull(
-    'abc',
-    () => Promise.resolve('data'),
-    10
-).then((v) => {
-    console.log(v); // { a: 1 }
 });
 ```
 
@@ -581,23 +629,6 @@ console.log(prepad0(70, 3));
 console.log(prepad0(70, 4));
 console.log(prepad0(1, 4));
 console.log(prepad0(1000, 2));
-```
-
-## array
-```JavaScript
-import { toArray } from './array';
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a));
-console.log(toArray(b));
-console.log(toArray(c));
-console.log(toArray(d));
-console.log(toArray(e));
 ```
 
 ## number

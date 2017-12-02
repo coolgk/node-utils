@@ -1,29 +1,16 @@
 // just a wrapper for compatibility in case bcrypt-nodejs needs to be replaced
 
-/*
-Example
-
-import { encrypt, verify } from './bcrypt';
-const password = 'abc123';
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log);
-
-    verify(password, 'invalidhash').then(console.log, console.error);
-
-    verify('invalidpass', hash).then(console.log);
-});
-*/
-
 import { compare, hash } from 'bcrypt-nodejs';
 
 /**
  * @param {string} value - string to encrypt
+ * @param {string} salt - salt
  * @return {promise}
  */
-export function encrypt (value: string): Promise<string> {
+export function encrypt (value: string, salt: string = null): Promise<string> {
     return new Promise(
         (resolve, reject) => hash(
-            value, null, null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
+            value, salt, null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
         )
     );
 }

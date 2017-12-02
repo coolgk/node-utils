@@ -66,11 +66,11 @@ export class Amqp {
     }
 
     /**
-     * @param {string} message - message string
+     * @param {*} message - message any type that can be JSON.stringify'ed
      * @param {function} [callback] - callback(message) for processing response from consumers
      * @param {object} [options]
      * @param {string} [options.route='#'] - route name
-     * @param {exchangeName} [options.route='defaultExchange'] - exchange name
+     * @param {string} [options.exchangeName='defaultExchange'] - exchange name
      * @return {promise}
      */
     public publish (
