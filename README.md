@@ -929,7 +929,7 @@ encrypt(password).then((hash) => {
 });
 ```
 #### Doc
-```
+```JavaScript
 /**
  * @param {string} value - string to encrypt
  * @param {string} salt - salt
@@ -943,4 +943,105 @@ function encrypt (value, salt = null) {}
  * @return {promise<boolean>}
  */
 function verify (value, hashedString) {}
+```
+
+##tmp
+wrapper functions, generate tmp file or folders
+#### Example
+```JavaScript
+import { generateFile, generateDir, generateTmpName } from '@coolgk/utils/tmp';
+// OR
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/utils/tmp');
+
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r)); // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r)); // file { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r)); // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+```
+#### Doc
+```JavaScript
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
+ * @param {boolean} [options.keep] - if to keep the file
+ * @return {promise}
+ */
+function generateFile (options) {}
+
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
+ * @param {boolean} [options.keep] - if to keep the file
+ * @return {promise}
+ */
+function generateDir (options) {}
+
+/**
+ * @param {object} [options]
+ * @param {number} [options.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
+ * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
+ * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
+ * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
+ * @return {promise}
+ */
+function generateTmpName (options) {}
+```
+
+##Jwt
+jwt token class
+#### Example
+```JavaScript
+import { Jwt } from '@coolgk/utils/jwt';
+// OR
+// const { Jwt } = require('@coolgk/utils/jwt');
+
+const jwt = new Jwt({secret: 'abc'});
+
+const string = 'http://example.com/a/b/c?a=1';
+
+const token = jwt.generate(string);
+
+console.log(
+    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+const token2 = jwt.generate(string, 200);
+
+console.log(
+    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+setTimeout(() => {
+    console.log(jwt.verify(token2)); // false
+}, 250);
+```
+#### Doc
+```JavaScript
+/**
+ * @param {object} options
+ * @param {string} options.secret - for encryption
+ */
+public constructor (options) {}
+
+/**
+ * @param {*} data - any data can be JSON.stringify'ed
+ * @param {number} [expiry=0] - in milliseconds 0 = never expire
+ * @return {string}
+ */
+public generate (data, expiry) {}
+
+/**
+ * @param {string} token - token to verify
+ * @return {boolean|object} - false or token data
+ */
+public verify (token) {}
 ```

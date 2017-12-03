@@ -81,7 +81,7 @@ export class Jwt {
 
     /**
      * @param {string} token - token to verify
-     * @return {boolean}
+     * @return {boolean|object}
      */
     public verify (token: string = ''): boolean | {} {
         const [unsignedToken, tokenSignature] = token.split('.');
