@@ -1,13 +1,4 @@
 
-/*
-import { round } from './number';
-
-console.log(round(1.3923, 2));
-console.log(round(100, 2));
-console.log(round(100.1264, 2));
-console.log(round(100.958747, 4));
-*/
-
 /**
  * @param {number} value - number to round
  * @param {number} precision - precision

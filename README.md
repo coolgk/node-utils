@@ -1,22 +1,20 @@
-# npm i -S @coolgk/utils
+#### npm i -S @coolgk/utils
 
 - [ampq](#ampq)
 - [array](#array)
 - [base64](#base64)
-- [bcrypt](#bcrypt)
-- [queue](#queue)
 - [cache](#cache)
 - [captcha](#captcha)
-- [request](#request)
-- [tmp](#tmp)
 - [csv](#csv)
 - [email](#email)
+- [number](#number)
 - [pdf](#pdf)
+- [queue](#queue)
+- [string](#string)
 - [token](#token)
 - [unit](#unit)
 - [url](#url)
-- [string](#string)
-- [number](#number)
+- [bcrypt](#bcrypt)
 
 ## ampq
 a simple RabbitMQ class for publishing and consuming messages
@@ -166,54 +164,25 @@ function encodeUrl (data = '') {}
 decodeUrl (data = '') {}
 ```
 
-## bcrypt
-bcrypt functions
+## cache
+a wrapper for redis
 #### Example
 ```JavaScript
-import { encrypt, verify } from '@coolgk/utils/bcrypt';
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
-```
-#### Doc
-```
-/**
- * @param {string} value - string to encrypt
- * @param {string} salt - salt
- * @return {promise<string>}
- */
-function encrypt (value, salt = null) {}
-
-/**
- * @param {string} value - string to check
- * @param {string} hashedString - encrypted hash
- * @return {promise<boolean>}
- */
-function verify (value, hashedString) {}
-
-```
-
-## cache
-```JavaScript
-import { Cache, CacheConfig } from './cache';
+import { Cache } from '@coolgk/utils/cache';
 import { createClient } from 'redis';
+// OR
+// const { Cache } = require('@coolgk/utils/cache');
+// const { createClient } = require('redis');
 
 const client = createClient({
     host: 'localhost',
-    port: 6379,
-    password: '---'
+    port: 12869,
+    password: '----'
 });
 
-const config: CacheConfig = {
+const cache = new Cache({
     redisClient: client
-};
-
-const cache = new Cache(config);
+});
 
 cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
 
@@ -232,96 +201,92 @@ cache.getSetIfNull(
     console.log(v); // { a: 1 }
 });
 ```
-
-## queue
+#### Doc
 ```JavaScript
-import { queue } from './queue';
+/**
+ * @param {object} options
+ * @param {object} [options.redisClient] - redis client from redis.createClient()
+ * redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class
+ */
+constructor (options: ICacheConfig) {
 
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
+/**
+ * @param {string} name - name of the variable
+ * @param {*} value - value is always JSON.stringify'ed
+ * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
+ * @return {promise}
+ */
+public set (name, value, expiry = 0) {}
 
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
+/**
+ * @param {string} name - name of the variable
+ * @return {promise}
+ */
+public get (name) {}
 
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
+/**
+ * get the cached value, if not set, resolve "callback()" and save the value then returns it
+ *
+ * @param {string} name - name of the variable
+ * @param {function} callback - a callback function which returns a value or a promise
+ * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
+ * @return {promise<{}>}
+ */
+public getSetIfNull (name, callback, expiry = 0) {}
 
-// call a, b, c in order i.e. b will not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each will wait until previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
+/**
+ * @param {string} command - redis command to run
+ * @param {[]} params - params for the command
+ * @return {promise}
+ */
+public command (command, ...params) {}
 ```
 
 ## captcha
+recapcha wrapper
+#### Example
 ```JavaScript
-import { Captcha } from './captcha';
+import { Captcha } from '@coolgk/utils/captcha';
+// OR
+// const { Captcha } = require('@coolgk/utils/captcha');
 
 const captcha = new Captcha({
-    secret: '---'
+    secret: '-------'
 });
 
-captcha.verify('input_response', 'ip').then((response) => {
-    console.log(response);
-});
-```
+const captchaResponse = '---------';
 
-## request
-
-```JavaScript
-import {send, get, post} from './request';
-
-get('https://httpbin.org/get?a=b').then((respose) => {
-    console.dir(respose.statusCode, {colors:true});
-    console.dir(respose.headers, {colors:true});
-    console.dir(respose.data, {colors:true});
-    // if respose.data is a json string, respose.json will return the json object
-    console.dir(respose.json, {colors:true});
-});
-
-post('https://httpbin.org/post?a=b').then((respose) => {
-    console.dir(respose.statusCode, {colors:true});
-    console.dir(respose.headers, {colors:true});
-    console.dir(respose.data, {colors:true});
-    // if respose.data is a json string, respose.json will return the json object
-    console.dir(respose.json, {colors:true});
+captcha.verify(captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
 });
 ```
-
-## tmp
+#### Doc
 ```JavaScript
-import { generateFile, generateDir, generateTmpName } from './tmp';
+/**
+ * @param {object} options
+ * @param {object} options.secret - google captcha secret https://www.google.com/recaptcha/admin#site/337294176
+ */
+constructor (options) {}
 
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+/**
+ * @param {string} response - repsonse from recaptcha
+ * @param {string} [remoteip] - ip address
+ * @param {promise<{}>}
+ */
+verify (response, remoteip = '') {}
 ```
 
 ## csv
+read and write csv files
+#### Example
 ```JavaScript
-import { CsvConfig, CsvReadConfig, CsvWriteConfig, Csv } from './csv';
+import { Csv } from '@coolgk/utils/csv';
+// OR
+// const { Csv } = require('@coolgk/utils/csv');
 
 const csv = new Csv({
-    tmpConfig: { // optional
-        dir: '/tmp/csv'
-    }
+    tmpConfig: { dir: '/tmp/csv' } // optional
 });
 
 const arrayData = [
@@ -345,7 +310,7 @@ csv.createFile(
         }
     }
 ).then((csvFilePath) => {
-    console.log(csvFilePath);
+    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
     read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
 });
 
@@ -358,7 +323,7 @@ csv.createFile(
         }
     }
 ).then((csvFilePath) => {
-    console.log(csvFilePath);
+    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
     read(csvFilePath, ['col1', 'col2', 'col3']);
 });
 
@@ -368,9 +333,16 @@ function read (file, columns) {
     lines.forEach(
         (lineArray, index) => {
             console.log(lineArray, index);
+            // {
+                // 'column 1': 'formatted-1',
+                // 'column 2': 'formatted-2',
+                // 'column 3': 'formatted-3',
+                // h4: 'formatted-4',
+                // h5: 'formatted-5'
+            // } 1
         },
         (total) => {
-            console.log('read done, total:', total);
+            console.log('read done, total:', total); // read done, total: 4
         }
     );
 
@@ -378,48 +350,84 @@ function read (file, columns) {
     const lines2 = csv.readFile(file);
     lines2.forEach(
         (lineArray, index) => {
-            console.log(lineArray, index);
+            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
         },
         (total) => {
-            console.log('read done, total:', total);
+            console.log('read done, total:', total); // read done, total: 4
         }
     );
 }
 ```
+#### Doc
+```JavaScript
+constructor () {}
+
+/**
+ * read a csv file. the return value can ONLY be used in a forEach() loop
+ * e.g. readFile('abc.csv').forEach((row, index) => { ... }, (lineCount) => { ... } )
+ * @param {string} file - file path
+ * @param {object} options
+ * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, row values becomes objects
+ * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
+ * @param {string} [options.delimiter=','] - csv delimiter
+ * @return {object} { forEach: ((row, index) => void, (totalCount) => void) => void }
+ */
+readFile (file, options = {}) {}
+
+/**
+ * @param {(array|cursor)} data - array of data or mongo cursor
+ * @param {object} options
+ * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', 'email']
+ * @param {function} [options.formatter] - callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'],
+ * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.
+ * @param {string} [options.filepath] - file path is automatically generated if empty
+ * @return {promise}
+ */
+createFile (data, options = {}) {}
+
+/**
+ * parse a string as csv data and returns an array
+ * @param {string} value - csv string
+ * @param {object} options
+ * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
+ * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
+ * @param {string} [options.delimiter=','] - csv delimiter
+ * @return {promise}
+ */
+parse (value, options = {}) {}
+```
 
 ## email
+email sender
+#### Example
 ```JavaScript
-import { Email } from './email';
+import { Email } from '@coolgk/utils/email';
+// OR
+// const { Email } = require('@coolgk/utils/email');
 
 const email = new Email({host: 'localhost'});
-
-// OR
-// import emailjs = require('emailjs');
-// const email = new Email({
-    // emailClient: emailjs.server.connect({host: 'localhost'})
-// });
 
 email.send({
     subject: 'hello this is email subject',
     from: {
             name: 'Daniel Gong',
-            email: 'daniel.gong@example.com'
+            email: 'daniel.k.gong@example.com'
     },
     to: [
         {
             name: 'Dan Go',
-            email: 'daniel.gong@example.com'
+            email: 'dan@example.com'
         },
-        'daniel.gong@example.com'
+        'gong@example.com'
     ],
     message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
     attachments: [
         {
-            path: '/file/path/image.png',
+            path: '/tmp/test.png',
             name: 'screenshot.png'
         },
         {
-            path:"/file/path/image.png",
+            path:"/tmp/test.png",
             headers:{"Content-ID": "<my-image>"}
         }
     ]
@@ -429,15 +437,74 @@ email.send({
     console.log(error);
 });
 ```
+#### Doc
+```JavaScript
+/**
+ * @param {object} options
+ * @param {string} [options.user] - username for logging into smtp
+ * @param {string} [options.password] - password for logging into smtp
+ * @param {string} [options.host='localhost'] - smtp host
+ * @param {string} [options.port] - smtp port (if null a standard port number will be used)
+ * @param {boolean} [options.ssl] - boolean (if true or object, ssl connection will be made)
+ * @param {boolean} [options.tls] - boolean (if true or object, starttls will be initiated)
+ * @param {string} [options.domain] - domain to greet smtp with (defaults to os.hostname)
+ * @param {string[]} [options.authentication] - authentication methods
+ */
+constructor (options = {host: 'localhost'}) {}
+
+/**
+ * @param {object} options
+ * @param {string} options.subject - email subject
+ * @param {string} [options.message] - html email message
+ * @param {Array.<(string|object)>} options.to - to email address
+ * @param {string} options.to[].name - name of the recipient
+ * @param {string} options.to[].email - email address of the recipient
+ * @param {(string|object)} [options.from] - see options.to
+ * @param {Array.<(string|object)>} [options.cc] - see options.to
+ * @param {Array.<(string|object)>} [options.bcc] - see options.to
+ * @param {object[]} [attachments] - email attachments
+ * @param {string} attachments.path - file path
+ * @param {string} [attachments.name] - file name
+ * @param {string} [attachments.type] - file mime type
+ * @param {string} [attachments.method] - method to send attachment as (used by calendar invites)
+ * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
+ * @return {promise}
+ */
+send (options) {}
+```
+
+## number
+utitlies
+#### Example
+```JavaScript
+import { round } from '@coolgk/utils/number';
+// OR
+// const { round } = require('@coolgk/utils/number');
+
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
+```
+#### Doc
+```JavaScript
+/**
+ * @param {number} value - number to round
+ * @param {number} precision - precision
+ * @return {number}
+ */
+function round (value, precision = 2) {}
+```
 
 ## pdf
+generate PDF files from html string or file
 ```JavaScript
-import { Pdf } from './pdf';
+import { Pdf, Format, Orientation } from '@coolgk/utils/pdf';
+// OR
+// const { Pdf, Format, Orientation } = require('@coolgk/utils/pdf');
 
 const pdf = new Pdf({
-    tmpConfig: {
-        dir: '/tmp/pdf'
-    }
+    tmpConfig: { dir: '/tmp/pdf' } // optional
 });
 
 pdf.createFromHtmlFile(
@@ -486,13 +553,158 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
     console.log(pdfFile);
 });
 ```
+#### Doc
+```JavaScript
+constructor () {}
+
+/**
+ * A4 page height: 842px
+ * for full page in PDF, set height of a page in html to 842px
+ *
+ * @param {string} htmlFilePath - file path of an html
+ * @param {string} [options.pdfFilePath] - file path is automatically generated if empty
+ * @param {number} [options.delay=1] - delay in seconds before generating pdf. wait for js generated contents.
+ * @param {(string|number)} [options.margin=0] - e.g. 1cm or {top: '50px', left: '20px'}
+ * @param {string} [options.orientation='portrait'] - e.g. portrait or landscape
+ * @param {string} [options.format='A4'] - e.g. A4
+ * @param {string|object} [options.header] - html code e.g. Page ${pageNumber} of ${numberOfPages}
+ * @param {(string|number)} [options.header.height] - e.g. 1cm or 100px
+ * @param {string} [options.header.contents] - html code e.g. Page ${pageNumber} of ${numberOfPages}
+ * @param {string|object} [options.footer] - html code e.g. Page ${pageNumber} of ${numberOfPages}
+ * @param {(string|number)} [options.footer.height] - e.g. 1cm or 100px
+ * @param {(string|number)} [options.footer.contents] - e.g. html code e.g. Page ${pageNumber} of ${numberOfPages}
+ * @param {number} [options.dpi=96] - e.g. 96
+ * @return {promise}
+ */
+createFromHtmlFile (
+    htmlFilePath: string,
+    {
+        pdfFilePath = '',
+        delay = 0,
+        margin = 0,
+        orientation = Orientation.Portrait,
+        format = Format.A4,
+        header = '',
+        footer = '',
+        dpi = 96
+    } = {}
+) {}
+
+/**
+ * @param {string} htmlString - html code e.g. <h1>header 1</h1>
+ * @see createFromHtmlFile()
+ */
+createFromHtmlString (htmlString, options = {}) {}
+```
+
+## queue
+run async functions in order or in x number of functions in parallel per batch in order.
+similar to async / await when the second parameter is 1
+#### Example
+```JavaScript
+import { queue } from '@coolgk/utils/queue';
+// OR
+// const { queue } = require('@coolgk/utils/queue');
+
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
+
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b will not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each will wait until previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
+```
+#### Doc
+```JavaScript
+/**
+ * @param {function} callback - callback function that returns a promise or any other types
+ * @param {number} [limit=1] - number of callback to run at the same time, by default one callback at a time
+ * @return {promise}
+ */
+function queue (callback, limit = 1) {}
+```
+
+## string
+utilities functions
+#### Example
+```JavaScript
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/utils/string';
+// OR
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/utils/string');
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
+```
+#### Doc
+```JavaScript
+/**
+ * strip html tags e.g. "<h1>header</h1><p>message</p>" becomes "header message"
+ * @param {string} a string
+ * @return {string} string with tags stripped
+ */
+function stripTags (value = '') {}
+
+/**
+ * escaping user input e.g. html code in a message box
+ * @param {string} value - string to escape
+ * @return {string}
+ */
+function escapeHtml (value = '') {}
+
+/**
+ * unescaping strings escaped by escapeHtml.js
+ * @param {string} string - string to unescape
+ * @return {string}
+ */
+function unescapeHtml (value = '') {}
+
+/**
+ * @param {number} value - an integer in string or number format
+ * @param {number} length - length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070.
+ * @return {string}
+ */
+function prepad0 (value, length = 2) {}
+```
 
 ## token
+an expirable, revocable token with data storage
+#### Example
 ```JavaScript
-import { Token } from './token';
+import { Token } from '@coolgk/utils/token';
 import { createClient } from 'redis';
 // OR
-// const Token = require('./token');
+// const { Token } = require('@coolgk/utils/token');
 // const createClient = require('redis').createClient;
 
 (async () => {
@@ -566,77 +778,169 @@ import { createClient } from 'redis';
     redisClient.quit();
 })()
 ```
+#### Doc
+```JavaScript
+/**
+ * @param {object} options
+ * @param {string} options.token - token string for creating a token object
+ * @param {object} options.redisClient - from require('redis').createClient
+ * @param {string} [options.prefix='token'] - prefix used in redis e.g. token:[TOKEN_STRING...]
+ * @param {number} [options.expiry=0] - in seconds. 0 = never expire
+ */
+constructor (options) {}
+
+/**
+ * @param {number} expiry - in seconds
+ * @return {promise}
+ */
+renew (expiry = this._expiry) {}
+
+/**
+ * set a data field value
+ * @param {string} name - field name
+ * @param {*} value - anything can be JSON.stringify'ed
+ * @return {promise}
+ */
+set (name, value) {}
+
+/**
+ * @return {promise<boolean>}
+ */
+verify () {}
+
+/**
+ * get the value of a data field
+ * @param {string} name - data field name
+ * @return {promise}
+ */
+get (name) {}
+
+/**
+ * delete the token
+ * @return {promise}
+ */
+destroy () {}
+
+/**
+ * delete a data field in the token
+ * @param {string} name - data field name
+ * @return {promise}
+ */
+delete (name) {}
+
+/**
+ * get the values of all data fields in the token
+ * @return {promise}
+ */
+getAll () {}
+```
 
 ## unit
+unit conversion
+#### Example
 ```JavaScript
-import { bytesToString, millisecondsToString } from './unit';
+import { bytesToString, millisecondsToString } from '@coolgk/utils/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/utils/unit');
 
 console.log(
-    bytesToString(500),
-    bytesToString(5000),
-    bytesToString(5000000),
-    bytesToString(5000000000),
-    bytesToString(5000000000000),
-    bytesToString(5000000000000000),
-    bytesToString(5000000000000000000),
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
 );
 
-console.log('1 sec', millisecondsToString(1 * 1000));
-console.log('1 min', millisecondsToString(60 * 1000));
-console.log('100 sec', millisecondsToString(100 * 1000));
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000));
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000));
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000));
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000));
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000));
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000));
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000));
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+```
+#### Doc
+```JavaScript
+/**
+ * @param {number} value - value in byte
+ * @return {string} value in KB, MB, GB or TB
+ */
+function bytesToString (value) {}
+
+/**
+ * @param {number} value - number of milliseconds
+ * @return {string} value in second, minute, hour, day, month or year
+ */
+function millisecondsToString (value) {}
 ```
 
 ## url
+simple function for get parameters from url
+#### Example
 ```JavaScript
-import { getParams } from './url';
+import { getParams } from '@coolgk/utils/url';
+// OR
+// const { getParams } = require('@coolgk/utils/url');
 
 const url = '/123';
 const pattern = '/:id';
 
-console.log(getParams(url, pattern));
+console.log(getParams(url, pattern)); // { id: '123' }
 
 const url2 = '/123/abc/456';
 const pattern2 = '/:id/abc/:value';
 
-console.log(getParams(url2, pattern2));
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
 
 const url3 = '/123/456';
 const pattern3 = ':id/:value';
 
-console.log(getParams(url3, pattern3));
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+```
+#### Doc
+```JavaScript
+/**
+ * a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+ * @param {string} url - url after the domain name e.g. http://abc.com/user/:id url should be /user/:id
+ * @param {string} pattern - e.g. /:userid/:name
+ * @return {object} - e.g. {userid: 123}
+ */
+function getParams (url, pattern) {}
 ```
 
-## string
+## bcrypt
+bcrypt functions
+#### Example
 ```JavaScript
-import { stripTags, escapeHtml, unescapeHtml } from './string';
+import { encrypt, verify } from '@coolgk/utils/bcrypt';
 
-const str = '<h1>test</h1><script>alert(1)</script>'
+const password = 'abc123';
 
-console.log(stripTags(str));
-console.log(escapeHtml(str));
-console.log(unescapeHtml(escapeHtml(str)));
-
-console.log(prepad0(7, 2));
-console.log(prepad0(70, 3));
-console.log(prepad0(70, 4));
-console.log(prepad0(1, 4));
-console.log(prepad0(1000, 2));
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
 ```
+#### Doc
+```
+/**
+ * @param {string} value - string to encrypt
+ * @param {string} salt - salt
+ * @return {promise<string>}
+ */
+function encrypt (value, salt = null) {}
 
-## number
-```JavaScript
-import { round } from './number';
-
-console.log(round(1.3923, 2));
-console.log(round(100, 2));
-console.log(round(100.1264, 2));
-console.log(round(100.958747, 4));
+/**
+ * @param {string} value - string to check
+ * @param {string} hashedString - encrypted hash
+ * @return {promise<boolean>}
+ */
+function verify (value, hashedString) {}
 ```

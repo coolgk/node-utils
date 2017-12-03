@@ -95,10 +95,9 @@ export function get (urlString: string, options: IRequestConfig = {}): Promise<I
  * @return {promise}
  */
 export function post (urlString: string, options: IRequestConfig = {}): Promise<IRequestResponse> {
-    options.data = stringify(options.data || {});
     options.headers = Object.assign(options.headers || {}, {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(JSON.stringify(options.data))
+        'Content-Length': Buffer.byteLength(stringify(options.data || {}))
     });
     options.method = 'POST';
     return send(urlString, options);

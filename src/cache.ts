@@ -46,6 +46,7 @@ export interface ICacheConfig {
 export class Cache {
 
     private _redisClient: ICacheClient;
+
     /**
      * @param {object} options
      * @param {object} [options.redisClient] - redis client from redis.createClient()
@@ -57,7 +58,7 @@ export class Cache {
 
     /**
      * @param {string} command - redis command to run
-     * @param {*[]} params - params for the command
+     * @param {[]} params - params for the command
      * @return {promise}
      */
     public command (command: string, ...params: any[]): Promise<any> {
@@ -91,9 +92,7 @@ export class Cache {
     }
 
     /**
-     * this method tries to get the cached value
-     * if not found in cache, it resolves the "value" parameter and saves the value to cache then returns it
-     *
+     * get the cached value, if not set, resolve "callback()" and save the value then returns it
      * @param {string} name - name of the variable
      * @param {function} callback - a callback function which returns a value or a promise
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
@@ -111,5 +110,4 @@ export class Cache {
             return cachedValue;
         });
     }
-
 }

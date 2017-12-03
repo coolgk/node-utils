@@ -1,16 +1,4 @@
-/*
-import { Captcha } from './captcha';
-
-const captcha = new Captcha({
-    secret: '---'
-});
-
-captcha.verify('input_response', 'ip').then((response) => {
-    console.log(response);
-});
-*/
-
-import * as request from './request';
+import * as request from 'request';
 
 export interface ICaptchaConfig {
     readonly request?: typeof request;
@@ -26,7 +14,7 @@ export class Captcha {
 
     /**
      * @param {object} options
-     * @param {object} [options.request] - ./request
+     * @param {object} [options.request] - require('request')
      * @param {object} options.secret - google captcha secret https://www.google.com/recaptcha/admin#site/337294176
      */
     public constructor (options: ICaptchaConfig) {
@@ -36,21 +24,28 @@ export class Captcha {
 
     /**
      * @param {string} response - repsonse from recaptcha
-     * @param {string} remoteip - ip address
+     * @param {string} [remoteip] - ip address
      * @param {promise}
      */
-    public verify (response: string, remoteip: string): Promise<{}> {
-        return this._request.post(
-            Captcha._RECAPTCHA_URL,
-            {
-                data: {
-                    secret: this._secret,
-                    response,
-                    remoteip
+    public verify (response: string, remoteip?: string): Promise<{}> {
+        return new Promise((resolve, reject) => {
+            request.post(
+                {
+                    url: Captcha._RECAPTCHA_URL,
+                    form: {
+                        secret: this._secret,
+                        response,
+                        remoteip
+                    }
+                },
+                (error, httpResponse, data) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(JSON.parse(data))
+                    }
                 }
-            }
-        ).then(
-            (requestResponse) => requestResponse.json
-        );
+            );
+        });
     }
 }
