@@ -7,7 +7,7 @@ const changed = require('gulp-changed');
 const merge = require('merge2');
 const fs = require('fs');
 const path = require('path');
-const jsdoc = require('gulp-jsdoc3');
+// const jsdoc = require('gulp-jsdoc3');
 
 const tsProject = ts.createProject('./tsconfig.json');
 

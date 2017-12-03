@@ -85,17 +85,16 @@ import { createClient } from 'redis';
 import { Cache, ICacheClient } from './cache';
 
 export interface IConfig {
+    readonly token: string;
     readonly expiry?: number;
     readonly prefix?: string;
 }
 
 export interface ITokenConfigWithCache extends IConfig {
-    readonly token: string;
     readonly cache: Cache;
 }
 
 export interface ITokenConfig extends IConfig {
-    readonly token: string;
     readonly redisClient: ICacheClient;
 }
 

@@ -15,6 +15,8 @@
 - [unit](#unit)
 - [url](#url)
 - [bcrypt](#bcrypt)
+- [tmp](#tmp)
+- [jwt](#jwt)
 
 ## ampq
 a simple RabbitMQ class for publishing and consuming messages
@@ -945,7 +947,7 @@ function encrypt (value, salt = null) {}
 function verify (value, hashedString) {}
 ```
 
-##tmp
+## tmp
 wrapper functions, generate tmp file or folders
 #### Example
 ```JavaScript
@@ -994,7 +996,7 @@ function generateDir (options) {}
 function generateTmpName (options) {}
 ```
 
-##Jwt
+## jwt
 jwt token class
 #### Example
 ```JavaScript
