@@ -42,7 +42,7 @@ export class Captcha {
                     if (error) {
                         reject(error);
                     } else {
-                        resolve(JSON.parse(data))
+                        resolve(JSON.parse(data));
                     }
                 }
             );

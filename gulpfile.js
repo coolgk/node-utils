@@ -81,11 +81,11 @@ gulp.task('postpublish', () => {
     });
 });
 
-gulp.task('jsdoc', (done) => {
-    gulp.src(['dist/*.js'], {read: false}).pipe(
-        jsdoc(require('./jsdoc.json'), done)
-    );
-});
+// gulp.task('jsdoc', (done) => {
+    // gulp.src(['dist/*.js'], {read: false}).pipe(
+        // jsdoc(require('./jsdoc.json'), done)
+    // );
+// });
 
 gulp.task('watch', ['ts'], () => {
     gulp.watch('src/*.ts', ['ts']);
