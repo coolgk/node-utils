@@ -1,21 +1,3 @@
-/*
-
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from './string';
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str));
-console.log(escapeHtml(str));
-console.log(unescapeHtml( escapeHtml(str) ));
-
-console.log(prepad0(7, 2));
-console.log(prepad0(70, 3));
-console.log(prepad0(70, 4));
-console.log(prepad0(1, 4));
-console.log(prepad0(1000, 2));
-
-*/
-
 /**
  * strip html tags e.g. "<h1>header</h1><p>message</p>" becomes "header message"
  * @param {string} a string
@@ -31,16 +13,14 @@ export function stripTags (value: string = ''): string {
  * @return {string}
  */
 export function escapeHtml (value: string = ''): string {
-    return value ? (value + '').replace(
-        /[&<>"']/g,
-        (matches) => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        }[matches])
-    ) : '';
+    const mappings: {[index: string]: string} = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return value ? (value + '').replace(/[&<>"']/g, (matches: string) => (mappings[matches])) : '';
 }
 
 /**
@@ -49,16 +29,14 @@ export function escapeHtml (value: string = ''): string {
  * @return {string}
  */
 export function unescapeHtml (value: string = ''): string {
-    return value ? (value + '').replace(
-        /&.+?;/g,
-        (matches) => ({
-            '&amp;': '&',
-            '&lt;': '<',
-            '&gt;': '>',
-            '&quot;': '"',
-            '&#039;': "'"
-        }[matches] || matches)
-    ) : '';
+    const mappings: {[index: string]: string} = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#039;': "'"
+    };
+    return value ? (value + '').replace(/&.+?;/g, (matches: string) => (mappings[matches] || matches)) : '';
 }
 
 /**

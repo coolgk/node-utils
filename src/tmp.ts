@@ -1,16 +1,3 @@
-/*
-example:
-
-import { generateFile, generateDir, generateTmpName } from './tmp';
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-
-*/
-
 // https://github.com/raszi/node-tmp
 // npm i -S tmp
 import tmp = require('tmp');
@@ -23,10 +10,19 @@ export interface ITmpConfig {
     keep?: boolean;
 }
 
-export interface ITmpResponse {
+export interface ITmpFileResponse {
     path: string;
-    fd?: string;
-    cleanupCallback?: () => void;
+    fd: string;
+    cleanupCallback: () => void;
+}
+
+export interface ITmpDirResponse {
+    path: string;
+    cleanupCallback: () => void;
+}
+
+export interface ITmpNameResponse {
+    path: string;
 }
 
 /**
@@ -39,7 +35,7 @@ export interface ITmpResponse {
  * @param {boolean} [options.keep] - if to keep the file
  * @return {promise}
  */
-export function generate (action: string, options: ITmpConfig = {}): Promise<ITmpResponse> {
+export function generate (action: string, options: ITmpConfig = {}): Promise<any> {
     return new Promise((resolve, reject) => {
         tmp[action](
             {
@@ -47,7 +43,7 @@ export function generate (action: string, options: ITmpConfig = {}): Promise<ITm
                 tries: 10,
                 ...options
             },
-            (error: Error, path: string, fd: string, cleanupCallback: () => void): void => {
+            (error: Error, path: string, fd?: string, cleanupCallback?: () => void): void => {
                 return error ? reject(error) : resolve({path, fd, cleanupCallback});
             }
         );
@@ -63,8 +59,8 @@ export function generate (action: string, options: ITmpConfig = {}): Promise<ITm
  * @param {boolean} [options.keep] - if to keep the file
  * @return {promise}
  */
-export function generateFile (options?: ITmpConfig): Promise<ITmpResponse> {
-    return generate('file', options);
+export function generateFile (options?: ITmpConfig): Promise<ITmpFileResponse> {
+    return generate('file', options) as Promise<ITmpFileResponse>;
 }
 
 /**
@@ -76,8 +72,8 @@ export function generateFile (options?: ITmpConfig): Promise<ITmpResponse> {
  * @param {boolean} [options.keep] - if to keep the file
  * @return {promise}
  */
-export function generateDir (options?: ITmpConfig): Promise<ITmpResponse> {
-    return generate('dir', options);
+export function generateDir (options?: ITmpConfig): Promise<ITmpDirResponse> {
+    return generate('dir', options) as Promise<ITmpDirResponse>;
 }
 
 /**
@@ -88,6 +84,6 @@ export function generateDir (options?: ITmpConfig): Promise<ITmpResponse> {
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
  * @return {promise}
  */
-export function generateTmpName (options?: ITmpConfig): Promise<ITmpResponse> {
-    return generate('tmpName', options);
+export function generateTmpName (options?: ITmpConfig): Promise<ITmpNameResponse> {
+    return generate('tmpName', options) as Promise<ITmpNameResponse>;
 }

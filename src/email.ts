@@ -50,6 +50,7 @@ export interface ISendConfig {
     readonly cc?: (string | IEmailAddress)[];
     readonly bcc?: (string | IEmailAddress)[];
     readonly attachments?: IEmailAttachment[];
+    [key: string]: any;
 }
 
 export class Email {
@@ -130,7 +131,7 @@ export class Email {
             delete sendOptions.message;
             delete sendOptions.attachments;
 
-            this._emailClient.send(sendOptions, (error, message) => {
+            this._emailClient.send(sendOptions, (error: Error, message: {}) => {
                 error ? reject(error) : resolve(message);
             });
         });
@@ -143,7 +144,7 @@ export class Email {
      * @return {string} - "name name" <email@email.com>, "name2" <email@email.com> ...
      */
     private _formatEmailAddress (emails: (string | IEmailAddress)[]): string {
-        const formattedEmails = [];
+        const formattedEmails: (string | IEmailAddress)[] = [];
         emails.forEach((email: string | IEmailAddress) => {
             if (typeof email === 'string') {
                 email = {email};

@@ -7,10 +7,10 @@ import { compare, hash } from 'bcrypt-nodejs';
  * @param {string} salt - salt
  * @return {promise}
  */
-export function encrypt (value: string, salt: string = null): Promise<string> {
+export function encrypt (value: string, salt: string = ''): Promise<string> {
     return new Promise(
         (resolve, reject) => hash(
-            value, salt, null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
+            value, salt, () => null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
         )
     );
 }

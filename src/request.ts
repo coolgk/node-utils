@@ -47,10 +47,10 @@ export function send (urlString: string, options: IRequestConfig = {}): Promise<
     return new Promise((resolve, reject) => {
         options = Object.assign(url.parse(urlString), options);
 
-        const request = require(options.protocol === 'http:' ? 'http' : 'https').request(options, (response) => {
+        const request = require(options.protocol === 'http:' ? 'http' : 'https').request(options, (response: any) => {
             response.setEncoding('utf8');
             let data = '';
-            response.on('data', (chunk) => data += chunk);
+            response.on('data', (chunk: any) => data += chunk);
             response.on('end', () => {
                 const requestResponse: IRequestResponse = {
                     statusCode: response.statusCode,

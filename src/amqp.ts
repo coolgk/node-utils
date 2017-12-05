@@ -23,12 +23,12 @@ export interface IConsumeConfig {
 }
 
 export interface IMessage {
-    rawMessage: Message;
+    rawMessage: Message | null;
     message: any;
 }
 
 export interface IResponseMessage {
-    rawResponseMessage: Message;
+    rawResponseMessage: Message | null;
     responseMessage: any;
 }
 
@@ -54,9 +54,9 @@ export class Amqp {
      */
     constructor (options: IAmqpConfig) {
         this._url = options.url;
-        this._sslPem = options.sslPem;
-        this._sslCa = options.sslCa;
-        this._sslPass = options.sslPass;
+        this._sslPem = options.sslPem || '';
+        this._sslCa = options.sslCa || '';
+        this._sslPass = options.sslPass || '';
         this._connect = options.connect || connect;
         this._uuid = options.uuid || v1;
     }
@@ -78,11 +78,11 @@ export class Amqp {
         callback?: (message: IResponseMessage) => any,
         {route = '#', exchangeName = 'defaultExchange'}: {route?: string, exchangeName?: string} = {}
     ): Promise<boolean> {
-        return this._getChannel().then((channel) => {
+        return this._getChannel().then((channel: Channel) => {
             if (callback) {
                 const messageId = this._uuid();
                 return channel.assertQueue('response' + messageId, {durable: false}).then((queue) => {
-                    channel.consume(queue.queue, (rawResponseMessage: Message) => {
+                    channel.consume(queue.queue, (rawResponseMessage: Message | null) => {
                         if (rawResponseMessage && rawResponseMessage.properties.correlationId === messageId) {
                             callback({
                                 rawResponseMessage,
@@ -140,14 +140,15 @@ export class Amqp {
                 (queue) => channel.bindQueue(queue.queue, exchangeName, route).then(
                     () => channel.consume(
                         queue.queue,
-                        (rawMessage) => {
+                        (rawMessage: Message | null) => {
                             Promise.resolve(
                                 callback({
                                     rawMessage,
-                                    message: JSON.parse(rawMessage.content.toString())
+                                    message: JSON.parse((rawMessage as Message).content.toString())
                                 })
                             ).then((response) => {
-                                if (rawMessage.properties.replyTo && rawMessage.properties.correlationId) {
+                                if (rawMessage
+                                    && rawMessage.properties.replyTo && rawMessage.properties.correlationId) {
                                     channel.sendToQueue(
                                         rawMessage.properties.replyTo,
                                         Buffer.from(JSON.stringify(response)),
@@ -157,7 +158,7 @@ export class Amqp {
                                         }
                                     );
                                 }
-                                channel.ack(rawMessage);
+                                channel.ack(rawMessage as Message);
                             });
                         },
                         { priority }
@@ -170,7 +171,7 @@ export class Amqp {
     /**
      * @return {promise}
      */
-    private _getChannel (): any {
+    private _getChannel (): Promise<Channel> {
         if (!this._channel) {
             if (this._sslPem) {
                 this._channel = new Promise((resolve, reject) => {

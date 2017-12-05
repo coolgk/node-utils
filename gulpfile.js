@@ -10,22 +10,34 @@ const path = require('path');
 // const jsdoc = require('gulp-jsdoc3');
 
 const tsProject = ts.createProject('./tsconfig.json');
-
 const distFolder = 'dist';
+
+const header = require('gulp-header');
+const pkg = require('./package.json');
+const codeHeader = `/*! ${pkg.name} - ${pkg.description}
+ * @version ${pkg.version}
+ * @link ${pkg.homepage}
+ * @license ${pkg.license}
+ */
+
+`;
 
 gulp.task('ts', ['index.ts'], () => {
     const tsResult = gulp.src('src/*.ts')
         .pipe(
             changed(distFolder, {extension: '.js'})
         )
-        .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+        // .pipe(sourcemaps.init()) // This means sourcemaps will be generated
         .pipe(tsProject());
 
     return merge([ // Merge the two output streams, so this task is finished when the IO of both operations is done.
-        tsResult.dts.pipe(gulp.dest(`${distFolder}`)),
+        tsResult.dts
+            .pipe(header(codeHeader))
+            .pipe(gulp.dest(`${distFolder}`)),
         tsResult.js
-        .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-        .pipe(gulp.dest(`${distFolder}`))
+            // .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+            .pipe(header(codeHeader))
+            .pipe(gulp.dest(`${distFolder}`))
     ]);
 });
 
@@ -35,10 +47,10 @@ gulp.task('index.ts', () => {
         fs.readdir('src', (error, files) => {
             files.forEach((file) => {
                 const filename = file.replace('.ts', '');
-                if (filename !== 'index' && filename !== 'test') {
+                if (!['index', 'test', 'globals.d'].includes(filename)) {
                     // const module = filename[0].toUpperCase() + filename.substr(1);
                     writeStream.write(`import * as _${filename} from './${filename}';\n`);
-                    writeStream.write(`export const ${filename} = _${filename};\n`);
+                    writeStream.write(`export const ${filename} = _${filename}; // tslint:disable-line\n`);
                 }
             });
             writeStream.end();

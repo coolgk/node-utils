@@ -96,7 +96,7 @@ export class Csv {
                 let index = 0;
                 readline.on(
                     'line',
-                    (line) => {
+                    (line: string) => {
                         if (!options.limit || index < options.limit) {
                             ((callbackIndex) => {
                                 queue(
@@ -156,7 +156,7 @@ export class Csv {
                             )
                         );
                     } else {
-                        const promises = [];
+                        const promises: Promise<any>[] = [];
                         data.forEach(
                             (row) => promises.push(this._writeCsvStream(fileStream, row, options)),
                             () => resolve(Promise.all(promises))

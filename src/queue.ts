@@ -1,5 +1,5 @@
-let promise = Promise.resolve(undefined);
-const backlogs = [];
+let promise: Promise<any> = Promise.resolve(undefined);
+const backlogs: Promise<any>[] = [];
 
 /**
  * @param {function} callback - callback function that returns a promise or any other types

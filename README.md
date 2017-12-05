@@ -600,7 +600,7 @@ createFromHtmlString (htmlString, options = {}) {}
 ```
 
 ## queue
-run async functions in order or in x number of functions in parallel per batch in order.
+run async functions in order or run x number of functions in parallel per batch in order.
 similar to async / await when the second parameter is 1
 #### Example
 ```JavaScript

@@ -25,7 +25,7 @@ console.log(getParams(url3, pattern3));
  * @return {object} - e.g. {userid: 123}
  */
 export function getParams (url: string, pattern: string): {} {
-    const params = {};
+    const params: {[key: string]: string, [key: number]: string} = {};
 
     if (pattern[0] !== '/') {
         pattern = '/' + pattern;
