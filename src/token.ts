@@ -107,7 +107,7 @@ export class Token {
     private _cache: Cache;
     private _expiry: number;
     private _name: string;
-    private _token: string;
+    protected _token: string;
 
     /**
      * @param {object} options
