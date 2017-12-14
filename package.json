@@ -35,11 +35,11 @@
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/csv-parse": "^1.1.11",
     "@types/csv-stringify": "^1.4.1",
-    "@types/mongodb": "^2.2.15",
-    "@types/node": "^8.0.52",
+    "@types/mongodb": "^2.2.17",
+    "@types/node": "^8.5.1",
     "@types/phantom": "^3.2.3",
-    "@types/redis": "^2.8.1",
-    "@types/request": "^2.0.8",
+    "@types/redis": "^2.8.3",
+    "@types/request": "^2.0.9",
     "@types/uuid": "^3.4.3",
     "amqplib": "^0.5.2",
     "bcrypt-nodejs": "0.0.3",
@@ -61,7 +61,7 @@
     "gulp-typescript": "^3.2.3",
     "merge2": "^1.2.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.1"
+    "typescript": "^2.6.2"
   },
   "scripts": {
     "prepublishOnly": "gulp prepublish",
