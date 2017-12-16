@@ -29,9 +29,9 @@ export interface ITmpNameResponse {
  * @param {string} action - valid actions: file, dir or tmpName
  * @param {object} [options]
  * @param {number} [options.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
- * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
- * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
- * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
+ * @param {string} [options.prefix=Date.now()] - the optional prefix
+ * @param {string} [options.postfix='.tmp'] - the optional postfix
+ * @param {string} [options.dir=os.tmpdir()] - the optional temporary directory, fallbacks to system default
  * @param {boolean} [options.keep] - if to keep the file
  * @return {promise}
  */

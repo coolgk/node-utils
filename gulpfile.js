@@ -41,6 +41,20 @@ gulp.task('ts', ['index.ts'], () => {
     ]);
 });
 
+gulp.task('ts-dev', () => {
+    const tsResult = gulp.src('src/*.ts')
+        .pipe(
+            changed(distFolder, {extension: '.js'})
+        )
+        .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+        .pipe(tsProject());
+
+    return tsResult.js
+            .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+            .pipe(header('require("source-map-support").install();'))
+            .pipe(gulp.dest(`${distFolder}`));
+});
+
 gulp.task('index.ts', () => {
     return new Promise((resolve) => {
         const writeStream = fs.createWriteStream('src/index.ts');
@@ -99,6 +113,6 @@ gulp.task('postpublish', () => {
     // );
 // });
 
-gulp.task('watch', ['ts'], () => {
+gulp.task('watch', ['ts-dev'], () => {
     gulp.watch('src/*.ts', ['ts']);
 });

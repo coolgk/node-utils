@@ -3,7 +3,7 @@
         "declaration": true,
         "declarationDir": "dist",
         "outDir": "dist",
-		"target": "ES6",
+		"target": "ES2016",
 		"module": "commonjs",
         "pretty": true,
         "removeComments": true,

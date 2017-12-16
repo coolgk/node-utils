@@ -47,5 +47,6 @@ export function unescapeHtml (value: string = ''): string {
  * @return {string}
  */
 export function prepad0 (value: number | string, length: number = 2): string {
-    return (value + '').padStart(length, '0');
+    return (value + '').length > length ? value + '' : ('0'.repeat(length) + value).substr(-length);
+    // return (value + '').padStart(length, '0'); // this is ES7 only?
 }
