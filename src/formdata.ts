@@ -39,13 +39,14 @@ export interface IFile {
     mimetype: string;
     size: number;
     path: string;
-    remove: () => void
+    remove: () => void;
 }
 
 export interface IFormData {
     [key: string]: string | string[] | IFile[];
 }
 
+/* tslint:disable */
 /**
  * @param {object} request - http.IncomingMessage, request parameter in createServer()'s callback or express request
  * @param {object} [globalOptions]
@@ -64,6 +65,7 @@ export interface IFormData {
  * @param {string} [globalOptions.limits.postSize] - For application/json & application/x-www-form-urlencoded, the max number of bytes can be posted
  * @return {function} - parser function for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'
  */
+/* tslint:disable */
 export default function formData (
     request: IncomingMessage, globalOptions: IFormdataConfig = {}
 ): (names: string[]) => Promise<IFormData> {
@@ -81,6 +83,7 @@ export default function formData (
         'application/x-www-form-urlencoded': qsParse
     };
 
+    /* tslint:disable */
     /**
      * @param {string[]} fileFieldNames - name of the file upload fields to store on disk
      * @param {object} [localOptions]
@@ -99,6 +102,7 @@ export default function formData (
      * @param {string} [localOptions.limits.postSize] - For application/json & application/x-www-form-urlencoded, the max number of bytes can be posted
      * @return {promise}
      */
+    /* tslint:disable */
     return (fileFieldNames: string[], localOptions: IFormdataConfig = {}): Promise<IFormData> => {
         const options = { ...globalOptions, ...localOptions };
 

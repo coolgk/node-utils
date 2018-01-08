@@ -1,87 +1,7 @@
-/*
-import { Token } from './token';
-import { createClient } from 'redis';
-// OR
-// const Token = require('./token');
-// const createClient = require('redis').createClient;
-
-(async () => {
-
-    const redisClient = createClient({
-        host: 'localhost',
-        port: 6379,
-        password: '----'
-    });
-
-    const token = new Token({
-        redisClient: redisClient,
-        expiry: 5,
-        token: 'abcde'
-    });
-
-    console.log(
-        await token.verify()
-    ) // false
-
-    await token.renew();
-
-    console.log(
-        await token.verify()
-    ) // true
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    await token.set('var1', {a: 'var1', b: false});
-
-    console.log(
-        await token.get('var1');
-    ); // {a: 'var1', b: false}
-
-    await token.set('var2', 'string var 2');
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
-
-    await token.delete('var2');
-
-    console.log(
-        await token.get('var2');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false } }
-
-    await token.destroy();
-
-    console.log(
-        await token.verify()
-    ) // false
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    redisClient.quit();
-})()
-*/
-
 /**
  * allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
  * (./jwt cannot be renewed or revoked until expired)
  */
-
 import { Cache, ICacheClient } from './cache';
 
 export interface IConfig {
@@ -104,10 +24,11 @@ export enum Errors {
 }
 
 export class Token {
+
+    protected _token: string;
     private _cache: Cache;
     private _expiry: number;
     private _name: string;
-    protected _token: string;
 
     /**
      * @param {object} options
