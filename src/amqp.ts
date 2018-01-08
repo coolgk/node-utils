@@ -6,6 +6,8 @@ keywords:
 dependencies:
     "@types/amqplib": "^0.5.5"
     "amqplib": "^0.5.2"
+    "uuid": "^3.1.0"
+    "@types/uuid": "^3.4.3"
 example: |
     import { Amqp } from '@coolgk/amqp';
     // OR
