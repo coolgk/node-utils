@@ -1,3 +1,85 @@
+/***
+description: a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+keywords:
+    - ampq
+    - rabbitmq
+dependencies:
+    "@types/amqplib": "^0.5.5"
+    "amqplib": "^0.5.2"
+    "uuid": "^3.1.0"
+    "@types/uuid": "^3.4.3"
+example: |
+    import { Amqp } from '@coolgk/amqp';
+    // OR
+    // const { Amqp } = require('@coolgk/amqp');
+
+    const amqp = new Amqp({
+        url: 'amqp://localhost/vhost'
+    });
+
+    const message = {
+        a: 1,
+        b: 'b'
+    };
+
+    // publisher.js
+    // publish a message, no response from consumer
+    amqp.publish('ignore response');
+
+    // publish a message and handle response from consumer
+    amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+        console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+    });
+
+    // consumer.js
+    // consume message and return (send) a response back to publisher
+    amqp.consume(({rawMessage, message}) => {
+        console.log('consumer received', message); // consumer received ignore response
+                                                   // consumer received { a: 1, b: 'b' }
+        return {
+            response: 'response message'
+        }
+    });
+documentation: |
+    #### constructor(options)
+    - Parameters
+        - options
+            - {string} options.url - connection string e.g. amqp://localhost
+            - {string} [options.sslPem] - pem file path
+            - {string} [options.sslCa] - sslCa file path
+            - {string} [options.sslPass] - password
+    - Return Value
+        - void
+
+    #### closeConnection()
+    close the connection
+    - Return Value
+        - void
+
+    #### publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {})
+    - Parameters
+        - {*} message - message any type that can be JSON.stringify'ed
+        - {function} [callback] - callback(message) for processing response from consumers
+        - {object} [options]
+            - {string} [options.route='#'] - route name
+            - {string} [options.exchangeName='defaultExchange'] - exchange name
+    - Return Value
+        - Promise<boolean>
+
+    #### consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {})
+    - Parameters
+        - {function} callback - consumer(message) function should returns a promise
+        - {object} [options]
+        - {string} [options.route='#'] - exchange route
+        - {string} [options.queueName='defaultQueue'] - queue name for processing request
+        - {string} [options.exchangeName='defaultExchange'] - exchange name
+        - {string} [options.exchangeType='topic'] - exchange type
+        - {number} [options.priority=0] - priority, larger numbers indicate higher priority
+        - {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+    - Return Value
+        - Promise
+*/
+
 // npm install -S @types/amqplib amqplib @types/uuid uuid
 
 import { connect, Channel, Connection, Message, Replies } from 'amqplib';
@@ -61,6 +143,9 @@ export class Amqp {
         this._uuid = options.uuid || v1;
     }
 
+    /**
+     * @return {void}
+     */
     public closeConnection (): void {
         this._connection && this._connection.close();
     }
@@ -170,6 +255,7 @@ export class Amqp {
 
     /**
      * @return {promise}
+     * @ignore
      */
     private _getChannel (): Promise<Channel> {
         if (!this._channel) {
@@ -204,3 +290,5 @@ export class Amqp {
         return this._channel;
     }
 }
+
+export default Amqp;

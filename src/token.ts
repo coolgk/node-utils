@@ -1,7 +1,93 @@
-/**
- * allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
- * (./jwt cannot be renewed or revoked until expired)
- */
+/***
+description: an expirable, revocable token with data storage
+keywords:
+    - token
+    - session token
+dependencies:
+    "@types/redis": "^2.8.3"
+    "redis": "^2.8.0"
+example: |
+    import { Token } from '@coolgk/token';
+    import { createClient } from 'redis';
+    // OR
+    // const { Token } = require('@coolgk/token');
+    // const createClient = require('redis').createClient;
+
+    (async () => {
+
+        const redisClient = createClient({
+            host: 'localhost',
+            port: 6379,
+            password: '----'
+        });
+
+        const token = new Token({
+            redisClient: redisClient,
+            expiry: 5,
+            token: 'abcde'
+        });
+
+        console.log(
+            await token.verify()
+        ) // false
+
+        await token.renew();
+
+        console.log(
+            await token.verify()
+        ) // true
+
+        console.log(
+            await token.get('var1');
+        ); // null
+
+        console.log(
+            await token.getAll()
+        ); // {}
+
+        await token.set('var1', {a: 'var1', b: false});
+
+        console.log(
+            await token.get('var1');
+        ); // {a: 'var1', b: false}
+
+        await token.set('var2', 'string var 2');
+
+        console.log(
+            await token.getAll()
+        ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
+
+        await token.delete('var2');
+
+        console.log(
+            await token.get('var2');
+        ); // null
+
+        console.log(
+            await token.getAll()
+        ); // { var1: { a: 'var1', b: false } }
+
+        await token.destroy();
+
+        console.log(
+            await token.verify()
+        ) // false
+
+        console.log(
+            await token.get('var1');
+        ); // null
+
+        console.log(
+            await token.getAll()
+        ); // {}
+
+        redisClient.quit();
+    })()
+*/
+
+// allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
+// (./jwt cannot be renewed or revoked until expired)
+
 import { Cache, ICacheClient } from './cache';
 
 export interface IConfig {
@@ -33,7 +119,7 @@ export class Token {
     /**
      * @param {object} options
      * @param {string} options.token - token string for creating a token object
-     * @param {object} options.redisClient - cacheConfig in ./cache
+     * @param {object} options.redisClient - redis client from redis.createClient()
      * @param {string} [options.prefix='token'] - prefix used in redis e.g. token:[TOKEN_STRING...]
      * @param {number} [options.expiry=0] - in seconds. 0 = never expire
      */
@@ -129,3 +215,5 @@ export class Token {
         return {};
     }
 }
+
+export default Token;

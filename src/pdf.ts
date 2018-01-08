@@ -1,3 +1,67 @@
+/***
+description: create PDF files from html string or file
+keywords:
+    - pdf
+    - pdf file generator
+dependencies:
+    "@types/phantom": "^3.2.3"
+    "phantom": "^4.0.9"
+example: |
+    import { Pdf, Format, Orientation } from '@coolgk/pdf';
+    // OR
+    // const { Pdf, Format, Orientation } = require('@coolgk/pdf');
+
+    const pdf = new Pdf({
+        tmpConfig: { dir: '/tmp/pdf' } // optional
+    });
+
+    pdf.createFromHtmlFile(
+        '/tmp/test.html',
+        {
+            header: {
+                height: '1cm',
+                contents: "header <strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
+            },
+            footer: {
+                height: '1cm',
+                contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
+            },
+            margin: '0.5cm'
+        }
+    ).then((pdfFile) => {
+        console.log(pdfFile);
+    });
+
+    const htmlCode = `<!DOCTYPE html><html><head>
+            <title>CCES</title>
+            <style>
+                .pagebreak { page-break-after: always; }
+                h2, h1 { color: red }
+            </style>
+        </head>
+        <body>
+            <div>
+                <h1>page 1</h1>
+                <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
+            </div>
+            <div class="pagebreak"></div>
+            <div>
+                <h2>page 2</h2>
+                <table>
+                    <tr>
+                        <td>texgt</td>
+                        <td>text</td>
+                    </tr>
+                </table>
+            </div>
+        </body>
+    </html>`;
+
+    pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
+        console.log(pdfFile);
+    });
+*/
+
 // npm i -S phantom @types/phantom
 
 // callback is missing in @types/phantom
@@ -53,6 +117,9 @@ export class Pdf {
     private _tmp: typeof tmp;
     private _tmpConfig: tmp.ITmpConfig;
 
+    /**
+     * @param {object} options
+     */
     public constructor (options: IPdfConfig = {}) {
         this._phantom = options.phantom || phantom;
         this._tmp = options.tmp || tmp;
@@ -129,8 +196,10 @@ export class Pdf {
     }
 
     /**
-     * @param {string} htmlString - html code e.g. <h1>header 1</h1>
      * @see createFromHtmlFile()
+     * @param {string} htmlString - html code e.g. &lt;h1&gt;header 1&lt;/h1&gt;
+     * @param {object} [options] - see options in createFromHtmlFile()
+     * @return {promise}
      */
     public async createFromHtmlString (
         htmlString: string,
@@ -157,6 +226,7 @@ export class Pdf {
      * @param {string} html - html code for footer or header
      * @return {function} - a callback function for phantom.callback
      * @see http://phantomjs.org/api/webpage/property/paper-size.html Headers and Footers section
+     * @ignore
      */
     private _getHeaderFooter (html: string = ''): () => string {
         return new Function(
@@ -168,3 +238,5 @@ export class Pdf {
         ) as () => string;
     }
 }
+
+export default Pdf;

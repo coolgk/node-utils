@@ -3,8 +3,8 @@
         "declaration": true,
         "declarationDir": "dist",
         "outDir": "dist",
-		"target": "ES2016",
-		"module": "commonjs",
+        "target": "ES2016",
+        "module": "commonjs",
         "pretty": true,
         "removeComments": true,
         "strict": true

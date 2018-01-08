@@ -1,7 +1,32 @@
+/***
+description: string utility functions
+keywords:
+    - stripTags
+    - escapeHtml
+    - unescapeHtml
+    - prepad0
+example: |
+    import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
+    // OR
+    // const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
+
+    const str = '<h1>test</h1><script>alert(1)</script>'
+
+    console.log(stripTags(str)); //  test alert(1)
+    console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+    console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+    console.log(prepad0(7, 2)); // 07
+    console.log(prepad0(70, 3)); // 070
+    console.log(prepad0(70, 4)); // 0070
+    console.log(prepad0(1, 4)); // 0001
+    console.log(prepad0(1000, 2)); // 1000
+*/
+
 /**
- * strip html tags e.g. "<h1>header</h1><p>message</p>" becomes "header message"
+ * strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
  * @param {string} a string
- * @return {string} string with tags stripped
+ * @return {string} - string with tags stripped
  */
 export function stripTags (value: string = ''): string {
     return (value + '').replace(/(<([^>]+)>)/ig, ' ').replace(/\s+/g, ' ');
@@ -24,7 +49,7 @@ export function escapeHtml (value: string = ''): string {
 }
 
 /**
- * unescaping strings escaped by escapeHtml.js
+ * unescaping strings escaped by escapeHtml()
  * @param {string} string - string to unescape
  * @return {string}
  */
