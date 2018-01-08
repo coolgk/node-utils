@@ -20,7 +20,7 @@ example: |
         {
             header: {
                 height: '1cm',
-                contents: "header <strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
+                contents: "<strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
             },
             footer: {
                 height: '1cm',

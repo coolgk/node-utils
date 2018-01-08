@@ -1,3 +1,4 @@
+/* tslint:disable */
 /***
 description: a simple jwt token class
 keywords:
@@ -29,6 +30,7 @@ example: |
         console.log(jwt.verify(token2)); // false
     }, 250);
 */
+/* tslint:enable */
 
 // https://en.wikipedia.org/wiki/JSON_Web_Token
 // https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/

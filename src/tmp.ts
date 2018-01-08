@@ -10,11 +10,14 @@ example: |
     // OR
     // const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
 
-    generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r)); // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+    generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+        // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
-    generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r)); // file { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+    generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+        // file { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
-    generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r)); // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+    generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+        // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
 */
 
 // https://github.com/raszi/node-tmp

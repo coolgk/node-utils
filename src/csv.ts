@@ -1,3 +1,4 @@
+/* tslint:disable */
 /***
 description: read and write csv files
 keywords:
@@ -88,6 +89,7 @@ example: |
         );
     }
 */
+/* tslint:enable */
 
 // npm i -S csv-stringify @types/csv-stringify csv-parse @types/csv-parse @types/mongodb
 

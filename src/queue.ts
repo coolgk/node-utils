@@ -1,3 +1,4 @@
+/* tslint:disable */
 /***
 description: run async functions in order or run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1
 keywords:
@@ -42,6 +43,7 @@ example: |
         queue(a, 3)
     });
 */
+/* tslint:enable */
 
 let promise: Promise<any> = Promise.resolve(undefined);
 const backlogs: Promise<any>[] = [];

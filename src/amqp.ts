@@ -1,3 +1,4 @@
+/* tslint:disable */
 /***
 description: a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
 keywords:
@@ -79,6 +80,7 @@ documentation: |
     - Return Value
         - Promise
 */
+/* tslint:enable */
 
 // npm install -S @types/amqplib amqplib @types/uuid uuid
 

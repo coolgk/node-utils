@@ -141,20 +141,23 @@ function parseFileMetaDoc (file, name) {
             if (metaComments) {
                 try {
                     const metaDoc = yaml.safeLoad(metaComments);
+                    const folder = `packages/${name}`;
 
-                    resolve(
+                    getFolder(folder).then(() => resolve(
                         Promise.all([
                             // create README.md
                             jsdoc2md.render({ files: `dist/${name}.js` }).then((jsDoc) => {
 
-                                const markdown = '# Examples' +
+                                const markdown = `# npm install @coolgk/${name}` + '\n' +
+                                `${metaDoc.description}` + "\n" +
+                                '## Examples' +
                                 getMdCode(metaDoc.example) +
                                 '## Docs' + "\n" +
                                 jsDoc;
                                 // metaDoc.documentation;
 
                                 return new Promise((resolve, reject) => {
-                                    fs.writeFile(`packages/README.${name}.md`, markdown, 'utf8', (error) => {
+                                    fs.writeFile(`${folder}/README.md`, markdown, 'utf8', (error) => {
                                         if (error) return reject(error);
                                         resolve();
                                     });
@@ -163,7 +166,7 @@ function parseFileMetaDoc (file, name) {
                             // create package.json
                             new Promise((resolve, reject) => {
                                 fs.writeFile(
-                                    `packages/package.${name}.json`,
+                                    `${folder}/package.json`,
                                     JSON.stringify(
                                         Object.assign(
                                             packageJson,{
@@ -185,7 +188,7 @@ function parseFileMetaDoc (file, name) {
                                 );
                             })
                         ])
-                    );
+                    ));
 
                 } catch (error) {
                     return reject(error);
@@ -195,6 +198,15 @@ function parseFileMetaDoc (file, name) {
                 console.error(chalk.white.bgRed.bold(`${file} has no meta doc`));
                 resolve();
             }
+        });
+    });
+}
+
+function getFolder (path) {
+    return new Promise((resolve, reject) => {
+        fs.mkdir(path, (error) => {
+            if (error && error.code !== 'EEXIST') return reject(error);
+            resolve();
         });
     });
 }

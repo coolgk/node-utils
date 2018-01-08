@@ -26,7 +26,8 @@ example: |
             },
             'gong@example.com'
         ],
-        message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+        message: '<html><body><h1>test</h1>some message here
+            <img src="cid:my-image" width="500" height="250"></body></html>',
         attachments: [
             {
                 path: '/tmp/test.png',
