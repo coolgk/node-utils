@@ -1,3 +1,49 @@
+/***
+description: email sender
+keywords:
+    - email sender
+    - smtp sender
+dependencies:
+    "mime-types": "^2.1.17"
+    "emailjs": "^1.0.12"
+example: |
+    import { Email } from '@coolgk/email';
+    // OR
+    // const { Email } = require('@coolgk/email');
+
+    const email = new Email({host: 'localhost'});
+
+    email.send({
+        subject: 'hello this is email subject',
+        from: {
+                name: 'Daniel Gong',
+                email: 'daniel.k.gong@example.com'
+        },
+        to: [
+            {
+                name: 'Dan Go',
+                email: 'dan@example.com'
+            },
+            'gong@example.com'
+        ],
+        message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+        attachments: [
+            {
+                path: '/tmp/test.png',
+                name: 'screenshot.png'
+            },
+            {
+                path:"/tmp/test.png",
+                headers:{"Content-ID": "<my-image>"}
+            }
+        ]
+    }).then((sentMessage) => {
+        console.log(sentMessage);
+    }).catch((error) => {
+        console.log(error);
+    });
+*/
+
 // mime package (https://www.npmjs.com/package/mime) does not work in node 8 using mime-types instead
 // npm i -S emailjs mime-types
 
@@ -142,6 +188,7 @@ export class Email {
      * @param {string} emails[].name - name of the recipient
      * @param {string} emails[].email - email address of the recipient
      * @return {string} - "name name" <email@email.com>, "name2" <email@email.com> ...
+     * @ignore
      */
     private _formatEmailAddress (emails: (string | IEmailAddress)[]): string {
         const formattedEmails: (string | IEmailAddress)[] = [];
@@ -154,3 +201,5 @@ export class Email {
         return formattedEmails.join(', ');
     }
 }
+
+export default Email;

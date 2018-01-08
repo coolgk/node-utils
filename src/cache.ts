@@ -1,35 +1,66 @@
-/*
-import { Cache, ICacheConfig } from './cache';
-import { createClient } from 'redis';
+/***
+description: a redis wrapper
+keywords:
+    - redis
+    - cache
+dependencies:
+    "@types/redis": "^2.8.3"
+    "redis": "^2.8.0"
+example: |
+    import { Cache } from '@coolgk/cache';
+    import { createClient } from 'redis';
+    // OR
+    // const { Cache } = require('@coolgk/cache');
+    // const { createClient } = require('redis');
 
-const client = createClient({
-    host: 'localhost',
-    port: 6379,
-    password: '---'
-});
+    const client = createClient({
+        host: 'localhost',
+        port: 12869,
+        password: '----'
+    });
 
-const config: ICacheConfig = {
-    redisClient: client
-};
+    const cache = new Cache({
+        redisClient: client
+    });
 
-const cache = new Cache(config);
+    cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
 
-cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
+    cache.get('abc').then(console.log); // { a: 1 }
 
-cache.get('abc').then(console.log); // { a: 1 }
+    setTimeout(() => {
+        cache.get('abc').then(console.log); // null
+        client.quit();
+    }, 1500);
 
-setTimeout(() => {
-    cache.get('abc').then(console.log); // null
-    client.quit();
-}, 1500);
+    cache.getSetIfNull(
+        'abc',
+        () => Promise.resolve('data'),
+        10
+    ).then((v) => {
+        console.log(v); // { a: 1 }
+    });
+documentation: |
+    #### constructor (options)
+    - Parameters
+        - {object} options
+        - {object} [options.redisClient] - redis client from redis.createClient()
+    - Return Value
+        - void
 
-cache.getSetIfNull(
-    'abc',
-    () => Promise.resolve('data'),
-    10
-).then((v) => {
-    console.log(v); // { a: 1 }
-});
+    #### set (name: string, value: any, expiry = 0)
+    - Parameters
+        - {object} options
+        - {object} [options.redisClient] - redis client from redis.createClient()
+    - Return Value
+        - void
+
+    #### constructor (options)
+    - Parameters
+        - {object} options
+        - {object} [options.redisClient] - redis client from redis.createClient()
+    - Return Value
+        - void
+
 */
 
 import { RedisClient } from 'redis';
@@ -57,20 +88,6 @@ export class Cache {
     }
 
     /**
-     * @param {string} command - redis command to run
-     * @param {[]} params - params for the command
-     * @return {promise}
-     */
-    public command (command: string, ...params: any[]): Promise<any> {
-        return new Promise((resolve, reject) => {
-            params.push((error: Error, response: any) => {
-                error ? reject(error) : resolve(response);
-            });
-            this._redisClient[command](...params);
-        });
-    }
-
-    /**
      * @param {string} name - name of the variable
      * @param {*} value - value is always JSON.stringify'ed
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
@@ -92,7 +109,7 @@ export class Cache {
     }
 
     /**
-     * get the cached value, if not set, resolve "callback()" and save the value then returns it
+     * get the cached value, if not set, resolve "callback()" and save the value then return it
      * @param {string} name - name of the variable
      * @param {function} callback - a callback function which returns a value or a promise
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
@@ -110,4 +127,20 @@ export class Cache {
             return cachedValue;
         });
     }
+
+    /**
+     * @param {string} command - redis command to run
+     * @param {array} params - params for the command
+     * @return {promise}
+     */
+    public command (command: string, ...params: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            params.push((error: Error, response: any) => {
+                error ? reject(error) : resolve(response);
+            });
+            this._redisClient[command](...params);
+        });
+    }
 }
+
+export default Cache;

@@ -1,3 +1,31 @@
+/***
+description: array utilities
+keywords:
+    - toArray
+example: |
+    import { toArray } from '@coolgk/array';
+    // OR
+    // const { toArray } = require('@coolgk/array');
+
+    const a = undefined;
+    const b = false;
+    const c = '';
+    const d = [1,2,3];
+    const e = {a:1};
+
+    console.log(toArray(a)); // []
+    console.log(toArray(b)); // [ false ]
+    console.log(toArray(c)); // [ '' ]
+    console.log(toArray(d)); // [ 1, 2, 3 ]
+    console.log(toArray(e)); // [ { a: 1 } ]
+documentation: |
+    #### toArray (data)
+    - Parameters
+        - {*} data - any data to be type cast to array
+    - Return Value
+        - array
+*/
+
 /**
  * @param {*} data - any data to be type cast to array
  * @return {array}

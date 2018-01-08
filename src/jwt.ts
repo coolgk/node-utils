@@ -1,31 +1,37 @@
+/***
+description: a simple jwt token class
+keywords:
+    - jwt
+example: |
+    import { Jwt } from '@coolgk/jwt';
+    // OR
+    // const { Jwt } = require('@coolgk/jwt');
+
+    const jwt = new Jwt({secret: 'abc'});
+
+    const string = 'http://example.com/a/b/c?a=1';
+
+    const token = jwt.generate(string);
+
+    console.log(
+        jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
+        jwt.verify(token+'1') // false
+    );
+
+    const token2 = jwt.generate(string, 200);
+
+    console.log(
+        jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
+        jwt.verify(token+'1') // false
+    );
+
+    setTimeout(() => {
+        console.log(jwt.verify(token2)); // false
+    }, 250);
+*/
+
 // https://en.wikipedia.org/wiki/JSON_Web_Token
 // https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
-
-/*
-import { Jwt } from './jwt';
-
-const jwt = new Jwt({secret: 'abc'});
-
-const string = 'http://example.com/a/b/c?a=1';
-
-const token = jwt.generate(string);
-
-console.log(
-    jwt.verify(token),
-    jwt.verify(token+'1')
-);
-
-const token2 = jwt.generate(string, 200);
-
-console.log(
-    jwt.verify(token2),
-    jwt.verify(token+'1')
-);
-
-setTimeout(() => {
-    console.log(jwt.verify(token2));
-}, 250);
-*/
 
 import { createHmac } from 'crypto';
 import { decodeUrl, encodeUrl } from './base64';
@@ -81,7 +87,7 @@ export class Jwt {
 
     /**
      * @param {string} token - token to verify
-     * @return {boolean|object}
+     * @return {boolean|object} - false or the payload of the token
      */
     public verify (token: string = ''): boolean | {} {
         const [unsignedToken, tokenSignature] = token.split('.');
@@ -99,3 +105,5 @@ export class Jwt {
         }
     }
 }
+
+export default Jwt;

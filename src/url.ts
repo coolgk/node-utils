@@ -1,23 +1,30 @@
-/*
+/***
+description: a simple function for parsing parameters in a url
+keywords:
+    - url
+    - parser
+example: |
+    import { getParams } from '@coolgk/url';
+    // OR
+    // const { getParams } = require('@coolgk/url');
 
-import { getParams } from './url';
+    const url = '/123';
+    const pattern = '/:id';
 
-const url = '/123';
-const pattern = '/:id';
+    console.log(getParams(url, pattern)); // { id: '123' }
 
-console.log(getParams(url, pattern));
+    const url2 = '/123/abc/456';
+    const pattern2 = '/:id/abc/:value';
 
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
+    console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
 
-console.log(getParams(url2, pattern2));
+    const url3 = '/123/456';
+    const pattern3 = ':id/:value';
 
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3));
+    console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 
 */
+
 /**
  * a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
  * @param {string} url - url after the domain name e.g. http://abc.com/user/:id url should be /user/:id
@@ -58,3 +65,5 @@ export function getParams (url: string, pattern: string): {} {
 
     return params;
 }
+
+export default getParams;

@@ -1,3 +1,52 @@
+/***
+description: base64 encoded decode functions
+keywords:
+    - base64
+    - encode
+    - decode
+    - encodeUrl
+    - decodeUrl
+example: |
+    import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+    // OR
+    // const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
+
+    const a = 'https://www.google.co.uk/?a=b'
+    const hash = encode(a);
+    const urlHash = encodeUrl(a);
+
+    console.log(a); // https://www.google.co.uk/?a=b
+    console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+    console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+    console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+    console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+documentation: |
+    #### encode (data = '')
+    - Parameters
+        - {string} data - string to encode
+    - Return Value
+        - string
+
+    #### decode (data = '')
+    - Parameters
+        - {string} data - encoded hash
+    - Return Value
+        - string
+
+    #### encodeUrl (data = '')
+    - Parameters
+        - {string} data - string to encode
+    - Return Value
+        - string
+
+    #### decodeUrl (data = '')
+    - Parameters
+        - {string} data - base64 encoded url
+    - Return Value
+        - string
+*/
+
 /**
  * @param {string} data - string to encode
  * @return {string}

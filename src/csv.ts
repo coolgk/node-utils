@@ -1,3 +1,94 @@
+/***
+description: read and write csv files
+keywords:
+    - csv
+    - csv parser
+    - csr writer
+dependencies:
+    "@types/mongodb": "^2.2.17"
+    "@types/csv-parse": "^1.1.11"
+    "@types/csv-stringify": "^1.4.1"
+    "csv-parse": "^2.0.0"
+    "csv-stringify": "^2.0.0"
+example: |
+    import { Csv } from '@coolgk/csv';
+    // OR
+    // const { Csv } = require('@coolgk/csv');
+
+    const csv = new Csv({
+        tmpConfig: { dir: '/tmp/csv' } // optional
+    });
+
+    const arrayData = [
+        [1,2,3,4,5],
+        [6,7,7,8,9],
+        [0,5,8,90,65]
+    ];
+
+    const objectData = [
+        {col1: 'ab', col2: 'cd', col3: 'ef'},
+        {col1: '2ab', col2: '2cd', col3: '2ef'},
+        {col1: '3ab', col2: '3cd', col3: '3ef'}
+    ];
+
+    csv.createFile(
+        arrayData,
+        {
+            columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+            formatter: (row: any[]) => {
+                return row.map((value) => 'formatted-' + value);
+            }
+        }
+    ).then((csvFilePath) => {
+        console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
+        read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+    });
+
+    csv.createFile(
+        objectData,
+        {
+            columns: ['col1', 'col2', 'col3'],
+            formatter: (row: {[propName: string]: any}) => {
+                return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+            }
+        }
+    ).then((csvFilePath) => {
+        console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
+        read(csvFilePath, ['col1', 'col2', 'col3']);
+    });
+
+    function read (file, columns) {
+        // with columns/headers
+        const lines = csv.readFile(file, {columns: columns});
+        lines.forEach(
+            (lineArray, index) => {
+                console.log(lineArray, index);
+                // {
+                    // 'column 1': 'formatted-1',
+                    // 'column 2': 'formatted-2',
+                    // 'column 3': 'formatted-3',
+                    // h4: 'formatted-4',
+                    // h5: 'formatted-5'
+                // } 1
+            },
+            (total) => {
+                console.log('read done, total:', total); // read done, total: 4
+            }
+        );
+
+        // without columns/headers
+        const lines2 = csv.readFile(file);
+        lines2.forEach(
+            (lineArray, index) => {
+                console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
+            },
+            (total) => {
+                console.log('read done, total:', total); // read done, total: 4
+            }
+        );
+    }
+*/
+
 // npm i -S csv-stringify @types/csv-stringify csv-parse @types/csv-parse @types/mongodb
 
 import csvParse = require('csv-parse');
@@ -83,7 +174,7 @@ export class Csv {
      * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, row values becomes objects
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
-     * @return {object} { forEach: ((row, index) => void, (totalCount) => void) => void }
+     * @return {object} - { forEach: ((row, index) => void, (totalCount) => void) => void }
      */
     /* tslint:enable */
     public readFile (file: string, options: ICsvReadConfig = {}): IReadFileResponse {
@@ -183,6 +274,7 @@ export class Csv {
      * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.
      * @param {string} [options.filepath] - file path is automatically generated if empty
      * @return {promise}
+     * @ignore
      */
     /* tslint:enable */
     private _writeCsvStream (
@@ -209,3 +301,5 @@ export class Csv {
         );
     }
 }
+
+export default Csv;

@@ -1,3 +1,27 @@
+/***
+description: recapcha wrapper
+keywords:
+    - recapcha
+dependencies:
+    "@types/request": "^2.0.9"
+    "request": "^2.83.0"
+example: |
+    import { Captcha } from '@coolgk/captcha';
+    // OR
+    // const { Captcha } = require('@coolgk/captcha');
+
+    const captcha = new Captcha({
+        secret: '-------'
+    });
+
+    const captchaResponse = '---------';
+
+    captcha.verify(captchaResponse).then((response) => {
+        console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                               // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+    });
+*/
+
 import * as request from 'request';
 
 export interface ICaptchaConfig {
@@ -49,3 +73,5 @@ export class Captcha {
         });
     }
 }
+
+export default Captcha;
