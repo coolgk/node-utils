@@ -179,7 +179,7 @@ function generateRootReadme (folder) {
                         new Promise((resolve) => {
                             fs.access(`packages/${name}/README.md`, fs.constants.R_OK, (error) => {
                                 if (error) return resolve();
-                                readmeWriteStream.write(`- [${name}](#@coolgk/${name})\n`);
+                                readmeWriteStream.write(`- [${name}](#coolgk${name})\n`);
 
                                 const rs = fs.createReadStream(`packages/${name}/README.md`);
                                 rs.on('data', (chunk) => {
