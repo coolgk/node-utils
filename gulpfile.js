@@ -61,7 +61,7 @@ gulp.task('ts-dev', () => {
             .pipe(gulp.dest(`${distFolder}`));
 });
 
-gulp.task('index.ts', () => {
+gulp.task('index.ts', ['generate-package-files'], () => {
     return new Promise((resolve) => {
         const writeStream = fs.createWriteStream('src/index.ts');
         fs.readdir('src', (error, files) => {
@@ -84,8 +84,12 @@ gulp.task('prepublish', ['ts'], () => {
         const promises = [];
         fs.readdir('dist', (error, files) => {
             files.forEach((file) => {
-                promises.push(new Promise((res) => {
-                    fs.rename(`dist/${file}`, `./${file}`, () => res())
+                const name = file.substr(0, file.indexOf('.'));
+                promises.push(new Promise((resolve) => {
+                    // fs.rename(`dist/${file}`, `./${file}`, () => resolve())
+                    fs.createReadStream(`dist/${file}`).pipe(
+                        fs.createWriteStream(`packages/${name}/${file}`)
+                    ).on('finish', () => resolve())
                 }));
             });
             resolve(Promise.all(promises));
