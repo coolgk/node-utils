@@ -278,7 +278,7 @@ function parseFileMetaDoc (file, name) {
                             // create README.md
                             jsdoc2md.render({ files: `${distFolder}/${name}.js` }).then((jsDoc) => {
 
-                                const markdown = `# @coolgk/${name}` + "\n" +
+                                const markdown = "\n" + `## @coolgk/${name}` + "\n" +
                                 'a javascript / typescript module' + "\n\n" +
                                 `\`npm install @coolgk/${name}\`` + "\n\n" +
                                 `${metaDoc.description}` + "\n" +
