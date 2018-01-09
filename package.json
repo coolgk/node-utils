@@ -2,7 +2,7 @@
   "name": "@coolgk/utils",
   "version": "1.0.0",
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
-  "homepage": "https://github.com/coolgk/utils",
+  "homepage": "https://www.npmjs.com/package/@coolgk/utils",
   "bugs": {
     "url": "https://github.com/coolgk/utils/issues"
   },
@@ -77,7 +77,7 @@
     "postpublish": "gulp postpublish",
     "publish-dryrun": "tar -tf $(npm pack)"
   },
-  "main": "./dist/js/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT"
 }

@@ -19,7 +19,8 @@ const distFolder = 'dist';
 
 const header = require('gulp-header');
 const pkg = require('./package.json');
-const codeHeader = `/*! ${pkg.name} - ${pkg.description}
+const codeHeader = `/*!
+ * @package ${pkg.name}
  * @version ${pkg.version}
  * @link ${pkg.homepage}
  * @license ${pkg.license}
@@ -27,11 +28,13 @@ const codeHeader = `/*! ${pkg.name} - ${pkg.description}
 
 `;
 
+gulp.task('index.ts', generateIndexFile);
+
 gulp.task('ts', ['index.ts'], () => {
     const tsResult = gulp.src('src/*.ts')
-        .pipe(
-            changed(distFolder, {extension: '.js'})
-        )
+        // .pipe(
+            // changed(distFolder, {extension: '.js'})
+        // )
         // .pipe(sourcemaps.init()) // This means sourcemaps will be generated
         .pipe(tsProject());
 
@@ -46,22 +49,108 @@ gulp.task('ts', ['index.ts'], () => {
     ]);
 });
 
-gulp.task('ts-dev', () => {
-    const devTsProject = ts.createProject('./tsconfig.json', { removeComments: false });
-    const tsResult = gulp.src('src/*.ts')
-        .pipe(
-            changed(distFolder, {extension: '.js'})
-        )
-        .pipe(sourcemaps.init()) // This means sourcemaps will be generated
-        .pipe(devTsProject());
+gulp.task('ts-dev', compileTsDev);
 
-    return tsResult.js
-            .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-            .pipe(header('require("source-map-support").install();'))
-            .pipe(gulp.dest(`${distFolder}`));
+// gulp.task('prepublish', ['ts'], addDistCodeToPackage);
+
+/*
+gulp.task('postpublish', () => {
+    return new Promise((resolve) => {
+        const promises = [];
+        fs.readdir('src', (error, files) => {
+            files.forEach((file) => {
+                const filename = file.replace('.ts', '');
+                promises.push(
+                    new Promise((res) => {
+                        fs.rename(`./${filename}.js`, `${distFolder}/${filename}.js`, () => res())
+                    }),
+                    new Promise((res) => {
+                        fs.rename(`./${filename}.d.ts`, `${distFolder}/${filename}.d.ts`, () => res())
+                    })
+                );
+            });
+            resolve(Promise.all(promises));
+        });
+    });
 });
+*/
 
-gulp.task('index.ts', ['generate-package-files'], () => {
+gulp.task('generate-all-packages', () => {
+    return generateSubPackages().then(() => generateRootPackage());
+});
+gulp.task('generate-root-package', generateRootPackage);
+gulp.task('generate-sub-packages', generateSubPackages);
+
+function generateSubPackages () {
+    return generateSubPackageMetaData()
+    .then(() => generateIndexFile())
+    .then(() => compileTs())
+    .then(() => addDistCodeToSubPackages());
+}
+
+function compileTs () {
+    const tsResult = gulp.src('src/*.ts')
+        // .pipe(
+            // changed(distFolder, {extension: '.js'})
+        // )
+        .pipe(tsProject());
+
+    return Promise.all([
+        new Promise((resolve) => {
+            tsResult.dts
+                .pipe(header(codeHeader))
+                .pipe(gulp.dest(`${distFolder}`))
+                .on('finish', () => resolve());
+        }),
+        new Promise((resolve) => {
+            tsResult.js
+                .pipe(header(codeHeader))
+                .pipe(gulp.dest(`${distFolder}`))
+                .on('finish', () => resolve());
+        })
+    ]);
+}
+
+function compileTsDev () {
+    return new Promise((resolve, reject) => {
+        const devTsProject = ts.createProject('./tsconfig.json', { removeComments: false });
+        const tsResult = gulp.src('src/*.ts')
+            // .pipe(
+                // changed(distFolder, {extension: '.js'})
+            // )
+            .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+            .pipe(devTsProject());
+
+        return tsResult.js
+                .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+                .pipe(header('require("source-map-support").install();'))
+                .pipe(gulp.dest(distFolder))
+                .on('finish', () => resolve());
+    });
+}
+
+function generateRootPackage () {
+    const folder = 'packages/utils';
+    return compileTs()
+        .then(() => createFolder(folder))
+        .then(() => {
+            return new Promise((resolve) => {
+                const promises = [];
+                fs.readdir(distFolder, (error, files) => {
+                    files.forEach((file) => {
+                        promises.push(new Promise((resolve) => {
+                            fs.createReadStream(`${distFolder}/${file}`).pipe(
+                                fs.createWriteStream(`${folder}/${file}`)
+                            ).on('finish', () => resolve());
+                        }));
+                    });
+                    resolve(Promise.all(promises));
+                });
+            });
+        });
+}
+
+function generateIndexFile () {
     return new Promise((resolve) => {
         const writeStream = fs.createWriteStream('src/index.ts');
         fs.readdir('src', (error, files) => {
@@ -76,64 +165,48 @@ gulp.task('index.ts', ['generate-package-files'], () => {
             writeStream.end();
             resolve();
         });
-    });
-});
+    })
+}
 
-gulp.task('prepublish', ['ts'], () => {
+function addDistCodeToSubPackages () {
     return new Promise((resolve) => {
         const promises = [];
-        fs.readdir('dist', (error, files) => {
+        fs.readdir(distFolder, (error, files) => {
             files.forEach((file) => {
                 const name = file.substr(0, file.indexOf('.'));
                 promises.push(new Promise((resolve) => {
-                    // fs.rename(`dist/${file}`, `./${file}`, () => resolve())
-                    fs.createReadStream(`dist/${file}`).pipe(
-                        fs.createWriteStream(`packages/${name}/${file}`)
-                    ).on('finish', () => resolve())
+                    fs.access(`packages/${name}`, fs.constants.W_OK, (error) => {
+                        if (error) return;
+                        fs.createReadStream(`${distFolder}/${file}`).pipe(
+                            fs.createWriteStream(`packages/${name}/${file}`)
+                        ).on('finish', () => resolve());
+                    });
                 }));
             });
             resolve(Promise.all(promises));
         });
     });
-});
+}
 
-gulp.task('postpublish', () => {
+function generateSubPackageMetaData () {
     return new Promise((resolve) => {
-        const promises = [];
-        fs.readdir('src', (error, files) => {
-            files.forEach((file) => {
-                const filename = file.replace('.ts', '');
-                promises.push(
-                    new Promise((res) => {
-                        fs.rename(`./${filename}.js`, `dist/${filename}.js`, () => res())
-                    }),
-                    new Promise((res) => {
-                        fs.rename(`./${filename}.d.ts`, `dist/${filename}.d.ts`, () => res())
-                    })
-                );
+        compileTsDev().then(() => {
+            fs.readdir('src', (error, files) => {
+                const promises = [];
+                files.forEach((file) => {
+                    const name = file.replace('.ts', '');
+                    if (!['index', 'test', 'globals.d'].includes(name)) {
+                    // if (['array'].includes(name)) {
+                        promises.push(
+                            parseFileMetaDoc(file, name)
+                        )
+                    }
+                });
+                resolve(Promise.all(promises));
             });
-            resolve(Promise.all(promises));
         });
     });
-});
-
-gulp.task('generate-package-files', ['ts-dev'], () => {
-    return new Promise((resolve) => {
-        fs.readdir('src', (error, files) => {
-            const promises = [];
-            files.forEach((file) => {
-                const name = file.replace('.ts', '');
-                if (!['index', 'test', 'globals.d'].includes(name)) {
-                // if (['array'].includes(name)) {
-                    promises.push(
-                        parseFileMetaDoc(file, name)
-                    )
-                }
-            });
-            resolve(Promise.all(promises));
-        });
-    });
-});
+}
 
 function parseFileMetaDoc (file, name) {
     return new Promise((resolve, reject) => {
@@ -147,10 +220,10 @@ function parseFileMetaDoc (file, name) {
                     const metaDoc = yaml.safeLoad(metaComments);
                     const folder = `packages/${name}`;
 
-                    getFolder(folder).then(() => resolve(
+                    createFolder(folder).then(() => resolve(
                         Promise.all([
                             // create README.md
-                            jsdoc2md.render({ files: `dist/${name}.js` }).then((jsDoc) => {
+                            jsdoc2md.render({ files: `${distFolder}/${name}.js` }).then((jsDoc) => {
 
                                 const markdown = `# npm install @coolgk/${name}` + '\n' +
                                 `${metaDoc.description}` + "\n" +
@@ -175,8 +248,8 @@ function parseFileMetaDoc (file, name) {
                                         Object.assign(
                                             packageJson,{
                                                 name: `@coolgk/${name}`,
-                                                main: `./dist/js/${name}.js`,
-                                                types: `./dist/types/${name}.d.ts`,
+                                                main: `./${distFolder}/${name}.js`,
+                                                types: `./${distFolder}/${name}.d.ts`,
                                                 description: metaDoc.description,
                                                 keywords: metaDoc.keywords,
                                                 dependencies: metaDoc.dependencies,
@@ -188,6 +261,7 @@ function parseFileMetaDoc (file, name) {
                                     'utf8',
                                     (error) => {
                                         if (error) return reject(error);
+                                        resolve();
                                     }
                                 );
                             })
@@ -206,7 +280,7 @@ function parseFileMetaDoc (file, name) {
     });
 }
 
-function getFolder (path) {
+function createFolder (path) {
     return new Promise((resolve, reject) => {
         fs.mkdir(path, (error) => {
             if (error && error.code !== 'EEXIST') return reject(error);
@@ -218,12 +292,6 @@ function getFolder (path) {
 function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n";
 }
-
-// gulp.task('jsdoc', (done) => {
-    // gulp.src(['dist/*.js'], {read: false}).pipe(
-        // jsdoc(require('./jsdoc.json'), done)
-    // );
-// });
 
 gulp.task('watch', ['ts-dev'], () => {
     gulp.watch('src/*.ts', ['ts']);
