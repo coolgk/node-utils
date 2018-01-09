@@ -11,6 +11,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 const jsdoc2md = require('jsdoc-to-markdown');
 const chalk = require('chalk');
+const childProcess = require('child_process');
 
 const packageJson = require('./package.json');
 
@@ -75,7 +76,11 @@ gulp.task('postpublish', () => {
 });
 */
 
-gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
+gulp.task('publish', ['packages'], () => {
+
+});
+
+gulp.task('packages', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-sub-packages', generateSubPackages);
 
@@ -130,9 +135,9 @@ function compileTsDev () {
 function generateRootPackage () {
     const folder = 'packages/utils';
 
-    return generateRootReadme(folder);
-
-    return compileTs()
+    return createFolder(folder)
+        .then(() => generateRootReadme(folder))
+        .then(() => compileTs())
         .then(() => createFolder(folder))
         .then(() => {
             return new Promise((resolve) => {
@@ -158,21 +163,27 @@ function generateRootPackage () {
 }
 
 function generateRootReadme (folder) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const file = `${folder}/README.md`;
-        fs.writeFile(file, '', () => {
+        // fs.writeFile(file, '', (error) => {
+            // if (error) return reject(error);
             fs.readdir('src', (error, files) => {
-                const readmeStream = fs.createWriteStream(file);
+                const readmeWriteStream = fs.createWriteStream(file);
+                readmeWriteStream.write('`npm install @coolgk/utils`' + "\n");
+
                 const promises = [];
                 files.forEach((file) => {
                     const name = file.replace('.ts', '');
+
                     promises.push(
                         new Promise((resolve) => {
                             fs.access(`packages/${name}/README.md`, fs.constants.R_OK, (error) => {
                                 if (error) return resolve();
+                                readmeWriteStream.write(`- [${name}](#@coolgk/${name})\n`);
+
                                 const rs = fs.createReadStream(`packages/${name}/README.md`);
                                 rs.on('data', (chunk) => {
-                                    readmeStream.write(chunk);
+                                    readmeWriteStream.write(chunk);
                                 });
                                 rs.on('end', () => {
                                     resolve();
@@ -182,10 +193,10 @@ function generateRootReadme (folder) {
                     )
                 });
                 resolve(Promise.all(promises).then(() => {
-                    readmeStream.end();
+                    readmeWriteStream.end();
                 }));
             });
-        });
+        // });
     });
 }
 
@@ -267,11 +278,13 @@ function parseFileMetaDoc (file, name) {
                             // create README.md
                             jsdoc2md.render({ files: `${distFolder}/${name}.js` }).then((jsDoc) => {
 
-                                const markdown = `# npm install @coolgk/${name}` + '\n' +
+                                const markdown = `# @coolgk/${name}` + "\n" +
+                                'a javascript / typescript module' + "\n\n" +
+                                `\`npm install @coolgk/${name}\`` + "\n\n" +
                                 `${metaDoc.description}` + "\n" +
                                 '## Examples' +
                                 getMdCode(metaDoc.example) +
-                                '## Docs' + "\n" +
+                                // '## Docs' + "\n" +
                                 jsDoc;
                                 // metaDoc.documentation;
 
@@ -293,7 +306,7 @@ function parseFileMetaDoc (file, name) {
                                                 main: `./${distFolder}/${name}.js`,
                                                 types: `./${distFolder}/${name}.d.ts`,
                                                 description: metaDoc.description,
-                                                keywords: metaDoc.keywords,
+                                                keywords: (metaDoc.keywords || []).concat('typescript'),
                                                 dependencies: metaDoc.dependencies,
                                                 devDependencies: undefined,
                                                 scripts: undefined
@@ -315,7 +328,7 @@ function parseFileMetaDoc (file, name) {
                 }
             } else {
                 // reject(`${file} has no meta doc`);
-                console.error(chalk.white.bgRed.bold(`${file} has no meta doc`));
+                consoleLogError(`${file} has no meta doc`);
                 resolve();
             }
         });
@@ -333,6 +346,26 @@ function createFolder (path) {
 
 function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n";
+}
+
+function execCommand (command, reporterOptions = {}, options = {}) {
+    return new Promise((resolve, reject) => {
+        console.log('exec command: ' + command);
+        childProcess.exec(command, {maxBuffer: Infinity}, (error, stdout, stderr) => {
+            console.log(stdout);
+            consoleLogError(stderr);
+            if (error) {
+                reject(error);
+            } else {
+                console.log('done');
+                resolve();
+            }
+        });
+    });
+}
+
+function consoleLogError(message) {
+    console.error(chalk.white.bgRed.bold(message));
 }
 
 gulp.task('watch', ['ts-dev'], () => {

@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/coolgk/utils.git"
   },
-  "description": "utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, http request, tmp, token, unit conversion, url params",
+  "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params",
   "keywords": [
     "array",
     "string",
@@ -24,7 +24,7 @@
     "jwt",
     "number",
     "pdf",
-    "http request",
+    "typescript",
     "tmp",
     "token",
     "unit conversion",
@@ -71,11 +71,6 @@
     "source-map-support": "^0.5.0",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
-  },
-  "scripts": {
-    "prepublishOnly": "gulp prepublish",
-    "postpublish": "gulp postpublish",
-    "publish-dryrun": "tar -tf $(npm pack)"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
