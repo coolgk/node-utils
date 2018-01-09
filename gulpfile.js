@@ -75,10 +75,8 @@ gulp.task('postpublish', () => {
 });
 */
 
-gulp.task('generate-all-packages', () => {
-    return generateSubPackages().then(() => generateRootPackage());
-});
-gulp.task('generate-root-package', generateRootPackage);
+gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
+gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
@@ -131,11 +129,20 @@ function compileTsDev () {
 
 function generateRootPackage () {
     const folder = 'packages/utils';
+
+    return generateRootReadme(folder);
+
     return compileTs()
         .then(() => createFolder(folder))
         .then(() => {
             return new Promise((resolve) => {
-                const promises = [];
+                const promises = [
+                    new Promise((resolve) => {
+                        fs.createReadStream(`./package.json`).pipe(
+                            fs.createWriteStream(`${folder}/package.json`)
+                        ).on('finish', () => resolve());
+                    })
+                ];
                 fs.readdir(distFolder, (error, files) => {
                     files.forEach((file) => {
                         promises.push(new Promise((resolve) => {
@@ -148,6 +155,38 @@ function generateRootPackage () {
                 });
             });
         });
+}
+
+function generateRootReadme (folder) {
+    return new Promise((resolve) => {
+        const file = `${folder}/README.md`;
+        fs.writeFile(file, '', () => {
+            fs.readdir('src', (error, files) => {
+                const readmeStream = fs.createWriteStream(file);
+                const promises = [];
+                files.forEach((file) => {
+                    const name = file.replace('.ts', '');
+                    promises.push(
+                        new Promise((resolve) => {
+                            fs.access(`packages/${name}/README.md`, fs.constants.R_OK, (error) => {
+                                if (error) return resolve();
+                                const rs = fs.createReadStream(`packages/${name}/README.md`);
+                                rs.on('data', (chunk) => {
+                                    readmeStream.write(chunk);
+                                });
+                                rs.on('end', () => {
+                                    resolve();
+                                });
+                            });
+                        })
+                    )
+                });
+                resolve(Promise.all(promises).then(() => {
+                    readmeStream.end();
+                }));
+            });
+        });
+    });
 }
 
 function generateIndexFile () {
@@ -176,7 +215,10 @@ function addDistCodeToSubPackages () {
                 const name = file.substr(0, file.indexOf('.'));
                 promises.push(new Promise((resolve) => {
                     fs.access(`packages/${name}`, fs.constants.W_OK, (error) => {
-                        if (error) return;
+                        if (error) {
+                            console.warn(chalk.red.bold(`${name} has no package folder`));
+                            return resolve();
+                        }
                         fs.createReadStream(`${distFolder}/${file}`).pipe(
                             fs.createWriteStream(`packages/${name}/${file}`)
                         ).on('finish', () => resolve());
