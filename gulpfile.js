@@ -186,7 +186,7 @@ function generateRootReadme (folder) {
             fs.readdir('src', (error, files) => {
                 const readmeWriteStream = fs.createWriteStream(file);
                 readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
-                readmeWriteStream.write('Replace @coolgk/[module] with @coolgk/**utils**/[module] in the npm install commands below' + "\n");
+                readmeWriteStream.write('replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + "\n\n");
 
                 const promises = [];
                 files.forEach((file) => {
