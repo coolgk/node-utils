@@ -75,9 +75,17 @@ gulp.task('postpublish', () => {
     });
 });
 */
-
+//
 gulp.task('publish', ['packages'], () => {
-
+    return new Promise((resolve) => {
+        fs.readdir('packages', (error, folders) => {
+            const promises = [];
+            folders.forEach((folder) => {
+                promises.push(execCommand(`cd packages/${folder} && npm publish --access=public`));
+            });
+            resolve(Promise.all(promises));
+        });
+    });
 });
 
 gulp.task('packages', ['generate-sub-packages'], generateRootPackage);
@@ -348,7 +356,7 @@ function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n";
 }
 
-function execCommand (command, reporterOptions = {}, options = {}) {
+function execCommand (command) {
     return new Promise((resolve, reject) => {
         console.log('exec command: ' + command);
         childProcess.exec(command, {maxBuffer: Infinity}, (error, stdout, stderr) => {
