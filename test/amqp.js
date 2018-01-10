@@ -3,64 +3,79 @@
 // const sinon = require('sinon');
 const expect = require('chai').expect;
 
+process.on('unhandledRejection', console.error);
+
 describe('Amqp Module', () => {
-/*
-    const { Amqp } = require('../packages/amqp/amqp');
+
+    // const { Amqp } = require('../dist/amqp.js');
+    const { Amqp } = require('@coolgk/amqp');
     const config = require('../test.config.js');
 
     const amqp = new Amqp({
         url: config.amqp.url
     });
 
-    const message = {
-        a: 1,
-        b: 'b'
-    };
-
-    amqp.publish('ignore response');
-
-    amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-        console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+    after(function() {
+        amqp.closeConnection();
     });
 
-    amqp.consume(({rawMessage, message}) => {
-        console.log('consumer received', message);
-        return {
-            response: 'response message'
-        }
-    });
+    it('should consumer message that does not require a response', (done) => {
+        const stringMessage = 'ignore response';
+        const route = Date.now() + Math.random();
 
-
-    describe('stripTags', () => {
-        it('should remove html tags', () => {
-            expect(stripTags('<h1>test</h1><script>alert(1)</script>')).to.equal('test alert(1)');
+        amqp.consume(({rawMessage, message}) => {
+            expect(stringMessage).to.equal(message);
+            done();
+        }, { route }).then(() => {
+            amqp.publish(stringMessage, undefined, { route });
         });
     });
 
-    describe('escapeHtml', () => {
-        it('should escape html tags', () => {
-            expect(
-                escapeHtml('<h1>test</h1><script>alert(1)</script>')
-            ).to.equal('&lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+    it('should consumer message that requires a response', (done) => {
+        const jsonMessage = { a: 1, b: 'b' };
+        const response = { response: 'response message' };
+        const route = Date.now() + Math.random();
+
+        amqp.consume(({rawMessage, message}) => {
+            expect(jsonMessage).to.deep.equal(message);
+            return response;
+        }, { route }).then(() => {
+            amqp.publish(jsonMessage, ({rawResponseMessage, responseMessage}) => {
+                expect(response).to.deep.equal(responseMessage);
+                done();
+            }, { route });
         });
     });
 
-    describe('unescapeHtml', () => {
-        it('should unescape html tags', () => {
-            expect(
-                unescapeHtml('&lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;')
-            ).to.equal('<h1>test</h1><script>alert(1)</script>');
-        });
-    });
+    it('should consume messages from the correct routes', (done) => {
+        const routes = {
+            a: {
+                message: Date.now() + Math.random(),
+                name: Date.now() + Math.random(),
+                response: Date.now() + Math.random()
+            },
+            b: {
+                message: Date.now() + Math.random(),
+                name: Date.now() + Math.random()
+            }
+        };
 
-    describe('prepad0', () => {
-        it('add 0 before a number to a specified length', () => {
-            expect(prepad0(7, 2)).to.equal('07');
-            expect(prepad0(70, 3)).to.equal('070');
-            expect(prepad0(70, 4)).to.equal('0070');
-            expect(prepad0(1, 4)).to.equal('0001');
-            expect(prepad0(1000, 2)).to.equal('1000');
+        Promise.all([
+            amqp.consume(({rawMessage, message}) => {
+                expect(routes.a.message).to.deep.equal(message);
+                return routes.a.response;
+            }, { route: routes.a.name }),
+            amqp.consume(({rawMessage, message}) => {
+                expect(routes.b.message).to.deep.equal(message);
+            }, { route: routes.b.name })
+        ]).then(() => {
+            return Promise.all([
+                amqp.publish(routes.b.message, undefined, { route: routes.b.name }),
+                amqp.publish(routes.a.message, ({rawResponseMessage, responseMessage}) => {
+                    expect(routes.a.response).to.deep.equal(responseMessage);
+                    done();
+                }, { route: routes.a.name })
+            ]);
         });
     });
-*/
 });

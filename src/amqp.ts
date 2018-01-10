@@ -23,14 +23,7 @@ example: |
         b: 'b'
     };
 
-    // publisher.js
-    // publish a message, no response from consumer
-    amqp.publish('ignore response');
-
-    // publish a message and handle response from consumer
-    amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-        console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-    });
+    // CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
 
     // consumer.js
     // consume message and return (send) a response back to publisher
@@ -40,6 +33,15 @@ example: |
         return {
             response: 'response message'
         }
+    });
+
+    // publisher.js
+    // publish a message, no response from consumer
+    amqp.publish('ignore response');
+
+    // publish a message and handle response from consumer
+    amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+        console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
     });
 documentation: |
     #### constructor(options)
@@ -168,7 +170,7 @@ export class Amqp {
         return this._getChannel().then((channel: Channel) => {
             if (callback) {
                 const messageId = this._uuid();
-                return channel.assertQueue('response' + messageId, {durable: false}).then((queue) => {
+                return channel.assertQueue('response' + messageId, {durable: false, autoDelete: true}).then((queue) => {
                     channel.consume(queue.queue, (rawResponseMessage: Message | null) => {
                         if (rawResponseMessage && rawResponseMessage.properties.correlationId === messageId) {
                             callback({
@@ -181,8 +183,8 @@ export class Amqp {
                     });
 
                     return channel.publish(
-                        exchangeName ,
-                        route,
+                        exchangeName,
+                        String(route),
                         Buffer.from(JSON.stringify(message)),
                         {
                             persistent: true,
@@ -192,7 +194,14 @@ export class Amqp {
                     );
                 });
             }
-            return channel.publish(exchangeName, route, Buffer.from(JSON.stringify(message)), {persistent: true});
+            return channel.publish(
+                exchangeName,
+                String(route),
+                Buffer.from(JSON.stringify(message)),
+                {
+                    persistent: true
+                }
+            );
         });
     }
 
@@ -200,7 +209,7 @@ export class Amqp {
      * @param {function} callback - consumer(message) function should returns a promise
      * @param {object} [options]
      * @param {string} [options.route='#'] - exchange route
-     * @param {string} [options.queueName='defaultQueue'] - queue name for processing request
+     * @param {string} [options.queueName=''] - queue name for processing request
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
      * @param {string} [options.exchangeType='topic'] - exchange type
      * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
@@ -211,20 +220,20 @@ export class Amqp {
         callback: (message: IMessage) => any,
         {
             route = '#',
-            queueName = 'defaultQueue',
+            queueName = '',
             exchangeName = 'defaultExchange',
             exchangeType = 'topic',
             priority = 0,
             prefetch = 0
         }: IConsumeConfig = {}
     ): Promise<Replies.Consume> {
-        return this._getChannel().then(
-            (channel) => channel.prefetch(prefetch).then(
-                () => channel.assertExchange(exchangeName, exchangeType, {durable: true})
-            ).then(
-                () => channel.assertQueue(queueName, {durable: true})
-            ).then(
-                (queue) => channel.bindQueue(queue.queue, exchangeName, route).then(
+        return this._getChannel().then((channel: any) => {
+            return channel.prefetch(prefetch).then(() => {
+                return channel.assertExchange(exchangeName, exchangeType, {durable: true});
+            }).then(() => {
+                return channel.assertQueue(queueName, {durable: false});
+            }).then((queue: Replies.AssertQueue) => {
+                return channel.bindQueue(queue.queue, exchangeName, String(route)).then(
                     () => channel.consume(
                         queue.queue,
                         (rawMessage: Message | null) => {
@@ -233,7 +242,7 @@ export class Amqp {
                                     rawMessage,
                                     message: JSON.parse((rawMessage as Message).content.toString())
                                 })
-                            ).then((response) => {
+                            ).then((response: any = '') => {
                                 if (rawMessage
                                     && rawMessage.properties.replyTo && rawMessage.properties.correlationId) {
                                     channel.sendToQueue(
@@ -250,19 +259,19 @@ export class Amqp {
                         },
                         { priority }
                     )
-                )
-            )
-        );
+                );
+            });
+        });
     }
 
     /**
      * @return {promise}
      * @ignore
      */
-    private _getChannel (): Promise<Channel> {
+    private _getChannel (): any {
         if (!this._channel) {
             if (this._sslPem) {
-                this._channel = new Promise((resolve, reject) => {
+                return this._channel = new Promise((resolve, reject) => {
                     readFile(
                         this._sslPem,
                         (error, sslPem) => error ? reject(error) : resolve({
@@ -284,7 +293,7 @@ export class Amqp {
                     )
                 );
             } else {
-                this._channel = this._connect(this._url).then(
+                return this._channel = this._connect(this._url).then(
                     (connection) => (this._connection = connection).createChannel()
                 );
             }

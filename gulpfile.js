@@ -142,7 +142,7 @@ function compileTsDev () {
 
         return tsResult.js
                 .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-                .pipe(header('require("source-map-support").install();'))
+                .pipe(header('require("source-map-support").install();' + "\n"))
                 .pipe(gulp.dest(distFolder))
                 .on('finish', () => resolve());
     });
@@ -407,6 +407,8 @@ function unitTest (reporter = 'spec') {
         });
 }
 
+process.on('unhandledRejection', consoleLogError);
+
 gulp.task('watch', ['ts-dev'], () => {
-    gulp.watch('src/*.ts', ['ts']);
+    gulp.watch('src/*.ts', ['ts-dev']);
 });
