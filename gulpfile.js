@@ -251,7 +251,10 @@ function addDistCodeToSubPackages () {
                             fs.createWriteStream(`${packageFolder}/${name}/${file}`)
                         ).on('finish', () => {
                             if (file.includes('.js')) {
-                                execCommand(`cd ${packageFolder}/${name} && npm link && cd - && npm link @coolgk/${name}`);
+                                execCommand(
+                                    `cd ${packageFolder}/${name} && npm link && cd - && npm link @coolgk/${name}`,
+                                    { mute: true }
+                                );
                             }
                             resolve();
                         });
@@ -370,16 +373,16 @@ function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n";
 }
 
-function execCommand (command) {
+function execCommand (command, options = {mute: false}) {
     return new Promise((resolve, reject) => {
-        console.log('exec command: ' + command);
+        if (!options.mute) console.log('exec command: ' + command);
         childProcess.exec(command, {maxBuffer: Infinity}, (error, stdout, stderr) => {
-            console.log(stdout);
+            if (!options.mute) console.log(stdout);
             consoleLogError(stderr);
             if (error) {
                 reject(error);
             } else {
-                console.log('done');
+                if (!options.mute) console.log('done');
                 resolve();
             }
         });
