@@ -11,6 +11,9 @@ const path = require('path');
 const yaml = require('js-yaml');
 const jsdoc2md = require('jsdoc-to-markdown');
 const chalk = require('chalk');
+const mocha = require('gulp-mocha');
+const del = require('del');
+
 const childProcess = require('child_process');
 
 const packageJson = require('./package.json');
@@ -75,7 +78,7 @@ gulp.task('postpublish', () => {
     });
 });
 */
-//
+
 gulp.task('publish', ['packages'], () => {
     return new Promise((resolve) => {
         fs.readdir('packages', (error, folders) => {
@@ -93,8 +96,9 @@ gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackag
 gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
-    return generateSubPackageMetaData()
-    .then(() => generateIndexFile())
+    return del(['dist/**', 'packages/**'])
+    .then(() => generateSubPackageMetaData())
+    // .then(() => generateIndexFile())
     .then(() => compileTs())
     .then(() => addDistCodeToSubPackages());
 }
@@ -374,6 +378,20 @@ function execCommand (command) {
 
 function consoleLogError(message) {
     console.error(chalk.white.bgRed.bold(message));
+}
+
+function unitTest (reporter = 'spec') {
+    return gulp.src('./test')
+        .pipe(
+            mocha({
+                ui: 'bdd',
+                reporter: reporter,
+                exit: true
+            })
+        )
+        .once('error', () => {
+            process.exit(1);
+        });
 }
 
 gulp.task('watch', ['ts-dev'], () => {
