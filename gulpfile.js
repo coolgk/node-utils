@@ -20,6 +20,7 @@ const packageJson = require('./package.json');
 
 const tsProject = ts.createProject('./tsconfig.json');
 const distFolder = 'dist';
+const packageFolder = 'packages';
 
 const header = require('gulp-header');
 const pkg = require('./package.json');
@@ -81,10 +82,10 @@ gulp.task('postpublish', () => {
 
 gulp.task('publish', ['packages'], () => {
     return new Promise((resolve) => {
-        fs.readdir('packages', (error, folders) => {
+        fs.readdir(packageFolder, (error, folders) => {
             const promises = [];
             folders.forEach((folder) => {
-                promises.push(execCommand(`cd packages/${folder} && npm publish --access=public`));
+                promises.push(execCommand(`cd ${packageFolder}/${folder} && npm publish --access=public`));
             });
             resolve(Promise.all(promises));
         });
@@ -96,8 +97,9 @@ gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackag
 gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
-    return del(['dist/**', 'packages/**'])
+    return del([`${distFolder}/**`, `${packageFolder}/**`])
     .then(() => generateSubPackageMetaData())
+    .then(() => createFolder(packageFolder))
     // .then(() => generateIndexFile())
     .then(() => compileTs())
     .then(() => addDistCodeToSubPackages());
@@ -145,7 +147,7 @@ function compileTsDev () {
 }
 
 function generateRootPackage () {
-    const folder = 'packages/utils';
+    const folder = `${packageFolder}/utils`;
 
     return createFolder(folder)
         .then(() => generateRootReadme(folder))
@@ -189,11 +191,11 @@ function generateRootReadme (folder) {
 
                     promises.push(
                         new Promise((resolve) => {
-                            fs.access(`packages/${name}/README.md`, fs.constants.R_OK, (error) => {
+                            fs.access(`${packageFolder}/${name}/README.md`, fs.constants.R_OK, (error) => {
                                 if (error) return resolve();
                                 readmeWriteStream.write(`- [${name}](#coolgk${name})\n`);
 
-                                const rs = fs.createReadStream(`packages/${name}/README.md`);
+                                const rs = fs.createReadStream(`${packageFolder}/${name}/README.md`);
                                 rs.on('data', (chunk) => {
                                     readmeWriteStream.write(chunk);
                                 });
@@ -237,13 +239,13 @@ function addDistCodeToSubPackages () {
             files.forEach((file) => {
                 const name = file.substr(0, file.indexOf('.'));
                 promises.push(new Promise((resolve) => {
-                    fs.access(`packages/${name}`, fs.constants.W_OK, (error) => {
+                    fs.access(`${packageFolder}/${name}`, fs.constants.W_OK, (error) => {
                         if (error) {
                             console.warn(chalk.red.bold(`${name} has no package folder`));
                             return resolve();
                         }
                         fs.createReadStream(`${distFolder}/${file}`).pipe(
-                            fs.createWriteStream(`packages/${name}/${file}`)
+                            fs.createWriteStream(`${packageFolder}/${name}/${file}`)
                         ).on('finish', () => resolve());
                     });
                 }));
@@ -283,7 +285,7 @@ function parseFileMetaDoc (file, name) {
             if (metaComments) {
                 try {
                     const metaDoc = yaml.safeLoad(metaComments);
-                    const folder = `packages/${name}`;
+                    const folder = `${packageFolder}/${name}`;
 
                     createFolder(folder).then(() => resolve(
                         Promise.all([
