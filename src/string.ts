@@ -29,7 +29,7 @@ example: |
  * @return {string} - string with tags stripped
  */
 export function stripTags (value: string = ''): string {
-    return (value + '').replace(/(<([^>]+)>)/ig, ' ').replace(/\s+/g, ' ');
+    return (value + '').replace(/(<([^>]+)>)/ig, ' ').replace(/\s+/g, ' ').trim();
 }
 
 /**

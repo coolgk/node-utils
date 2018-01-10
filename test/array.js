@@ -1,12 +1,10 @@
 'use strict';
 
-const sinon = require('sinon');
-const chai = require('chai');
-const expect = chai.expect;
-
-const { toArray } = require('../packages/array/array.js');
+// const sinon = require('sinon');
+const expect = require('chai').expect;
 
 describe('Array Module', () => {
+    const { toArray } = require('@coolgk/array');
 
     // before(() => {});
     // beforeEach(() => {});

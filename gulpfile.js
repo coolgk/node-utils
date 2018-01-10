@@ -80,7 +80,9 @@ gulp.task('postpublish', () => {
 });
 */
 
-gulp.task('publish', ['packages'], () => {
+gulp.task('test', () => unitTest());
+
+gulp.task('publish', ['generate-all-packages'], () => {
     return new Promise((resolve) => {
         fs.readdir(packageFolder, (error, folders) => {
             const promises = [];
@@ -92,14 +94,14 @@ gulp.task('publish', ['packages'], () => {
     });
 });
 
-gulp.task('packages', ['generate-sub-packages'], generateRootPackage);
+gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
     return del([`${distFolder}/**`, `${packageFolder}/**`])
-    .then(() => generateSubPackageMetaData())
     .then(() => createFolder(packageFolder))
+    .then(() => generateSubPackageMetaData())
     // .then(() => generateIndexFile())
     .then(() => compileTs())
     .then(() => addDistCodeToSubPackages());
@@ -183,7 +185,8 @@ function generateRootReadme (folder) {
             // if (error) return reject(error);
             fs.readdir('src', (error, files) => {
                 const readmeWriteStream = fs.createWriteStream(file);
-                readmeWriteStream.write('`npm install @coolgk/utils`' + "\n");
+                readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
+                readmeWriteStream.write('Replace @coolgk/[module] with @coolgk/**utils**/[module] in the npm install commands below' + "\n");
 
                 const promises = [];
                 files.forEach((file) => {
@@ -246,7 +249,12 @@ function addDistCodeToSubPackages () {
                         }
                         fs.createReadStream(`${distFolder}/${file}`).pipe(
                             fs.createWriteStream(`${packageFolder}/${name}/${file}`)
-                        ).on('finish', () => resolve());
+                        ).on('finish', () => {
+                            if (file.includes('.js')) {
+                                execCommand(`cd ${packageFolder}/${name} && npm link && cd - && npm link @coolgk/${name}`);
+                            }
+                            resolve();
+                        });
                     });
                 }));
             });
@@ -317,8 +325,8 @@ function parseFileMetaDoc (file, name) {
                                         Object.assign(
                                             packageJson,{
                                                 name: `@coolgk/${name}`,
-                                                main: `./${distFolder}/${name}.js`,
-                                                types: `./${distFolder}/${name}.d.ts`,
+                                                main: `./${name}.js`,
+                                                types: `./${name}.d.ts`,
                                                 description: metaDoc.description,
                                                 keywords: (metaDoc.keywords || []).concat('typescript'),
                                                 dependencies: metaDoc.dependencies,

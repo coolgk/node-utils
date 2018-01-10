@@ -1,0 +1,66 @@
+'use strict';
+
+// const sinon = require('sinon');
+const expect = require('chai').expect;
+
+describe('Amqp Module', () => {
+/*
+    const { Amqp } = require('../packages/amqp/amqp');
+    const config = require('../test.config.js');
+
+    const amqp = new Amqp({
+        url: config.amqp.url
+    });
+
+    const message = {
+        a: 1,
+        b: 'b'
+    };
+
+    amqp.publish('ignore response');
+
+    amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+        console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+    });
+
+    amqp.consume(({rawMessage, message}) => {
+        console.log('consumer received', message);
+        return {
+            response: 'response message'
+        }
+    });
+
+
+    describe('stripTags', () => {
+        it('should remove html tags', () => {
+            expect(stripTags('<h1>test</h1><script>alert(1)</script>')).to.equal('test alert(1)');
+        });
+    });
+
+    describe('escapeHtml', () => {
+        it('should escape html tags', () => {
+            expect(
+                escapeHtml('<h1>test</h1><script>alert(1)</script>')
+            ).to.equal('&lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+        });
+    });
+
+    describe('unescapeHtml', () => {
+        it('should unescape html tags', () => {
+            expect(
+                unescapeHtml('&lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;')
+            ).to.equal('<h1>test</h1><script>alert(1)</script>');
+        });
+    });
+
+    describe('prepad0', () => {
+        it('add 0 before a number to a specified length', () => {
+            expect(prepad0(7, 2)).to.equal('07');
+            expect(prepad0(70, 3)).to.equal('070');
+            expect(prepad0(70, 4)).to.equal('0070');
+            expect(prepad0(1, 4)).to.equal('0001');
+            expect(prepad0(1000, 2)).to.equal('1000');
+        });
+    });
+*/
+});

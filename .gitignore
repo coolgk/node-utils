@@ -1,5 +1,6 @@
 node_modules/
 dist/
+packages/
+test.config.local.js
 src/test.ts
 src/index.ts
-packages/
