@@ -7,6 +7,8 @@ dependencies:
     "bcrypt-nodejs": "0.0.3"
 example: |
     import { encrypt, verify } from '@coolgk/bcrypt';
+    // OR
+    // const { encrypt, verify } = require('@coolgk/bcrypt');
 
     const password = 'abc123';
 

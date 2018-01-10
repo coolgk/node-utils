@@ -13,6 +13,7 @@ const jsdoc2md = require('jsdoc-to-markdown');
 const chalk = require('chalk');
 const mocha = require('gulp-mocha');
 const del = require('del');
+const istanbul = require('gulp-istanbul');
 
 const childProcess = require('child_process');
 
@@ -80,7 +81,41 @@ gulp.task('postpublish', () => {
 });
 */
 
-gulp.task('test', () => unitTest());
+gulp.task('pre-test', () => { // https://github.com/SBoudrias/gulp-istanbul
+    return gulp.src([`${distFolder}/*.js`])
+        .pipe(istanbul({
+            // includeUntested: true
+        }))
+        .pipe(istanbul.hookRequire());
+});
+
+gulp.task('test', ['pre-test'], () => {
+    return gulp.src('./test')
+        .pipe(
+            mocha({
+                ui: 'bdd',
+                reporter: 'spec',
+                exit: true
+            })
+        )
+        .pipe(
+            istanbul.writeReports({
+                dir: `./${distFolder}/coverage`,
+                reporters: ['text', 'html']
+            })
+        )
+        .pipe(
+            istanbul.enforceThresholds({
+                thresholds: {
+                    global: 80,
+                    each: 80
+                }
+            })
+        )
+        .once('error', () => {
+            process.exit(1);
+        });
+});
 
 gulp.task('publish', ['generate-all-packages'], () => {
     return new Promise((resolve) => {
@@ -95,7 +130,7 @@ gulp.task('publish', ['generate-all-packages'], () => {
 });
 
 gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
-gulp.task('generate-root-package', ['generate-sub-packages'], generateRootPackage);
+gulp.task('package', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
@@ -400,6 +435,20 @@ function unitTest (reporter = 'spec') {
                 ui: 'bdd',
                 reporter: reporter,
                 exit: true
+            })
+        )
+        .pipe(
+            istanbul.writeReports({
+                dir: `./${distFolder}/coverage`,
+                reporters: ['text', 'html']
+            })
+        )
+        .pipe(
+            istanbul.enforceThresholds({
+                thresholds: {
+                    global: 80,
+                    each: 80
+                }
             })
         )
         .once('error', () => {

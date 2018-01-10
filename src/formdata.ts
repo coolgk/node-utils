@@ -66,7 +66,7 @@ export interface IFormData {
  * @return {function} - parser function for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'
  */
 /* tslint:disable */
-export default function formData (
+export function formData (
     request: IncomingMessage, globalOptions: IFormdataConfig = {}
 ): (names: string[]) => Promise<IFormData> {
 
@@ -221,3 +221,5 @@ export default function formData (
         });
     }
 }
+
+export default formData;
