@@ -85,7 +85,10 @@
   },
   "pre-commit": {
     "silent": false,
-    "run": ["test:precommit", "tslint"]
+    "run": [
+      "test:precommit",
+      "tslint"
+    ]
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
