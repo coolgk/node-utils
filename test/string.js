@@ -2,10 +2,11 @@
 
 // const sinon = require('sinon');
 const expect = require('chai').expect;
+const config = require('../test.config.js');
 
 describe('String Module', () => {
 
-    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('../dist/string');
+    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require(`../${config.sourceFolder}/string`);
     // const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('@coolgk/string');
     // before(() => {});
     // beforeEach(() => {});

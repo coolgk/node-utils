@@ -33,7 +33,7 @@
   "scripts": {
     "pretest": "tsc --project tsconfig.dev.json",
     "test": "nyc mocha test",
-    "test:hook": "tsc --project tsconfig.dev.json && nyc --reporter text-summary mocha test --reporter min",
+    "test:precommit": "tsc --project tsconfig.dev.json && nyc --reporter text-summary mocha test --reporter min",
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**"
   },
@@ -85,7 +85,7 @@
   },
   "pre-commit": {
     "silent": false,
-    "run": ["test:hook", "tslint"]
+    "run": ["test:precommit", "tslint"]
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

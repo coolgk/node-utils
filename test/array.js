@@ -2,10 +2,11 @@
 
 // const sinon = require('sinon');
 const expect = require('chai').expect;
+const config = require('../test.config.js');
 
 describe('Array Module', () => {
 
-    const { toArray } = require('../dist/array');
+    const { toArray } = require(`../${config.sourceFolder}/array`);
     // const { toArray } = require('@coolgk/array');
 
     // before(() => {});

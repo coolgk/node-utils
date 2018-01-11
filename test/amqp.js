@@ -2,14 +2,14 @@
 
 // const sinon = require('sinon');
 const expect = require('chai').expect;
+const config = require('../test.config.js');
 
 process.on('unhandledRejection', console.error);
 
 describe('Amqp Module', () => {
 
-    const { Amqp } = require('../dist/amqp');
+    const { Amqp } = require(`../${config.sourceFolder}/amqp`);
     // const { Amqp } = require('@coolgk/amqp');
-    const config = require('../test.config.js');
 
     const amqp = new Amqp({
         url: config.amqp.url

@@ -2,6 +2,7 @@
 
 module.exports = Object.assign(
     {
+        sourceFolder: 'dist',
         amqp: {
             url: ''
         }

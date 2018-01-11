@@ -2,11 +2,12 @@
 
 // const sinon = require('sinon');
 const expect = require('chai').expect;
+const config = require('../test.config.js');
 
 describe('Base64 Module', () => {
-/*
-    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('@coolgk/string');
-    
+    /*
+    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('../dist/string');
+
     import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
     // OR
     // const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
@@ -57,5 +58,5 @@ describe('Base64 Module', () => {
             expect(prepad0(1000, 2)).to.equal('1000');
         });
     });
-*/
+    */
 });
