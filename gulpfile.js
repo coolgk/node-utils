@@ -3,33 +3,33 @@
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
-const changed = require('gulp-changed');
-const merge = require('merge2');
 const fs = require('fs');
 const path = require('path');
-// const jsdoc = require('gulp-jsdoc3');
 const yaml = require('js-yaml');
 const jsdoc2md = require('jsdoc-to-markdown');
 const chalk = require('chalk');
-const mocha = require('gulp-mocha');
 const del = require('del');
-const istanbul = require('gulp-istanbul');
+const header = require('gulp-header');
 
 const childProcess = require('child_process');
 
-const packageJson = require('./package.json');
+// const changed = require('gulp-changed');
+// const istanbul = require('gulp-istanbul');
+// const mocha = require('gulp-mocha');
+// const merge = require('merge2');
+// const jsdoc = require('gulp-jsdoc3');
 
+const packageJson = require('./package.json');
 const tsProject = ts.createProject('./tsconfig.json');
+
 const distFolder = 'dist';
 const packageFolder = 'packages';
 
-const header = require('gulp-header');
-const pkg = require('./package.json');
 const codeHeader = `/*!
- * @package ${pkg.name}
- * @version ${pkg.version}
- * @link ${pkg.homepage}
- * @license ${pkg.license}
+ * @package ${packageJson.name}
+ * @version ${packageJson.version}
+ * @link ${packageJson.homepage}
+ * @license ${packageJson.license}
  */
 
 `;
@@ -287,7 +287,7 @@ function addDistCodeToSubPackages () {
                         ).on('finish', () => {
                             if (file.includes('.js')) {
                                 execCommand(
-                                    `cd ${packageFolder}/${name} && npm link && cd - && npm link @coolgk/${name}`,
+                                    `cd ${packageFolder}/${name} && sudo npm link && cd - && npm link @coolgk/${name}`,
                                     { mute: true }
                                 );
                             }

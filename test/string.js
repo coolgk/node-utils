@@ -6,7 +6,6 @@ const expect = require('chai').expect;
 describe('String Module', () => {
 
     const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('@coolgk/string');
-    // const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('../dist/string.js');
     // before(() => {});
     // beforeEach(() => {});
 

@@ -16,7 +16,9 @@ describe('Amqp Module', () => {
     });
 
     after(function() {
-        amqp.closeConnection();
+        setTimeout(() => {
+            amqp.closeConnection();
+        }, 200);
     });
 
     it('should consumer message that does not require a response', (done) => {
