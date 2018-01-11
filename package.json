@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "test": "nyc mocha test",
+    "test:hook": "nyc --reporter text-summary mocha test --reporter min",
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**"
   },
@@ -83,7 +84,7 @@
   },
   "pre-commit": {
     "silent": false,
-    "run": ["test", "tslint"]
+    "run": ["test:hook", "tslint"]
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
