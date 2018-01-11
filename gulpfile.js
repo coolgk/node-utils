@@ -285,12 +285,12 @@ function addDistCodeToSubPackages () {
                         fs.createReadStream(`${distFolder}/${file}`).pipe(
                             fs.createWriteStream(`${packageFolder}/${name}/${file}`)
                         ).on('finish', () => {
-                            if (file.includes('.js')) {
-                                execCommand(
-                                    `cd ${packageFolder}/${name} && sudo npm link && cd - && npm link @coolgk/${name}`,
-                                    { mute: true }
-                                );
-                            }
+                            // if (file.includes('.js')) {
+                                // execCommand(
+                                    // `cd ${packageFolder}/${name} && sudo npm link && cd - && npm link @coolgk/${name}`,
+                                    // { mute: true }
+                                // );
+                            // }
                             resolve();
                         });
                     });
