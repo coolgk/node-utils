@@ -3,10 +3,26 @@
 // const sinon = require('sinon');
 const expect = require('chai').expect;
 
-describe('String Module', () => {
+describe('Base64 Module', () => {
+/*
+    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('@coolgk/string');
+    
+    import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+    // OR
+    // const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
 
-    const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('../dist/string');
-    // const { stripTags, prepad0, escapeHtml, unescapeHtml } = require('@coolgk/string');
+    const a = 'https://www.google.co.uk/?a=b'
+    const hash = encode(a);
+    const urlHash = encodeUrl(a);
+
+    console.log(a); // https://www.google.co.uk/?a=b
+    console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+    console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+    console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+    console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+
+
     // before(() => {});
     // beforeEach(() => {});
 
@@ -41,5 +57,5 @@ describe('String Module', () => {
             expect(prepad0(1000, 2)).to.equal('1000');
         });
     });
-
+*/
 });

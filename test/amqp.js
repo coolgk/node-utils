@@ -7,8 +7,8 @@ process.on('unhandledRejection', console.error);
 
 describe('Amqp Module', () => {
 
-    // const { Amqp } = require('../dist/amqp.js');
-    const { Amqp } = require('@coolgk/amqp');
+    const { Amqp } = require('../dist/amqp');
+    // const { Amqp } = require('@coolgk/amqp');
     const config = require('../test.config.js');
 
     const amqp = new Amqp({

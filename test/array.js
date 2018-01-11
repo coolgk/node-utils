@@ -4,7 +4,9 @@
 const expect = require('chai').expect;
 
 describe('Array Module', () => {
-    const { toArray } = require('@coolgk/array');
+
+    const { toArray } = require('../dist/array');
+    // const { toArray } = require('@coolgk/array');
 
     // before(() => {});
     // beforeEach(() => {});
