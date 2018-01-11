@@ -1,9 +1,10 @@
 /* tslint:disable */
 /***
-description: This function does three things: 1. Limit the number of async functions that can be running in parallel. 2. Run async functions in order 3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1
+description: This function does three things: 1. Limit the number of async functions that runs concurrently. 2. Run async functions in order 3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1
 keywords:
     - async
     - parallel
+    - concurrent
     - promise
     - limiter
     - async function limiter
