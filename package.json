@@ -82,11 +82,8 @@
     "typescript": "^2.6.2"
   },
   "pre-commit": {
-    "run": {
-      "test",
-      "tslint"
-    },
-    "silent": true
+    "silent": true,
+    "run": ["test", "tslint"],
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
