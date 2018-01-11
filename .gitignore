@@ -1,6 +1,7 @@
 node_modules/
+.nyc_output/
 dist/
 packages/
-test.config.local.js
 src/test.ts
 src/index.ts
+test.config.local.js
