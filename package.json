@@ -37,7 +37,8 @@
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**",
     "tsc": "tsc --project tsconfig.json",
-    "tsc:dev": "tsc --project tsconfig.dev.json"
+    "tsc:dev": "tsc --project tsconfig.dev.json",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
     "@types/amqplib": "^0.5.5",
@@ -68,6 +69,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chalk": "^2.3.0",
+    "coveralls": "^3.0.0",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-header": "^1.8.9",
