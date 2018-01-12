@@ -5,3 +5,4 @@ packages/
 src/test.ts
 src/index.ts
 test.config.local.js
+.env

@@ -103,9 +103,15 @@ export class Cache {
      * @return {promise}
      */
     public get (name: string): Promise<{}> {
-        return this.command('get', name).then((value) => {
-            return Promise.resolve(JSON.parse(value));
-        });
+        return this.command('get', name).then((value) => JSON.parse(value));
+    }
+
+    /**
+     * @param {string|string[]} name - name(s) of the variable
+     * @return {promise}
+     */
+    public delete (name: string | string[]): Promise<{}> {
+        return this.command('del', name);
     }
 
     /**
