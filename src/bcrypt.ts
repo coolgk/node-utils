@@ -1,5 +1,5 @@
 /***
-description: just a wrapper for bcrypt-nodejs
+description: just a promise wrapper for bcrypt-nodejs
 keywords:
     - bcrypt
 dependencies:
