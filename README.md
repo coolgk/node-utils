@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)
+
 `npm install @coolgk/utils`
 
 replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
@@ -240,6 +242,8 @@ just a wrapper for bcrypt-nodejs
 ## Examples
 ```javascript
 import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
 
 const password = 'abc123';
 
@@ -923,7 +927,8 @@ a javascript / typescript module
 
 `npm install @coolgk/queue`
 
-run async functions in order or run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1
+This is a super lightweight function that does three things: 1. Limit the number of async functions that run concurrently. 2. Run async functions in order 3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+
 ## Examples
 ```javascript
 import { queue } from '@coolgk/queue';
