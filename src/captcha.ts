@@ -53,7 +53,7 @@ export class Captcha {
      */
     public verify (response: string, remoteip?: string): Promise<{}> {
         return new Promise((resolve, reject) => {
-            request.post(
+            this._request.post(
                 {
                     url: Captcha._RECAPTCHA_URL,
                     form: {
