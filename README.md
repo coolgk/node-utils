@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcoolgk%2Futils.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcoolgk%2Futils?ref=badge_shield)
 
 `npm install @coolgk/utils`
 
@@ -1424,3 +1425,7 @@ a simple function to get params in a url e.g. with url: user/123, pattern: user/
 | url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
 | pattern | <code>string</code> | e.g. /:userid/:name |
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcoolgk%2Futils.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcoolgk%2Futils?ref=badge_large)
