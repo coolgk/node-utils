@@ -238,7 +238,7 @@ a javascript / typescript module
 
 `npm install @coolgk/bcrypt`
 
-just a wrapper for bcrypt-nodejs
+just a promise wrapper for bcrypt-nodejs
 ## Examples
 ```javascript
 import { encrypt, verify } from '@coolgk/bcrypt';
@@ -335,6 +335,7 @@ cache.getSetIfNull(
     * [new Cache(options)](#new_Cache_new)
     * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
     * [.get(name)](#Cache+get) ⇒ <code>promise</code>
+    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
     * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
     * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
 
@@ -366,6 +367,15 @@ cache.getSetIfNull(
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | name of the variable |
+
+<a name="Cache+delete"></a>
+
+### cache.delete(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
 
 <a name="Cache+getSetIfNull"></a>
 

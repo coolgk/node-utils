@@ -35,7 +35,9 @@
     "test": "nyc mocha test",
     "test:precommit": "tsc --project tsconfig.dev.json && nyc --reporter text-summary mocha test --reporter min",
     "scan": "nsp check",
-    "tslint": "tslint --exclude src/test.ts src/**"
+    "tslint": "tslint --exclude src/test.ts src/**",
+    "tsc": "tsc --project tsconfig.json",
+    "tsc:dev": "tsc --project tsconfig.dev.json"
   },
   "dependencies": {
     "@types/amqplib": "^0.5.5",

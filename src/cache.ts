@@ -39,6 +39,30 @@ example: |
     ).then((v) => {
         console.log(v); // { a: 1 }
     });
+
+    Promise.all([
+        cache.set('x', 'val x'),
+        cache.set('y', 'val y'),
+        cache.set('z', 'val z')
+    ]).then(
+        () => Promise.all([
+            cache.get('x').then(console.log), // val x
+            cache.get('y').then(console.log), // val y
+            cache.get('z').then(console.log) // val z
+        ])
+    ).then(
+        () => Promise.all([
+            cache.delete('x'),
+            cache.delete('y'),
+            cache.delete('z')
+        ])
+    ).then(
+        () => Promise.all([
+            cache.get('x').then(console.log), // null
+            cache.get('y').then(console.log), // null
+            cache.get('z').then(console.log) // null
+        ])
+    );
 documentation: |
     #### constructor (options)
     - Parameters
