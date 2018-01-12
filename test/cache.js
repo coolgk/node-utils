@@ -13,14 +13,19 @@ describe('Cache Module', function () {
     const { Cache } = require(`../${config.sourceFolder}/cache`);
     const { createClient } = require('redis');
 
-    const client = createClient({
-        host: config.redis.url,
-        port: config.redis.port,
-        password: config.redis.password
-    });
+    let client;
+    let cache;
 
-    const cache = new Cache({
-        redisClient: client
+    before(() => {
+        client = createClient({
+            host: config.redis.url,
+            port: config.redis.port,
+            password: config.redis.password
+        });
+
+        cache = new Cache({
+            redisClient: client
+        });
     });
 
     const fieldNames = [
