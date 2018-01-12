@@ -33,7 +33,7 @@
   "scripts": {
     "pretest": "tsc --project tsconfig.dev.json",
     "test": "nyc mocha test",
-    "test:precommit": "tsc --project tsconfig.dev.json && nyc --reporter text-summary mocha test --reporter min",
+    "test:precommit": "tsc --project tsconfig.json && nyc --reporter text-summary mocha test --reporter min",
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**",
     "tsc": "tsc --project tsconfig.json",
