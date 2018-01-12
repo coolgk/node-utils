@@ -215,11 +215,13 @@ function generateRootPackage () {
 
 function generateRootReadme (folder) {
     return new Promise((resolve, reject) => {
-        const file = `${folder}/README.md`;
+        const rootReadmeFile = `${folder}/README.md`;
         // fs.writeFile(file, '', (error) => {
             // if (error) return reject(error);
             fs.readdir('src', (error, files) => {
-                const readmeWriteStream = fs.createWriteStream(file);
+                const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
+                readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)');
+                readmeWriteStream.write("\n\n");
                 readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
                 readmeWriteStream.write('replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + "\n\n");
 
@@ -244,9 +246,14 @@ function generateRootReadme (folder) {
                         })
                     )
                 });
-                resolve(Promise.all(promises).then(() => {
+                Promise.all(promises).then(() => {
                     readmeWriteStream.end();
-                }));
+                    fs.createReadStream(rootReadmeFile).pipe(
+                        fs.createWriteStream('./README.md')
+                    ).on('finish', () => {
+                        resolve();
+                    });
+                });
             });
         // });
     });
