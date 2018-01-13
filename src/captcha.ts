@@ -25,7 +25,7 @@ example: |
 import * as request from 'request';
 
 export interface ICaptchaConfig {
-    readonly request?: typeof request;
+    readonly request?: typeof request; // DI for test
     readonly secret: string;
 }
 
@@ -38,7 +38,6 @@ export class Captcha {
 
     /**
      * @param {object} options
-     * @param {object} [options.request] - require('request')
      * @param {object} options.secret - google captcha secret https://www.google.com/recaptcha/admin#site/337294176
      */
     public constructor (options: ICaptchaConfig) {

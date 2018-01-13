@@ -132,8 +132,6 @@ export class Amqp {
     /**
      * @param {object} options
      * @param {string} options.url - connection string e.g. amqp://localhost
-     * @param {function} [options.connect] - connect in amqplib library
-     * @param {function} [options.uuid] - v1 in uuid library
      * @param {string} [options.sslPem] - pem file path
      * @param {string} [options.sslCa] - sslCa file path
      * @param {string} [options.sslPass] - password
@@ -160,7 +158,7 @@ export class Amqp {
      * @param {object} [options]
      * @param {string} [options.route='#'] - route name
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
-     * @return {promise}
+     * @return {promise<boolean>}
      */
     public publish (
         message: any,

@@ -72,9 +72,9 @@ export interface IEmailClient {
 }
 
 export interface IEmailConfigWithClient {
-    readonly emailClient: IEmailClient;
-    readonly stripTags?: typeof stripTags;
-    readonly getMimeType?: typeof mimeTypes.lookup;
+    readonly emailClient: IEmailClient; // DI for test
+    readonly stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
+    readonly getMimeType?: typeof mimeTypes.lookup; // DI for test
 }
 
 export interface IEmailAddress {
@@ -103,12 +103,11 @@ export interface ISendConfig {
 
 export class Email {
     private _emailClient: IEmailClient;
-    private _stripTags: typeof stripTags;
+    private _stripTags: typeof stripTags; // DI for test, from @coolgk/stripTags.js
     private _getMimeType: typeof mimeTypes.lookup;
 
     /**
      * @param {object} options
-     * @param {function} [options.stripTags] - ./stripTags.js
      * @param {string} [options.user] - username for logging into smtp
      * @param {string} [options.password] - password for logging into smtp
      * @param {string} [options.host='localhost'] - smtp host

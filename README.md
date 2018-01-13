@@ -73,7 +73,7 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 * [Amqp](#Amqp)
     * [new Amqp(options)](#new_Amqp_new)
     * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;boolean&gt;</code>
     * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
 
 <a name="new_Amqp_new"></a>
@@ -84,8 +84,6 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 | --- | --- | --- |
 | options | <code>object</code> |  |
 | options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.connect] | <code>function</code> | connect in amqplib library |
-| [options.uuid] | <code>function</code> | v1 in uuid library |
 | [options.sslPem] | <code>string</code> | pem file path |
 | [options.sslCa] | <code>string</code> | sslCa file path |
 | [options.sslPass] | <code>string</code> | password |
@@ -96,7 +94,7 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 **Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 <a name="Amqp+publish"></a>
 
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise</code>
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;boolean&gt;</code>
 **Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 
 | Param | Type | Default | Description |
@@ -465,7 +463,6 @@ captcha.verify(captchaResponse).then((response) => {
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> |  |
-| [options.request] | <code>object</code> | require('request') |
 | options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
 
 <a name="Captcha+verify"></a>
@@ -574,41 +571,41 @@ function read (file, columns) {
 **Kind**: global class  
 
 * [Csv](#Csv)
-    * [new Csv(options)](#new_Csv_new)
-    * [.parse(value, options)](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
-    * [.readFile(file, options)](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, options)](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+    * [new Csv([options])](#new_Csv_new)
+    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
+    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
+    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
 
 <a name="new_Csv_new"></a>
 
-### new Csv(options)
+### new Csv([options])
 
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| [options.generateFile] | <code>function</code> | generateFile function from ./tmp |
-| [options.csvStringify] | <code>function</code> | require('csv-stringify') |
-| [options.csvParse] | <code>function</code> | require('csv-parse') |
-| [options.tmpConfig] | <code>object</code> | see generate() in ./tmp |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
 
 <a name="Csv+parse"></a>
 
-### csv.parse(value, options) ⇒ <code>promise.&lt;array&gt;</code>
+### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
 parse a string as csv data and returns an array promise
 
 **Kind**: instance method of [<code>Csv</code>](#Csv)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| value | <code>string</code> |  | csv string |
-| options | <code>object</code> |  |  |
+| value | <code>string</code> |  | a csv string |
+| [options] | <code>object</code> |  |  |
 | [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
 | [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
 
 <a name="Csv+readFile"></a>
 
-### csv.readFile(file, options) ⇒ <code>object</code>
+### csv.readFile(file, [options]) ⇒ <code>object</code>
 read a csv file. the return value can ONLY be used in a forEach() loop
 e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 
@@ -618,21 +615,21 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | file | <code>string</code> |  | file path |
-| options | <code>object</code> |  |  |
+| [options] | <code>object</code> |  |  |
 | [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
 | [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
 
 <a name="Csv+createFile"></a>
 
-### csv.createFile(data, options) ⇒ <code>promise.&lt;string&gt;</code>
+### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
 **Kind**: instance method of [<code>Csv</code>](#Csv)  
 **Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
-| options | <code>object</code> |  |  |
+| [options] | <code>object</code> |  |  |
 | [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
 | [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
@@ -644,7 +641,7 @@ a javascript / typescript module
 
 `npm install @coolgk/email`
 
-email sender
+a email sender wrapper class
 ## Examples
 ```javascript
 import { Email } from '@coolgk/email';
@@ -702,7 +699,6 @@ email.send({
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | options | <code>object</code> |  |  |
-| [options.stripTags] | <code>function</code> |  | ./stripTags.js |
 | [options.user] | <code>string</code> |  | username for logging into smtp |
 | [options.password] | <code>string</code> |  | password for logging into smtp |
 | [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
@@ -716,6 +712,7 @@ email.send({
 
 ### email.send(options, [attachments]) ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -789,8 +786,6 @@ setTimeout(() => {
 | --- | --- | --- |
 | options | <code>object</code> |  |
 | options.secret | <code>string</code> | for encryption |
-| options.encodeUrl | <code>object</code> | base64 encodeUrl function in "./base64" |
-| options.decodeUrl | <code>object</code> | base64 decodeUrl function in "./base64" |
 
 <a name="Jwt+generate"></a>
 
