@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@coolgk/queue": "^1.0.6",
+    "@coolgk/string": "^1.0.8",
     "@coolgk/tmp": "^1.0.6",
     "@types/amqplib": "^0.5.5",
     "@types/bcrypt-nodejs": "0.0.30",
