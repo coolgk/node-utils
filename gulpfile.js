@@ -220,6 +220,7 @@ function generateRootReadme (folder) {
             // if (error) return reject(error);
             fs.readdir('src', (error, files) => {
                 const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
+
                 readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils) ');
                 readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/utils/status.svg)](https://david-dm.org/coolgk/utils) ');
                 readmeWriteStream.write('[![Coverage Status](https://coveralls.io/repos/github/coolgk/utils/badge.svg?branch=develop)](https://coveralls.io/github/coolgk/utils?branch=develop)');
