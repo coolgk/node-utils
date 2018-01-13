@@ -62,4 +62,15 @@ describe('Tmp Module', function () {
         return expect(generateDir({dir: '/tmp' + Math.random()})).to.eventually.be.rejected;
     });
 
+    it('should generage without options', (done) => {
+        generateFile().then(({ path, cleanupCallback }) => {
+            fs.stat(path, (error, stats) => {
+                if (error) return done(error);
+                expect(stats.isFile()).to.be.true;
+                cleanupCallback();
+                done();
+            });
+        }).catch(done);
+    });
+
 });
