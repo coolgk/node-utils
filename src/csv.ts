@@ -11,6 +11,8 @@ dependencies:
     "@types/csv-stringify": "^1.4.1"
     "csv-parse": "^2.0.0"
     "csv-stringify": "^2.0.0"
+    "@coolgk/queue": "^1.0.6"
+    "@coolgk/tmp": "^1.0.6"
 example: |
     import { Csv } from '@coolgk/csv';
     // OR
@@ -36,7 +38,7 @@ example: |
         arrayData,
         {
             columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-            formatter: (row: any[]) => {
+            formatter: (row) => {
                 return row.map((value) => 'formatted-' + value);
             }
         }
@@ -49,7 +51,7 @@ example: |
         objectData,
         {
             columns: ['col1', 'col2', 'col3'],
-            formatter: (row: {[propName: string]: any}) => {
+            formatter: (row) => {
                 return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
             }
         }
@@ -60,6 +62,7 @@ example: |
 
     function read (file, columns) {
         // with columns/headers
+        // read lines as object
         const lines = csv.readFile(file, {columns: columns});
         lines.forEach(
             (lineArray, index) => {
@@ -78,6 +81,7 @@ example: |
         );
 
         // without columns/headers
+        // read lines as array
         const lines2 = csv.readFile(file);
         lines2.forEach(
             (lineArray, index) => {
@@ -95,8 +99,8 @@ example: |
 
 import csvParse = require('csv-parse');
 import csvStringify = require('csv-stringify');
-import { queue } from './queue';
-import { generateFile, ITmpConfig } from './tmp';
+import { queue } from '@coolgk/queue';
+import { generateFile, ITmpConfig } from '@coolgk/tmp';
 import { createReadStream, createWriteStream, WriteStream } from 'fs';
 import { Cursor } from 'mongodb';
 
@@ -150,13 +154,13 @@ export class Csv {
 
     /* tslint:disable */
     /**
-     * parse a string as csv data and returns an array
+     * parse a string as csv data and returns an array promise
      * @param {string} value - csv string
      * @param {object} options
      * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
-     * @return {promise}
+     * @return {promise<array>}
      */
     /* tslint:enable */
     public parse (value: string, options: ICsvReadConfig = {}): Promise<any[]> {
@@ -173,7 +177,7 @@ export class Csv {
      * e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
      * @param {string} file - file path
      * @param {object} options
-     * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, row values becomes objects
+     * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
      * @return {object} - { forEach: ((row, index) => void, (totalCount) => void) => void }
@@ -204,7 +208,7 @@ export class Csv {
                         }
                     }
                 );
-                readline.on('close', () => endCallback(index));
+                readline.on('close', () => endCallback && endCallback(index));
             }
         };
     }
@@ -217,7 +221,7 @@ export class Csv {
      * @param {function} [options.formatter] - callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'],
      * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.
      * @param {string} [options.filepath] - file path is automatically generated if empty
-     * @return {promise}
+     * @return {promise<string>} - file path of the csv file generated
      */
     /* tslint:enable */
     public createFile (data: any[] | Cursor, options: ICsvWriteConfig = {}): Promise<string> {

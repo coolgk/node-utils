@@ -14,7 +14,7 @@ example: |
         // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
     generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-        // file { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+        // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
     generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
         // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
@@ -54,7 +54,7 @@ export interface ITmpNameResponse {
  * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
  * @param {boolean} [options.keep=false] - if to keep the file
- * @return {promise}
+ * @return {promise} - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
  */
 export function generateFile (options?: ITmpConfig): Promise<ITmpFileResponse> {
     return generate('file', options) as Promise<ITmpFileResponse>;
@@ -67,7 +67,7 @@ export function generateFile (options?: ITmpConfig): Promise<ITmpFileResponse> {
  * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
  * @param {boolean} [options.keep=false] - if to keep the file
- * @return {promise}
+ * @return {promise} - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
  */
 export function generateDir (options?: ITmpConfig): Promise<ITmpDirResponse> {
     return generate('dir', options) as Promise<ITmpDirResponse>;
@@ -79,7 +79,7 @@ export function generateDir (options?: ITmpConfig): Promise<ITmpDirResponse> {
  * @param {string} [options.prefix=Date.now()] - the optional prefix, fallbacks to tmp- if not provided
  * @param {string} [options.postfix='.tmp'] - the optional postfix, fallbacks to .tmp on file creation
  * @param {string} [options.dir=/tmp] -  the optional temporary directory, fallbacks to system default
- * @return {promise}
+ * @return {promise} - { path: ... }
  */
 export function generateTmpName (options?: ITmpConfig): Promise<ITmpNameResponse> {
     return generate('tmpName', options) as Promise<ITmpNameResponse>;

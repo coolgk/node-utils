@@ -39,6 +39,30 @@ example: |
     ).then((v) => {
         console.log(v); // { a: 1 }
     });
+
+    Promise.all([
+        cache.set('x', 'val x'),
+        cache.set('y', 'val y'),
+        cache.set('z', 'val z')
+    ]).then(
+        () => Promise.all([
+            cache.get('x').then(console.log), // val x
+            cache.get('y').then(console.log), // val y
+            cache.get('z').then(console.log) // val z
+        ])
+    ).then(
+        () => Promise.all([
+            cache.delete('x'),
+            cache.delete('y'),
+            cache.delete('z')
+        ])
+    ).then(
+        () => Promise.all([
+            cache.get('x').then(console.log), // null
+            cache.get('y').then(console.log), // null
+            cache.get('z').then(console.log) // null
+        ])
+    );
 documentation: |
     #### constructor (options)
     - Parameters
@@ -103,9 +127,15 @@ export class Cache {
      * @return {promise}
      */
     public get (name: string): Promise<{}> {
-        return this.command('get', name).then((value) => {
-            return Promise.resolve(JSON.parse(value));
-        });
+        return this.command('get', name).then((value) => JSON.parse(value));
+    }
+
+    /**
+     * @param {string|string[]} name - name(s) of the variable
+     * @return {promise}
+     */
+    public delete (name: string | string[]): Promise<{}> {
+        return this.command('del', name);
     }
 
     /**

@@ -221,6 +221,9 @@ function generateRootReadme (folder) {
             fs.readdir('src', (error, files) => {
                 const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
                 readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)');
+                readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/utils/status.svg)](https://david-dm.org/coolgk/utils)');
+                readmeWriteStream.write('[![Coverage Status](https://coveralls.io/repos/github/coolgk/utils/badge.svg?branch=develop)](https://coveralls.io/github/coolgk/utils?branch=develop)');
+
                 readmeWriteStream.write("\n\n");
                 readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
                 readmeWriteStream.write('replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + "\n\n");

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)
+[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils)[![dependencies Status](https://david-dm.org/coolgk/utils/status.svg)](https://david-dm.org/coolgk/utils)[![Coverage Status](https://coveralls.io/repos/github/coolgk/utils/badge.svg?branch=develop)](https://coveralls.io/github/coolgk/utils?branch=develop)
 
 `npm install @coolgk/utils`
 
@@ -238,7 +238,7 @@ a javascript / typescript module
 
 `npm install @coolgk/bcrypt`
 
-just a wrapper for bcrypt-nodejs
+just a promise wrapper for bcrypt-nodejs
 ## Examples
 ```javascript
 import { encrypt, verify } from '@coolgk/bcrypt';
@@ -325,6 +325,30 @@ cache.getSetIfNull(
     console.log(v); // { a: 1 }
 });
 
+Promise.all([
+    cache.set('x', 'val x'),
+    cache.set('y', 'val y'),
+    cache.set('z', 'val z')
+]).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // val x
+        cache.get('y').then(console.log), // val y
+        cache.get('z').then(console.log) // val z
+    ])
+).then(
+    () => Promise.all([
+        cache.delete('x'),
+        cache.delete('y'),
+        cache.delete('z')
+    ])
+).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // null
+        cache.get('y').then(console.log), // null
+        cache.get('z').then(console.log) // null
+    ])
+);
+
 ```
 <a name="Cache"></a>
 
@@ -335,6 +359,7 @@ cache.getSetIfNull(
     * [new Cache(options)](#new_Cache_new)
     * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
     * [.get(name)](#Cache+get) ⇒ <code>promise</code>
+    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
     * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
     * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
 
@@ -366,6 +391,15 @@ cache.getSetIfNull(
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | name of the variable |
+
+<a name="Cache+delete"></a>
+
+### cache.delete(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
 
 <a name="Cache+getSetIfNull"></a>
 
@@ -478,7 +512,7 @@ csv.createFile(
     arrayData,
     {
         columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-        formatter: (row: any[]) => {
+        formatter: (row) => {
             return row.map((value) => 'formatted-' + value);
         }
     }
@@ -491,7 +525,7 @@ csv.createFile(
     objectData,
     {
         columns: ['col1', 'col2', 'col3'],
-        formatter: (row: {[propName: string]: any}) => {
+        formatter: (row) => {
             return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
         }
     }
@@ -502,6 +536,7 @@ csv.createFile(
 
 function read (file, columns) {
     // with columns/headers
+    // read lines as object
     const lines = csv.readFile(file, {columns: columns});
     lines.forEach(
         (lineArray, index) => {
@@ -520,6 +555,7 @@ function read (file, columns) {
     );
 
     // without columns/headers
+    // read lines as array
     const lines2 = csv.readFile(file);
     lines2.forEach(
         (lineArray, index) => {
@@ -539,9 +575,9 @@ function read (file, columns) {
 
 * [Csv](#Csv)
     * [new Csv(options)](#new_Csv_new)
-    * [.parse(value, options)](#Csv+parse) ⇒ <code>promise</code>
+    * [.parse(value, options)](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
     * [.readFile(file, options)](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, options)](#Csv+createFile) ⇒ <code>promise</code>
+    * [.createFile(data, options)](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
 
 <a name="new_Csv_new"></a>
 
@@ -557,8 +593,8 @@ function read (file, columns) {
 
 <a name="Csv+parse"></a>
 
-### csv.parse(value, options) ⇒ <code>promise</code>
-parse a string as csv data and returns an array
+### csv.parse(value, options) ⇒ <code>promise.&lt;array&gt;</code>
+parse a string as csv data and returns an array promise
 
 **Kind**: instance method of [<code>Csv</code>](#Csv)  
 
@@ -583,14 +619,15 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | --- | --- | --- | --- |
 | file | <code>string</code> |  | file path |
 | options | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, row values becomes objects |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
 | [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
 
 <a name="Csv+createFile"></a>
 
-### csv.createFile(data, options) ⇒ <code>promise</code>
+### csv.createFile(data, options) ⇒ <code>promise.&lt;string&gt;</code>
 **Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1083,7 +1120,7 @@ generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
     // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
 generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // file { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
 generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
     // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
@@ -1104,6 +1141,7 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 
 ## generateFile([options]) ⇒ <code>promise</code>
 **Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1118,6 +1156,7 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 
 ## generateDir([options]) ⇒ <code>promise</code>
 **Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1132,6 +1171,7 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 
 ## generateTmpName([options]) ⇒ <code>promise</code>
 **Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
