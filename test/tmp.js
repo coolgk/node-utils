@@ -11,7 +11,7 @@ describe('Tmp Module', function () {
 
     const { generateFile, generateDir, generateTmpName } = require(`../${config.sourceFolder}/tmp`);
 
-    let tmpDir = '/tmp/test' + Math.random();
+    let tmpDir = '/tmp/test-tmp' + Math.random();
 
     const fs = require('fs');
 

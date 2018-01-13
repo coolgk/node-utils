@@ -41,6 +41,8 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
+    "@coolgk/queue": "^1.0.6",
+    "@coolgk/tmp": "^1.0.6",
     "@types/amqplib": "^0.5.5",
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/busboy": "^0.2.3",
