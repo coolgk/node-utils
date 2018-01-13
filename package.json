@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@coolgk/base64": "^1.0.8",
+    "@coolgk/cache": "^1.0.8",
     "@coolgk/queue": "^1.0.9",
     "@coolgk/string": "^1.0.8",
     "@coolgk/tmp": "^1.0.8",

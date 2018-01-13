@@ -1,11 +1,12 @@
 /***
-description: an expirable, revocable token with data storage
+description: an expirable, revocable, renewable token with data storage
 keywords:
     - token
     - session token
 dependencies:
-    "@types/redis": "^2.8.3"
-    "redis": "^2.8.0"
+    "@coolgk/cache": "^1.0.8"
+engines:
+    node: ">=8"
 example: |
     import { Token } from '@coolgk/token';
     import { createClient } from 'redis';
@@ -88,7 +89,7 @@ example: |
 // allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
 // (./jwt cannot be renewed or revoked until expired)
 
-import { Cache, ICacheClient } from './cache';
+import { Cache, ICacheClient } from '@coolgk/cache';
 
 export interface IConfig {
     readonly token: string;
@@ -106,7 +107,8 @@ export interface ITokenConfig extends IConfig {
 
 export enum Errors {
     INVALID_TOKEN = 'INVALID_TOKEN',
-    DESTROYED_TOKEN = 'DESTROYED_TOKEN'
+    RESERVED_NAME = 'RESERVED_NAME',
+    EXPIRED_TOKEN = 'EXPIRED_TOKEN'
 }
 
 export class Token {
@@ -132,15 +134,21 @@ export class Token {
     }
 
     /**
-     * @param {number} expiry - in seconds
+     * @param {number} [expiry] - in seconds
      * @return {promise}
      */
-    public async renew (expiry: number = this._expiry): Promise<any> {
+    public async renew (expiry?: number): Promise<any> {
         if (!this._token) {
-            return {error: Errors.DESTROYED_TOKEN};
+            return {error: Errors.INVALID_TOKEN};
         }
-        await this.set('_timestamp', new Date());
-        return expiry ? this._cache.command('expire', this._name, expiry) : true;
+
+        if (expiry || expiry === 0) {
+            this._expiry = expiry;
+        }
+
+        // need to set a var first to create the variable in cache
+        await this._cache.command('hset', this._name, '_timestamp', JSON.stringify(Date.now()));
+        return this._expiry ? this._cache.command('expire', this._name, this._expiry) : true;
     }
 
     /**
@@ -150,13 +158,20 @@ export class Token {
      * @return {promise}
      */
     public async set (name: string, value: any): Promise<any> {
+        if (name === '_timestamp') {
+            return {error: Errors.RESERVED_NAME};
+        }
+        // should not set if token expired or not newed yet
+        if (this._expiry && !(await this.get('_timestamp'))) {
+            return {error: Errors.EXPIRED_TOKEN};
+        }
         return this._token ? this._cache.command(
             'hset', this._name, name, JSON.stringify(value)
-        ) : {error: Errors.DESTROYED_TOKEN};
+        ) : {error: Errors.INVALID_TOKEN};
     }
 
     /**
-     * @return {promise}
+     * @return {promise<boolean>}
      */
     public async verify (): Promise<boolean> {
         const timestamp = await this.get('_timestamp');
@@ -192,14 +207,14 @@ export class Token {
      */
     public async delete (name: string): Promise<any> {
         if (!this._token) {
-            return {error: Errors.DESTROYED_TOKEN};
+            return {error: Errors.INVALID_TOKEN};
         }
         return this._cache.command('hdel', this._name, name);
     }
 
     /**
      * get the values of all data fields in the token
-     * @return {promise}
+     * @return {promise<{}>}
      */
     public async getAll (): Promise<{}> {
         if (this._token) {
