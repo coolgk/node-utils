@@ -1,6 +1,10 @@
 {
   "name": "@coolgk/utils",
+<<<<<<< HEAD
   "version": "1.0.7",
+=======
+  "version": "1.0.8",
+>>>>>>> master
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
   "homepage": "https://www.npmjs.com/package/@coolgk/utils",
   "bugs": {
