@@ -3,6 +3,8 @@
 description: a simple jwt token class
 keywords:
     - jwt
+dependencies:
+    "@coolgk/base64": "^1.0.8"
 example: |
     import { Jwt } from '@coolgk/jwt';
     // OR
@@ -36,25 +38,23 @@ example: |
 // https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
 
 import { createHmac } from 'crypto';
-import { decodeUrl, encodeUrl } from './base64';
+import { decodeUrl, encodeUrl } from '@coolgk/base64';
 
 export interface IJwtConfig {
-    encodeUrl?: typeof encodeUrl;
-    decodeUrl?: typeof decodeUrl;
+    encodeUrl?: typeof encodeUrl; // DI for test
+    decodeUrl?: typeof decodeUrl; // DI for test
     secret: string;
 }
 
 export class Jwt {
 
-    private _encodeUrl: typeof encodeUrl;
-    private _decodeUrl: typeof decodeUrl;
+    private _encodeUrl: typeof encodeUrl; // base64 encodeUrl function in "@coolgk/base64"
+    private _decodeUrl: typeof decodeUrl; // base64 decodeUrl function in "@coolgk/base64"
     private _secret: string;
 
     /**
      * @param {object} options
      * @param {string} options.secret - for encryption
-     * @param {object} options.encodeUrl - base64 encodeUrl function in "./base64"
-     * @param {object} options.decodeUrl - base64 decodeUrl function in "./base64"
      */
     public constructor (options: IJwtConfig) {
         this._encodeUrl = options.encodeUrl || encodeUrl;

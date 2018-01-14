@@ -1,11 +1,12 @@
 /***
-description: email sender
+description: a email sender wrapper class
 keywords:
-    - email sender
+    - email
     - smtp sender
 dependencies:
     "mime-types": "^2.1.17"
     "emailjs": "^1.0.12"
+    "@coolgk/string": "^1.0.8"
 example: |
     import { Email } from '@coolgk/email';
     // OR
@@ -51,7 +52,7 @@ example: |
 import emailjs = require('emailjs');
 import mimeTypes = require('mime-types');
 import { basename } from 'path';
-import { stripTags } from './string';
+import { stripTags } from '@coolgk/string';
 
 export interface IEmailConfig {
     readonly host: string;
@@ -71,9 +72,9 @@ export interface IEmailClient {
 }
 
 export interface IEmailConfigWithClient {
-    readonly emailClient: IEmailClient;
-    readonly stripTags?: typeof stripTags;
-    readonly getMimeType?: typeof mimeTypes.lookup;
+    readonly emailClient: IEmailClient; // DI for test
+    readonly stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
+    readonly getMimeType?: typeof mimeTypes.lookup; // DI for test
 }
 
 export interface IEmailAddress {
@@ -102,12 +103,11 @@ export interface ISendConfig {
 
 export class Email {
     private _emailClient: IEmailClient;
-    private _stripTags: typeof stripTags;
+    private _stripTags: typeof stripTags; // DI for test, from @coolgk/stripTags.js
     private _getMimeType: typeof mimeTypes.lookup;
 
     /**
      * @param {object} options
-     * @param {function} [options.stripTags] - ./stripTags.js
      * @param {string} [options.user] - username for logging into smtp
      * @param {string} [options.password] - password for logging into smtp
      * @param {string} [options.host='localhost'] - smtp host
@@ -141,7 +141,7 @@ export class Email {
      * @param {string} [attachments.type] - file mime type
      * @param {string} [attachments.method] - method to send attachment as (used by calendar invites)
      * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
-     * @return {promise}
+     * @return {promise} - message sent
      */
     public send (options: ISendConfig): Promise<{}> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {

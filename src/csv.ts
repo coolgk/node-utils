@@ -105,9 +105,9 @@ import { createReadStream, createWriteStream, WriteStream } from 'fs';
 import { Cursor } from 'mongodb';
 
 export interface ICsvConfig {
-    readonly generateFile?: typeof generateFile;
-    readonly csvStringify?: typeof csvStringify;
-    readonly csvParse?: typeof csvParse;
+    readonly generateFile?: typeof generateFile; // DI for test
+    readonly csvStringify?: typeof csvStringify; // DI for test
+    readonly csvParse?: typeof csvParse; // DI for test
     readonly tmpConfig?: ITmpConfig;
 }
 
@@ -133,18 +133,20 @@ export interface IReadFileResponse {
 
 export class Csv {
 
-    private _csvParse: typeof csvParse;
-    private _csvStringify: typeof csvStringify;
-    private _generateFile: typeof generateFile;
+    private _csvParse: typeof csvParse; // DI for test
+    private _csvStringify: typeof csvStringify; // DI for test
+    private _generateFile: typeof generateFile; // DI for test
     private _tmpConfig: ITmpConfig;
 
+    /* tslint:disable */
     /**
-     * @param {object} options
-     * @param {function} [options.generateFile] - generateFile function from ./tmp
-     * @param {function} [options.csvStringify] - require('csv-stringify')
-     * @param {function} [options.csvParse] - require('csv-parse')
-     * @param {object} [options.tmpConfig] - see generate() in ./tmp
+     * @param {object} [options]
+     * @param {object} [options.tmpConfig] - config for the generated file
+     * @param {number} [options.tmpConfig.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
+     * @param {string} [options.tmpConfig.prefix=Date.now()] - the optional prefix
+     * @param {string} [options.tmpConfig.dir=os.tmpdir()] - the optional temporary directory, fallbacks to system default
      */
+    /* tslint:enable */
     public constructor (options: ICsvConfig = {}) {
         this._csvStringify = options.csvStringify || csvStringify;
         this._csvParse = options.csvParse || csvParse;
@@ -155,8 +157,8 @@ export class Csv {
     /* tslint:disable */
     /**
      * parse a string as csv data and returns an array promise
-     * @param {string} value - csv string
-     * @param {object} options
+     * @param {string} value - a csv string
+     * @param {object} [options]
      * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
@@ -176,7 +178,7 @@ export class Csv {
      * read a csv file. the return value can ONLY be used in a forEach() loop
      * e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
      * @param {string} file - file path
-     * @param {object} options
+     * @param {object} [options]
      * @param {string[]} [options.columns] - array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays
      * @param {number} [options.limit=0] - number of rows to read, 0 = unlimited
      * @param {string} [options.delimiter=','] - csv delimiter
@@ -216,7 +218,7 @@ export class Csv {
     /* tslint:disable */
     /**
      * @param {(array|cursor)} data - mongo cursor or array of data
-     * @param {object} options
+     * @param {object} [options]
      * @param {string[]} [options.columns] - array of headers e.g. ['id', 'name', 'email']
      * @param {function} [options.formatter] - callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'],
      * @param {string} [options.delimiter=','] - Set the field delimiter, one character only, defaults to a comma.

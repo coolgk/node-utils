@@ -5,7 +5,6 @@ keywords:
     - cache
 dependencies:
     "@types/redis": "^2.8.3"
-    "redis": "^2.8.0"
 example: |
     import { Cache } from '@coolgk/cache';
     import { createClient } from 'redis';
@@ -124,7 +123,7 @@ export class Cache {
 
     /**
      * @param {string} name - name of the variable
-     * @return {promise}
+     * @return {promise} - cached value
      */
     public get (name: string): Promise<{}> {
         return this.command('get', name).then((value) => JSON.parse(value));
@@ -143,7 +142,7 @@ export class Cache {
      * @param {string} name - name of the variable
      * @param {function} callback - a callback function which returns a value or a promise
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
-     * @return {promise}
+     * @return {promise} - cached value
      */
     public getSetIfNull (name: string, callback: () => any, expiry = 0): Promise<{}> {
         return this.get(name).then((cachedValue) => {

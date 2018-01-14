@@ -9,9 +9,6 @@ keywords:
     - promise
     - limiter
     - async function limiter
-dependencies:
-    "@types/amqplib": "^0.5.5"
-    "amqplib": "^0.5.2"
 example: |
     import { queue } from '@coolgk/queue';
     // OR

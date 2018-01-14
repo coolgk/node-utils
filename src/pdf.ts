@@ -1,12 +1,15 @@
 /***
-description: create PDF files from html string or file
+description: html to PDF module. create PDF files from html string or file.
 keywords:
     - pdf
-    - pdf file generator
+    - html to pdf
 dependencies:
     "@types/phantom": "^3.2.3"
     "phantom": "^4.0.9"
+    "@coolgk/tmp": "^1.0.6"
 example: |
+    // for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
+
     import { Pdf, Format, Orientation } from '@coolgk/pdf';
     // OR
     // const { Pdf, Format, Orientation } = require('@coolgk/pdf');
@@ -73,7 +76,7 @@ declare module 'phantom' {
 
 import { createWriteStream } from 'fs';
 import * as phantom from 'phantom';
-import * as tmp from './tmp';
+import * as tmp from '@coolgk/tmp';
 
 export interface IPdfConfig {
     readonly phantom?: typeof phantom;
@@ -117,9 +120,15 @@ export class Pdf {
     private _tmp: typeof tmp;
     private _tmpConfig: tmp.ITmpConfig;
 
+    /* tslint:disable */
     /**
-     * @param {object} options
+     * @param {object} [options]
+     * @param {object} [options.tmpConfig] - config for the generated file
+     * @param {number} [options.tmpConfig.mode=0600] - the file mode to create with, defaults to 0600 on file and 0700 on directory
+     * @param {string} [options.tmpConfig.prefix=Date.now()] - the optional prefix
+     * @param {string} [options.tmpConfig.dir=os.tmpdir()] - the optional temporary directory, fallbacks to system default
      */
+    /* tslint:enable */
     public constructor (options: IPdfConfig = {}) {
         this._phantom = options.phantom || phantom;
         this._tmp = options.tmp || tmp;
@@ -144,7 +153,7 @@ export class Pdf {
      * @param {(string|number)} [options.footer.height] - e.g. 1cm or 100px
      * @param {(string|number)} [options.footer.contents] - e.g. html code e.g. Page ${pageNumber} of ${numberOfPages}
      * @param {number} [options.dpi=96] - e.g. 96
-     * @return {promise}
+     * @return {promise<string>} - filepath of the generated PDF
      */
     public async createFromHtmlFile (
         htmlFilePath: string,
@@ -199,7 +208,7 @@ export class Pdf {
      * @see createFromHtmlFile()
      * @param {string} htmlString - html code e.g. &lt;h1&gt;header 1&lt;/h1&gt;
      * @param {object} [options] - see options in createFromHtmlFile()
-     * @return {promise}
+     * @return {promise} - filepath of the generated PDF
      */
     public async createFromHtmlString (
         htmlString: string,
