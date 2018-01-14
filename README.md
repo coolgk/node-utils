@@ -385,6 +385,7 @@ Promise.all([
 
 ### cache.get(name) ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -405,6 +406,7 @@ Promise.all([
 get the cached value, if not set, resolve "callback()" and save the value then return it
 
 **Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -842,9 +844,11 @@ a javascript / typescript module
 
 `npm install @coolgk/pdf`
 
-create PDF files from html string or file
+html to PDF module. create PDF files from html string or file.
 ## Examples
 ```javascript
+// for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
+
 import { Pdf, Format, Orientation } from '@coolgk/pdf';
 // OR
 // const { Pdf, Format, Orientation } = require('@coolgk/pdf');
@@ -906,22 +910,27 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 **Kind**: global class  
 
 * [Pdf](#Pdf)
-    * [new Pdf(options)](#new_Pdf_new)
-    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise</code>
+    * [new Pdf([options])](#new_Pdf_new)
+    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise.&lt;string&gt;</code>
     * [.createFromHtmlString(htmlString, [options])](#Pdf+createFromHtmlString) ⇒ <code>promise</code>
 
 <a name="new_Pdf_new"></a>
 
-### new Pdf(options)
+### new Pdf([options])
 
-| Param | Type |
-| --- | --- |
-| options | <code>object</code> | 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
 
 <a name="Pdf+createFromHtmlFile"></a>
 
-### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise</code>
+### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
 **Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
 **See**: http://phantomjs.org/api/webpage/property/paper-size.html
 A4 page height: 842px
 for full page in PDF, set height of a page in html to 842px  
@@ -946,6 +955,7 @@ for full page in PDF, set height of a page in html to 842px
 
 ### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise</code> - - filepath of the generated PDF  
 **See**: createFromHtmlFile()  
 
 | Param | Type | Description |
@@ -1182,7 +1192,7 @@ a javascript / typescript module
 
 `npm install @coolgk/token`
 
-an expirable, revocable token with data storage
+an expirable, revocable, renewable token with data storage
 ## Examples
 ```javascript
 import { Token } from '@coolgk/token';
@@ -1270,13 +1280,13 @@ import { createClient } from 'redis';
 
 * [Token](#Token)
     * [new Token(options)](#new_Token_new)
-    * [.renew(expiry)](#Token+renew) ⇒ <code>promise</code>
+    * [.renew([expiry])](#Token+renew) ⇒ <code>promise</code>
     * [.set(name, value)](#Token+set) ⇒ <code>promise</code>
-    * [.verify()](#Token+verify) ⇒ <code>promise</code>
+    * [.verify()](#Token+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
     * [.get(name)](#Token+get) ⇒ <code>promise</code>
     * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
     * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
-    * [.getAll()](#Token+getAll) ⇒ <code>promise</code>
+    * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
 
 <a name="new_Token_new"></a>
 
@@ -1292,12 +1302,12 @@ import { createClient } from 'redis';
 
 <a name="Token+renew"></a>
 
-### token.renew(expiry) ⇒ <code>promise</code>
+### token.renew([expiry]) ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Token</code>](#Token)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| expiry | <code>number</code> | in seconds |
+| [expiry] | <code>number</code> | in seconds |
 
 <a name="Token+set"></a>
 
@@ -1313,7 +1323,7 @@ set a data field value
 
 <a name="Token+verify"></a>
 
-### token.verify() ⇒ <code>promise</code>
+### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
 **Kind**: instance method of [<code>Token</code>](#Token)  
 <a name="Token+get"></a>
 
@@ -1345,7 +1355,7 @@ delete a data field in the token
 
 <a name="Token+getAll"></a>
 
-### token.getAll() ⇒ <code>promise</code>
+### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
 get the values of all data fields in the token
 
 **Kind**: instance method of [<code>Token</code>](#Token)  
