@@ -1,7 +1,66 @@
+/* tslint:disable */
+/***
+description: http request form data parser for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'
+keywords:
+    - form
+    - post
+    - json
+    - x-www-form-urlencoded
+    - multipart
+    - form-data
+    - formdata
+    - express
+    - middleware
+    - promise
+dependencies:
+    "@coolgk/array": "^1.0.9"
+    "@coolgk/tmp": "^1.0.9"
+    "busboy": "^0.2.14"
+    "@types/busboy": "^0.2.3"
+    "@types/node": "^8.5.8"
+example: |
+    // <form method="POST" enctype="multipart/form-data">
+        // <input type="text" name="name">
+        // <input type="text" name="age">
+        // <input type="file" name="photo">
+        // <input type="file" name="photo">
+        // <input type="file" name="id">
+    // </form>
 
-// 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'
-// "@coolgk/array": "^1.0.9"
-//     "@coolgk/tmp": "^1.0.9",
+    // express middleware
+    const formdata = require('@coolgk/formdata');
+    const app = require('express')();
+
+    app.use(formdata.express());
+
+    app.post('/', async (request, response, next) => {
+        const post = await request.formdata.getData('photo');
+        console.log(post);
+        // {
+            // "name": "John",
+            // "age": "33",
+            // "photo": {
+                // "error": null,
+                // "fieldname": "photo",
+                // "filename": "test.svg",
+                // "encoding": "7bit",
+                // "mimetype": "image/svg+xml",
+                // "size": 938,
+                // "path": "/tmp/tmp-21261Y3umlbCcYUjp"
+            // }
+        // }
+    });
+
+    // OR
+    // const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
+    // OR
+    // import { formData, express, getFormData, FormDataError } from '@coolgk/formdata';
+
+*/
+/* tslint:enable */
+
+// multer does not seems to be very memory efficient for larger files
+// other parsers have strange api
 
 import { tmpdir } from 'os';
 import * as Busboy from 'busboy';
@@ -90,7 +149,7 @@ export interface IRequest extends IncomingMessage {
  * @param {object} request - http.IncomingMessage, request parameter in createServer()'s callback or express request
  * @param {object} [options]
  * @param {boolean} [options.array=false] - if to always get form data as array. By default values could either be string or array e.g. fieldname = val1, fieldname = [val1, val2]. if array is true, fieldname = val1 becomes fieldname = [val1]
- * @param {string[]|string} [options.fileFieldNames] - name of the file upload fields
+ * @param {string[]|string} [options.fileFieldNames] - name of the file upload fields. Only file fields in this list are parsed, other files are ignored i.e. if someone sends a random huge file onto your server, it will not be stored in disk or memory.
  * @param {number} [options.mode=0600] - permission of the uploaded files, defaults to 0600 on file and 0700 on directory
  * @param {string} [options.prefix=Date.now()] - prefix for file names
  * @param {string} [options.postfix=''] - postfix for file names

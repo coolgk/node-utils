@@ -14,6 +14,7 @@ describe('Tmp Module', function () {
     let tmpDir = '/tmp/test-tmp' + Math.random();
 
     const fs = require('fs');
+    const path = require('path');
 
     before((done) => {
         fs.mkdir(tmpDir, (error) => {
@@ -70,6 +71,16 @@ describe('Tmp Module', function () {
                 cleanupCallback();
                 done();
             });
+        }).catch(done);
+    });
+
+    it('should create a file with correct prefix when prefix is falsy', (done) => {
+        const options = {};
+        generateFile({dir: tmpDir, prefix: options.prefix}).then((file) => {
+            expect(
+                path.basename(file.path)
+            ).to.not.match(/^tmp\-/);
+            done();
         }).catch(done);
     });
 

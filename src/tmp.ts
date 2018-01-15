@@ -98,6 +98,9 @@ export function generateTmpName (options?: ITmpConfig): Promise<ITmpNameResponse
  */
 export function generate (action: string, options: ITmpConfig = {}): Promise<any> {
     return new Promise((resolve, reject) => {
+        if (!options.prefix) {
+            options.prefix = Date.now() + '';
+        }
         tmp[action](
             {
                 prefix: Date.now(),
