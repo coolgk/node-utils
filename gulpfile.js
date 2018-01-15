@@ -376,7 +376,7 @@ function parseFileMetaDoc (file, name) {
                                                 name: `@coolgk/${name}`,
                                                 main: `./${name}.js`,
                                                 types: `./${name}.d.ts`,
-                                                description: metaDoc.description,
+                                                description: metaDoc.description.replace(/\n/, ' '),
                                                 keywords: (metaDoc.keywords || []).concat('typescript'),
                                                 dependencies: metaDoc.dependencies,
                                                 devDependencies: undefined,
