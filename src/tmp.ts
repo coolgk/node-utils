@@ -103,7 +103,6 @@ export function generate (action: string, options: ITmpConfig = {}): Promise<any
         }
         tmp[action](
             {
-                prefix: Date.now(),
                 tries: 10,
                 ...options
             },
