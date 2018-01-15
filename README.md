@@ -12,6 +12,7 @@ replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or imp
 - [captcha](#coolgkcaptcha)
 - [csv](#coolgkcsv)
 - [email](#coolgkemail)
+- [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
 - [number](#coolgknumber)
 - [pdf](#coolgkpdf)
@@ -28,6 +29,43 @@ a javascript / typescript module
 `npm install @coolgk/amqp`
 
 a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+#### constructor(options)
+- Parameters
+    - options
+        - {string} options.url - connection string e.g. amqp://localhost
+        - {string} [options.sslPem] - pem file path
+        - {string} [options.sslCa] - sslCa file path
+        - {string} [options.sslPass] - password
+- Return Value
+    - void
+
+#### closeConnection()
+close the connection
+- Return Value
+    - void
+
+#### publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {})
+- Parameters
+    - {*} message - message any type that can be JSON.stringify'ed
+    - {function} [callback] - callback(message) for processing response from consumers
+    - {object} [options]
+        - {string} [options.route='#'] - route name
+        - {string} [options.exchangeName='defaultExchange'] - exchange name
+- Return Value
+    - Promise<boolean>
+
+#### consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {})
+- Parameters
+    - {function} callback - consumer(message) function should returns a promise
+    - {object} [options]
+    - {string} [options.route='#'] - exchange route
+    - {string} [options.queueName='defaultQueue'] - queue name for processing request
+    - {string} [options.exchangeName='defaultExchange'] - exchange name
+    - {string} [options.exchangeType='topic'] - exchange type
+    - {number} [options.priority=0] - priority, larger numbers indicate higher priority
+    - {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+- Return Value
+    - Promise
 ## Examples
 ```javascript
 import { Amqp } from '@coolgk/amqp';
@@ -128,6 +166,11 @@ a javascript / typescript module
 `npm install @coolgk/array`
 
 array utilities
+#### toArray (data)
+- Parameters
+    - {*} data - any data to be type cast to array
+- Return Value
+    - array
 ## Examples
 ```javascript
 import { toArray } from '@coolgk/array';
@@ -163,6 +206,29 @@ a javascript / typescript module
 `npm install @coolgk/base64`
 
 base64 encoded decode functions
+#### encode (data = '')
+- Parameters
+    - {string} data - string to encode
+- Return Value
+    - string
+
+#### decode (data = '')
+- Parameters
+    - {string} data - encoded hash
+- Return Value
+    - string
+
+#### encodeUrl (data = '')
+- Parameters
+    - {string} data - string to encode
+- Return Value
+    - string
+
+#### decodeUrl (data = '')
+- Parameters
+    - {string} data - base64 encoded url
+- Return Value
+    - string
 ## Examples
 ```javascript
 import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
@@ -237,6 +303,19 @@ a javascript / typescript module
 `npm install @coolgk/bcrypt`
 
 just a promise wrapper for bcrypt-nodejs
+#### encrypt (value, salt = null)
+- Parameters
+    - {string} value - string to encrypt
+    - {string} salt - salt
+- Return Value
+    - promise<string>
+
+#### verify (value, hashedString)
+- Parameters
+    - {string} value - string to check
+    - {string} hashedString - encrypted hash
+- Return Value
+    - promise<boolean>
 ## Examples
 ```javascript
 import { encrypt, verify } from '@coolgk/bcrypt';
@@ -288,6 +367,26 @@ a javascript / typescript module
 `npm install @coolgk/cache`
 
 a redis wrapper
+#### constructor (options)
+- Parameters
+    - {object} options
+    - {object} [options.redisClient] - redis client from redis.createClient()
+- Return Value
+    - void
+
+#### set (name: string, value: any, expiry = 0)
+- Parameters
+    - {object} options
+    - {object} [options.redisClient] - redis client from redis.createClient()
+- Return Value
+    - void
+
+#### constructor (options)
+- Parameters
+    - {object} options
+    - {object} [options.redisClient] - redis client from redis.createClient()
+- Return Value
+    - void
 ## Examples
 ```javascript
 import { Cache } from '@coolgk/cache';
@@ -733,6 +832,244 @@ email.send({
 | [attachments.type] | <code>string</code> | file mime type |
 | [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
 | [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+
+
+## @coolgk/formdata
+a javascript / typescript module
+
+`npm install @coolgk/formdata`
+
+A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parse form data when you ask for it.
+#### Example Form
+```html
+<form method="POST" enctype="multipart/form-data">
+    <input type="text" name="name">
+    <input type="text" name="age">
+    <input type="file" name="photo">
+    <input type="file" name="photo">
+    <input type="file" name="id">
+</form>
+```
+#### Express Middleware
+```javascript
+// express middleware
+const app = require('express')();
+const formdata = require('@coolgk/formdata');
+
+app.use(formdata.express());
+
+app.post('/id-only', async (request, response, next) => {
+    const post = await request.formdata.getData('id'); // upload 3 files but only parse 1, ignore others
+    console.log(post);
+    response.json(post);
+    // output
+    // {
+        // "name": "Tim",
+        // "age": "33",
+        // "id": {
+            // "error": null,
+            // "fieldname": "id",
+            // "filename": "test.txt",
+            // "encoding": "7bit",
+            // "mimetype": "text/plain",
+            // "size": 13,
+            // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+        // }
+    // }
+});
+
+app.post('/all-files', async (request, response, next) => {
+    const post = await request.formdata.getData(['id', 'photo']); // parse all files
+    console.log(post);
+    response.json(post);
+    // output
+    // {
+        // "name": "Tim",
+        // "age": "33",
+        // "photo": [
+            // {
+                // "error": null,
+                // "fieldname": "photo",
+                // "filename": "test.png",
+                // "encoding": "7bit",
+                // "mimetype": "image/png",
+                // "size": 604,
+                // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+            // },
+            // {
+                // "error": null,
+                // "fieldname": "photo",
+                // "filename": "test.svg",
+                // "encoding": "7bit",
+                // "mimetype": "image/svg+xml",
+                // "size": 2484,
+                // "path": "/tmp/151605931497916067EAUAa3yB4q42"
+            // }
+        // ],
+        // "id": {
+            // "error": null,
+            // "fieldname": "id",
+            // "filename": "test.txt",
+            // "encoding": "7bit",
+            // "mimetype": "text/plain",
+            // "size": 13,
+            // "path": "/tmp/151605931498016067zqZe6dlhidQ5"
+        // }
+    // }
+});
+
+app.listen(8888);
+```
+#### Vanilla App
+```javascript
+const { formData, express, getFormData, FormDataError } = require('./formdata');
+const http = require('http');
+http.createServer(async (request, response) => {
+
+    const data = await getFormData(request, { fileFieldNames: ['id', 'photo'] });
+
+    // OR
+    // const formdata = formData(request);
+    // ... some middelware
+    // ... in some routes
+    // const data = formdata.getData(['id', 'photo']);
+
+    console.log(data);
+    response.end(JSON.stringify(data));
+
+    // {
+        // "name": "Tim",
+        // "age": "33",
+        // "photo": [
+            // {
+                // "error": null,
+                // "fieldname": "photo",
+                // "filename": "test.png",
+                // "encoding": "7bit",
+                // "mimetype": "image/png",
+                // "size": 604,
+                // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+            // },
+            // {
+                // "error": null,
+                // "fieldname": "photo",
+                // "filename": "test.svg",
+                // "encoding": "7bit",
+                // "mimetype": "image/svg+xml",
+                // "size": 2484,
+                // "path": "/tmp/151605931497916067EAUAa3yB4q42"
+            // }
+        // ],
+        // "id": {
+            // "error": null,
+            // "fieldname": "id",
+            // "filename": "test.txt",
+            // "encoding": "7bit",
+            // "mimetype": "text/plain",
+            // "size": 13,
+            // "path": "/tmp/151605931498016067zqZe6dlhidQ5"
+        // }
+    // }
+
+}).listen(8888);
+```
+## Examples
+```javascript
+// OR
+// const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
+// OR
+// import { formData, express, getFormData, FormDataError } from '@coolgk/formdata';
+
+```
+## Constants
+
+<dl>
+<dt><a href="#FormDataError">FormDataError</a> : <code>object</code></dt>
+<dd><p>Error Codes</p>
+</dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#getFormData">getFormData(request, [options])</a> ⇒ <code>promise.&lt;{}&gt;</code></dt>
+<dd><p>the return value contains all normal post fields and the file upload fields that in &quot;fileFieldNames&quot; param</p>
+</dd>
+<dt><a href="#formData">formData(request, [globalOptions])</a> ⇒ <code>object</code></dt>
+<dd></dd>
+<dt><a href="#express">express([requestFieldName], [options])</a> ⇒ <code>function</code></dt>
+<dd></dd>
+</dl>
+
+<a name="FormDataError"></a>
+
+## FormDataError : <code>object</code>
+Error Codes
+
+**Kind**: global constant  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| FILE_SIZE_EXCEEDED_LIMIT | <code>string</code> | size of uploaded file exceeded limit |
+| NUM_OF_NON_FILE_FIELDS_EXCEEDED_LIMIT | <code>string</code> | # of non file fields exceeded limit |
+| NUM_OF_FIELDS_EXCEEDED_LIMIT | <code>string</code> | # of fields posted exceeded limit |
+| NUM_OF_FILES_EXCEEDED_LIMIT | <code>string</code> | # of file fields exceeded limit |
+| POST_SIZE_EXCEEDED_LIMIT | <code>string</code> | the max number of bytes exceeded limit for application/json & application/x-www-form-urlencoded |
+| FIELD_SIZE_EXCEEDED_LIMIT | <code>string</code> | max field value size exceeded limit |
+| INVALID_JSON | <code>string</code> | invalid json data for application/json |
+
+<a name="getFormData"></a>
+
+## getFormData(request, [options]) ⇒ <code>promise.&lt;{}&gt;</code>
+the return value contains all normal post fields and the file upload fields that in "fileFieldNames" param
+
+**Kind**: global function  
+**Returns**: <code>promise.&lt;{}&gt;</code> - - { fieldname: value, uploadedFileName: { error: ..., fieldname: ..., filename: ..., encoding: ..., mimetype: ..., size: ..., path: ..., remove: () => void } } "remove" is a callback function for deleting the uploaded file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| request | <code>object</code> |  | http.IncomingMessage, request parameter in createServer()'s callback or express request |
+| [options] | <code>object</code> |  |  |
+| [options.array] | <code>boolean</code> | <code>false</code> | if to always get form data as array. By default values could either be string or array e.g. fieldname = val1, fieldname = [val1, val2]. if array is true, fieldname = val1 becomes fieldname = [val1] |
+| [options.fileFieldNames] | <code>Array.&lt;string&gt;</code> \| <code>string</code> |  | name of the file upload fields. Only file fields in this list are parsed, other files are ignored i.e. if someone sends a random huge file onto your server, it will not be stored in disk or memory. |
+| [options.mode] | <code>number</code> | <code>0600</code> | permission of the uploaded files, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | prefix for file names |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | postfix for file names |
+| [options.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | directory for storing the uploaded files, fallbacks to system default |
+| [options.alwaysReject] | <code>boolean</code> | <code>false</code> | if to reject the promise when fieldNameSize and fieldSize limits are exceeded. By default, field name and value will be truncated to their limits. 'multipart/form-data' only |
+| [options.limits] | <code>object</code> |  |  |
+| [options.limits.fieldSize] | <code>string</code> | <code>1024000</code> | Max field value size (in bytes) (Default: 1MB), 'multipart/form-data' only |
+| [options.limits.fields] | <code>string</code> | <code>&quot;Infinity&quot;</code> | Max number of non-file fields (Default: Infinity) |
+| [options.limits.fileSize] | <code>string</code> | <code>&quot;Infinity&quot;</code> | the max file size (in bytes) (Default: Infinity) |
+| [options.limits.files] | <code>string</code> | <code>&quot;Infinity&quot;</code> | the max number of file fields (Default: Infinity) |
+| [options.limits.parts] | <code>string</code> | <code>&quot;Infinity&quot;</code> | the max number of parts (fields + files) (Default: Infinity), 'multipart/form-data' only |
+| [options.limits.headerPairs] | <code>string</code> | <code>2000</code> | For multipart forms, the max number of header key=>value pairs to parse Default: 2000 (same as node's http) |
+| [options.limits.postSize] | <code>string</code> | <code>1024000</code> | the max number of bytes can be posted. For application/json & application/x-www-form-urlencoded only |
+
+<a name="formData"></a>
+
+## formData(request, [globalOptions]) ⇒ <code>object</code>
+**Kind**: global function  
+**Returns**: <code>object</code> - - { getData: (fileFieldNames, options) => ... } see "fileFieldNames" and "options" and the return value of getFormData()  
+**See**: getFormData()  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request | <code>object</code> | http.IncomingMessage, request parameter in createServer()'s callback or express request |
+| [globalOptions] | <code>object</code> | see the "option" param of getFormData() |
+
+<a name="express"></a>
+
+## express([requestFieldName], [options]) ⇒ <code>function</code>
+**Kind**: global function  
+**Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()  
+**See**: getFormData()  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [requestFieldName] | <code>string</code> | <code>&quot;&#x27;formdata&#x27;&quot;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
+| [options] | <code>object</code> |  | see the "option" param of getFormData() |
 
 
 ## @coolgk/jwt
@@ -1273,6 +1610,21 @@ import { createClient } from 'redis';
 })()
 
 ```
+## Classes
+
+<dl>
+<dt><a href="#Token">Token</a></dt>
+<dd></dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#TokenError">TokenError</a> : <code>object</code></dt>
+<dd><p>Error Codes</p>
+</dd>
+</dl>
+
 <a name="Token"></a>
 
 ## Token
@@ -1359,6 +1711,20 @@ delete a data field in the token
 get the values of all data fields in the token
 
 **Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="TokenError"></a>
+
+## TokenError : <code>object</code>
+Error Codes
+
+**Kind**: global constant  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| INVALID_TOKEN | <code>string</code> | invalid token string |
+| RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
+| EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
+
 
 ## @coolgk/unit
 a javascript / typescript module

@@ -349,14 +349,23 @@ function parseFileMetaDoc (file, name) {
                             // create README.md
                             jsdoc2md.render({ files: `${distFolder}/${name}.js` }).then((jsDoc) => {
 
-                                const markdown = "\n" + `## @coolgk/${name}` + "\n" +
+                                let markdown = "\n" + `## @coolgk/${name}` + "\n" +
                                 'a javascript / typescript module' + "\n\n" +
                                 `\`npm install @coolgk/${name}\`` + "\n\n" +
-                                `${metaDoc.description}` + "\n" +
-                                '## Examples' +
-                                getMdCode(metaDoc.example) +
+                                `${metaDoc.description}` + "\n";
+
+                                if (metaDoc.documentation) {
+                                    markdown += metaDoc.documentation;
+                                }
+
+                                if (metaDoc.example) {
+                                    markdown += '## Examples' + getMdCode(metaDoc.example);
+                                }
+
+                                markdown += jsDoc;
+
                                 // '## Docs' + "\n" +
-                                jsDoc;
+                                // jsDoc;
                                 // metaDoc.documentation;
 
                                 return new Promise((resolve, reject) => {

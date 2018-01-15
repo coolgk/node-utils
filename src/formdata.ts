@@ -1,6 +1,140 @@
 /* tslint:disable */
 /***
-description: http request form data parser for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'
+description: A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parse form data when you ask for it.
+documentation: |
+    #### Example Form
+    ```html
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="name">
+        <input type="text" name="age">
+        <input type="file" name="photo">
+        <input type="file" name="photo">
+        <input type="file" name="id">
+    </form>
+    ```
+    #### Express Middleware
+    ```javascript
+    // express middleware
+    const app = require('express')();
+    const formdata = require('@coolgk/formdata');
+
+    app.use(formdata.express());
+
+    app.post('/id-only', async (request, response, next) => {
+        const post = await request.formdata.getData('id'); // upload 3 files but only parse 1, ignore others
+        console.log(post);
+        response.json(post);
+        // output
+        // {
+            // "name": "Tim",
+            // "age": "33",
+            // "id": {
+                // "error": null,
+                // "fieldname": "id",
+                // "filename": "test.txt",
+                // "encoding": "7bit",
+                // "mimetype": "text/plain",
+                // "size": 13,
+                // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+            // }
+        // }
+    });
+
+    app.post('/all-files', async (request, response, next) => {
+        const post = await request.formdata.getData(['id', 'photo']); // parse all files
+        console.log(post);
+        response.json(post);
+        // output
+        // {
+            // "name": "Tim",
+            // "age": "33",
+            // "photo": [
+                // {
+                    // "error": null,
+                    // "fieldname": "photo",
+                    // "filename": "test.png",
+                    // "encoding": "7bit",
+                    // "mimetype": "image/png",
+                    // "size": 604,
+                    // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+                // },
+                // {
+                    // "error": null,
+                    // "fieldname": "photo",
+                    // "filename": "test.svg",
+                    // "encoding": "7bit",
+                    // "mimetype": "image/svg+xml",
+                    // "size": 2484,
+                    // "path": "/tmp/151605931497916067EAUAa3yB4q42"
+                // }
+            // ],
+            // "id": {
+                // "error": null,
+                // "fieldname": "id",
+                // "filename": "test.txt",
+                // "encoding": "7bit",
+                // "mimetype": "text/plain",
+                // "size": 13,
+                // "path": "/tmp/151605931498016067zqZe6dlhidQ5"
+            // }
+        // }
+    });
+
+    app.listen(8888);
+    ```
+    #### Vanilla App
+    ```javascript
+    const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
+    const http = require('http');
+    http.createServer(async (request, response) => {
+
+        const data = await getFormData(request, { fileFieldNames: ['id', 'photo'] });
+
+        // OR
+        // const formdata = formData(request);
+        // ... some middelware
+        // ... in some routes
+        // const data = formdata.getData(['id', 'photo']);
+
+        console.log(data);
+        response.end(JSON.stringify(data));
+
+        // {
+            // "name": "Tim",
+            // "age": "33",
+            // "photo": [
+                // {
+                    // "error": null,
+                    // "fieldname": "photo",
+                    // "filename": "test.png",
+                    // "encoding": "7bit",
+                    // "mimetype": "image/png",
+                    // "size": 604,
+                    // "path": "/tmp/151605931497716067xZGgxPUdNvoj"
+                // },
+                // {
+                    // "error": null,
+                    // "fieldname": "photo",
+                    // "filename": "test.svg",
+                    // "encoding": "7bit",
+                    // "mimetype": "image/svg+xml",
+                    // "size": 2484,
+                    // "path": "/tmp/151605931497916067EAUAa3yB4q42"
+                // }
+            // ],
+            // "id": {
+                // "error": null,
+                // "fieldname": "id",
+                // "filename": "test.txt",
+                // "encoding": "7bit",
+                // "mimetype": "text/plain",
+                // "size": 13,
+                // "path": "/tmp/151605931498016067zqZe6dlhidQ5"
+            // }
+        // }
+
+    }).listen(8888);
+    ```
 keywords:
     - form
     - post
@@ -12,6 +146,9 @@ keywords:
     - express
     - middleware
     - promise
+    - large file
+    - file
+    - upload
 dependencies:
     "@coolgk/array": "^1.0.9"
     "@coolgk/tmp": "^1.0.9"
@@ -19,38 +156,6 @@ dependencies:
     "@types/busboy": "^0.2.3"
     "@types/node": "^8.5.8"
 example: |
-    // <form method="POST" enctype="multipart/form-data">
-        // <input type="text" name="name">
-        // <input type="text" name="age">
-        // <input type="file" name="photo">
-        // <input type="file" name="photo">
-        // <input type="file" name="id">
-    // </form>
-
-    // express middleware
-    const formdata = require('@coolgk/formdata');
-    const app = require('express')();
-
-    app.use(formdata.express());
-
-    app.post('/', async (request, response, next) => {
-        const post = await request.formdata.getData('photo');
-        console.log(post);
-        // {
-            // "name": "John",
-            // "age": "33",
-            // "photo": {
-                // "error": null,
-                // "fieldname": "photo",
-                // "filename": "test.svg",
-                // "encoding": "7bit",
-                // "mimetype": "image/svg+xml",
-                // "size": 938,
-                // "path": "/tmp/tmp-21261Y3umlbCcYUjp"
-            // }
-        // }
-    });
-
     // OR
     // const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
     // OR
@@ -349,7 +454,7 @@ export function formData (
 /* tslint:disable */
 /**
  * @see getFormData()
- * @param {string} [requestFieldName] - field name to be used on the request object. by default it assigns to request.formdata
+ * @param {string} [requestFieldName='formdata'] - field name to be assigned to the request object. by default it assigns to request.formdata
  * @param {object} [options] - see the "option" param of getFormData()
  * @return {function} - (request, response, next) => ... see the return value of getFormData()
  */
