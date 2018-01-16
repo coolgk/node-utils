@@ -5,8 +5,8 @@
 replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
 
 - [amqp](#coolgkamqp)
-- [array](#coolgkarray)
 - [base64](#coolgkbase64)
+- [array](#coolgkarray)
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
@@ -29,43 +29,6 @@ a javascript / typescript module
 `npm install @coolgk/amqp`
 
 a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-#### constructor(options)
-- Parameters
-    - options
-        - {string} options.url - connection string e.g. amqp://localhost
-        - {string} [options.sslPem] - pem file path
-        - {string} [options.sslCa] - sslCa file path
-        - {string} [options.sslPass] - password
-- Return Value
-    - void
-
-#### closeConnection()
-close the connection
-- Return Value
-    - void
-
-#### publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {})
-- Parameters
-    - {*} message - message any type that can be JSON.stringify'ed
-    - {function} [callback] - callback(message) for processing response from consumers
-    - {object} [options]
-        - {string} [options.route='#'] - route name
-        - {string} [options.exchangeName='defaultExchange'] - exchange name
-- Return Value
-    - Promise<boolean>
-
-#### consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {})
-- Parameters
-    - {function} callback - consumer(message) function should returns a promise
-    - {object} [options]
-    - {string} [options.route='#'] - exchange route
-    - {string} [options.queueName='defaultQueue'] - queue name for processing request
-    - {string} [options.exchangeName='defaultExchange'] - exchange name
-    - {string} [options.exchangeType='topic'] - exchange type
-    - {number} [options.priority=0] - priority, larger numbers indicate higher priority
-    - {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
-- Return Value
-    - Promise
 ## Examples
 ```javascript
 import { Amqp } from '@coolgk/amqp';
@@ -160,75 +123,12 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 | [options.prefetch] | <code>number</code> | <code>0</code> | 1 or 0, if to process request one at a time |
 
 
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-#### toArray (data)
-- Parameters
-    - {*} data - any data to be type cast to array
-- Return Value
-    - array
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
-
-
 ## @coolgk/base64
 a javascript / typescript module
 
 `npm install @coolgk/base64`
 
 base64 encoded decode functions
-#### encode (data = '')
-- Parameters
-    - {string} data - string to encode
-- Return Value
-    - string
-
-#### decode (data = '')
-- Parameters
-    - {string} data - encoded hash
-- Return Value
-    - string
-
-#### encodeUrl (data = '')
-- Parameters
-    - {string} data - string to encode
-- Return Value
-    - string
-
-#### decodeUrl (data = '')
-- Parameters
-    - {string} data - base64 encoded url
-- Return Value
-    - string
 ## Examples
 ```javascript
 import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
@@ -297,25 +197,47 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 | data | <code>string</code> | base64 encoded url to decode |
 
 
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
+
 ## @coolgk/bcrypt
 a javascript / typescript module
 
 `npm install @coolgk/bcrypt`
 
-just a promise wrapper for bcrypt-nodejs
-#### encrypt (value, salt = null)
-- Parameters
-    - {string} value - string to encrypt
-    - {string} salt - salt
-- Return Value
-    - promise<string>
-
-#### verify (value, hashedString)
-- Parameters
-    - {string} value - string to check
-    - {string} hashedString - encrypted hash
-- Return Value
-    - promise<boolean>
+just a promise wrapper
 ## Examples
 ```javascript
 import { encrypt, verify } from '@coolgk/bcrypt';
@@ -367,26 +289,6 @@ a javascript / typescript module
 `npm install @coolgk/cache`
 
 a redis wrapper
-#### constructor (options)
-- Parameters
-    - {object} options
-    - {object} [options.redisClient] - redis client from redis.createClient()
-- Return Value
-    - void
-
-#### set (name: string, value: any, expiry = 0)
-- Parameters
-    - {object} options
-    - {object} [options.redisClient] - redis client from redis.createClient()
-- Return Value
-    - void
-
-#### constructor (options)
-- Parameters
-    - {object} options
-    - {object} [options.redisClient] - redis client from redis.createClient()
-- Return Value
-    - void
 ## Examples
 ```javascript
 import { Cache } from '@coolgk/cache';
@@ -1298,8 +1200,10 @@ a javascript / typescript module
 
 `npm install @coolgk/queue`
 
-This is a super lightweight function that does three things: 1. Limit the number of async functions that run concurrently. 2. Run async functions in order 3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 ## Examples
 ```javascript
 import { queue } from '@coolgk/queue';
@@ -1321,12 +1225,12 @@ function c (x) {
     return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
 }
 
-// call a, b, c in order i.e. b will not start until a resolves
+// call a, b, c in order i.e. b does not start until a resolves
 queue(a);
 queue(b);
 queue(c);
 
-// call a 5 times, each will wait until previous call resolves
+// call a 5 times, each waits until the previous call resolves
 [1,2,3,4,5].forEach(() => {
     queue(a)
 });

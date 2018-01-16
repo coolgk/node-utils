@@ -1,7 +1,10 @@
 /* tslint:disable */
 /***
-description: >
-    This is a super lightweight function that does three things: 1. Limit the number of async functions that run concurrently. 2. Run async functions in order 3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+description: This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+documentation: |
+    1. Put async functions in a queue and limit the number of async functions that run concurrently.
+    2. Run async functions in order
+    3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 keywords:
     - async
     - parallel
@@ -29,12 +32,12 @@ example: |
         return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
     }
 
-    // call a, b, c in order i.e. b will not start until a resolves
+    // call a, b, c in order i.e. b does not start until a resolves
     queue(a);
     queue(b);
     queue(c);
 
-    // call a 5 times, each will wait until previous call resolves
+    // call a 5 times, each waits until the previous call resolves
     [1,2,3,4,5].forEach(() => {
         queue(a)
     });

@@ -18,12 +18,6 @@ example: |
     console.log(toArray(c)); // [ '' ]
     console.log(toArray(d)); // [ 1, 2, 3 ]
     console.log(toArray(e)); // [ { a: 1 } ]
-documentation: |
-    #### toArray (data)
-    - Parameters
-        - {*} data - any data to be type cast to array
-    - Return Value
-        - array
 */
 
 /**

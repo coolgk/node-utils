@@ -1,5 +1,5 @@
 /***
-description: just a promise wrapper for bcrypt-nodejs
+description: just a promise wrapper
 keywords:
     - bcrypt
 dependencies:
@@ -17,20 +17,6 @@ example: |
         verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
         verify('invalidpass', hash).then(console.log); // false
     });
-documentation: |
-    #### encrypt (value, salt = null)
-    - Parameters
-        - {string} value - string to encrypt
-        - {string} salt - salt
-    - Return Value
-        - promise<string>
-
-    #### verify (value, hashedString)
-    - Parameters
-        - {string} value - string to check
-        - {string} hashedString - encrypted hash
-    - Return Value
-        - promise<boolean>
 */
 
 // just a wrapper for compatibility in case bcrypt-nodejs needs to be replaced
