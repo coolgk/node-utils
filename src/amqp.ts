@@ -43,44 +43,6 @@ example: |
     amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
         console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
     });
-documentation: |
-    #### constructor(options)
-    - Parameters
-        - options
-            - {string} options.url - connection string e.g. amqp://localhost
-            - {string} [options.sslPem] - pem file path
-            - {string} [options.sslCa] - sslCa file path
-            - {string} [options.sslPass] - password
-    - Return Value
-        - void
-
-    #### closeConnection()
-    close the connection
-    - Return Value
-        - void
-
-    #### publish(message, callback, { route = '#', exchangeName = 'defaultExchange' } = {})
-    - Parameters
-        - {*} message - message any type that can be JSON.stringify'ed
-        - {function} [callback] - callback(message) for processing response from consumers
-        - {object} [options]
-            - {string} [options.route='#'] - route name
-            - {string} [options.exchangeName='defaultExchange'] - exchange name
-    - Return Value
-        - Promise<boolean>
-
-    #### consume(callback, { route = '#', queueName = 'defaultQueue', exchangeName = 'defaultExchange', exchangeType = 'topic', priority = 0, prefetch = 0 } = {})
-    - Parameters
-        - {function} callback - consumer(message) function should returns a promise
-        - {object} [options]
-        - {string} [options.route='#'] - exchange route
-        - {string} [options.queueName='defaultQueue'] - queue name for processing request
-        - {string} [options.exchangeName='defaultExchange'] - exchange name
-        - {string} [options.exchangeType='topic'] - exchange type
-        - {number} [options.priority=0] - priority, larger numbers indicate higher priority
-        - {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
-    - Return Value
-        - Promise
 */
 /* tslint:enable */
 

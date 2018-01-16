@@ -62,28 +62,6 @@ example: |
             cache.get('z').then(console.log) // null
         ])
     );
-documentation: |
-    #### constructor (options)
-    - Parameters
-        - {object} options
-        - {object} [options.redisClient] - redis client from redis.createClient()
-    - Return Value
-        - void
-
-    #### set (name: string, value: any, expiry = 0)
-    - Parameters
-        - {object} options
-        - {object} [options.redisClient] - redis client from redis.createClient()
-    - Return Value
-        - void
-
-    #### constructor (options)
-    - Parameters
-        - {object} options
-        - {object} [options.redisClient] - redis client from redis.createClient()
-    - Return Value
-        - void
-
 */
 
 import { RedisClient } from 'redis';

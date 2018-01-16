@@ -21,30 +21,6 @@ example: |
 
     console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
     console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
-documentation: |
-    #### encode (data = '')
-    - Parameters
-        - {string} data - string to encode
-    - Return Value
-        - string
-
-    #### decode (data = '')
-    - Parameters
-        - {string} data - encoded hash
-    - Return Value
-        - string
-
-    #### encodeUrl (data = '')
-    - Parameters
-        - {string} data - string to encode
-    - Return Value
-        - string
-
-    #### decodeUrl (data = '')
-    - Parameters
-        - {string} data - base64 encoded url
-    - Return Value
-        - string
 */
 
 /**
