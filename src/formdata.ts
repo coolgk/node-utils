@@ -155,12 +155,6 @@ dependencies:
     "busboy": "^0.2.14"
     "@types/busboy": "^0.2.3"
     "@types/node": "^8.5.8"
-example: |
-    // OR
-    // const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
-    // OR
-    // import { formData, express, getFormData, FormDataError } from '@coolgk/formdata';
-
 */
 /* tslint:enable */
 
