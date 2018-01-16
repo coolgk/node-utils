@@ -4,11 +4,11 @@
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
   "homepage": "https://www.npmjs.com/package/@coolgk/utils",
   "bugs": {
-    "url": "https://github.com/coolgk/utils/issues"
+    "url": "https://github.com/coolgk/node-utils/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/coolgk/utils.git"
+    "url": "https://github.com/coolgk/node-utils.git"
   },
   "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params",
   "keywords": [
