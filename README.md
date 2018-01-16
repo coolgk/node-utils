@@ -973,14 +973,6 @@ http.createServer(async (request, response) => {
 
 }).listen(8888);
 ```
-## Examples
-```javascript
-// OR
-// const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
-// OR
-// import { formData, express, getFormData, FormDataError } from '@coolgk/formdata';
-
-```
 ## Constants
 
 <dl>
