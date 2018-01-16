@@ -8,7 +8,7 @@ const expect = chai.expect;
 const config = require('../test.config.js');
 
 describe('PDF Module', function () {
-    this.timeout(3000);
+    this.timeout(5000);
 
     const { Pdf, Format, Orientation } = require(`../${config.sourceFolder}/pdf`);
 
@@ -85,7 +85,7 @@ describe('PDF Module', function () {
                 expect(mimeTypes.lookup(pdfFile)).to.equal('application/pdf');
                 done();
             });
-        });
+        }).catch(done);
     });
 
     it('should create PDF from string', (done) => {
@@ -99,7 +99,7 @@ describe('PDF Module', function () {
                 expect(mimeTypes.lookup(pdfFile)).to.equal('application/pdf');
                 done();
             });
-        });
+        }).catch(done);
     });
 
 });

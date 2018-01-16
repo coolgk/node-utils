@@ -105,7 +105,15 @@ export interface ITokenConfig extends IConfig {
     readonly redisClient: ICacheClient;
 }
 
-export enum Errors {
+/**
+ * Error Codes
+ * @const
+ * @type {object}
+ * @property {string} INVALID_TOKEN - invalid token string
+ * @property {string} RESERVED_NAME - reserved names are used when setting token variables e.g. _timestamp
+ * @property {string} EXPIRED_TOKEN - token expired or renew() has not been called
+ */
+export enum TokenError {
     INVALID_TOKEN = 'INVALID_TOKEN',
     RESERVED_NAME = 'RESERVED_NAME',
     EXPIRED_TOKEN = 'EXPIRED_TOKEN'
@@ -139,7 +147,7 @@ export class Token {
      */
     public async renew (expiry?: number): Promise<any> {
         if (!this._token) {
-            return {error: Errors.INVALID_TOKEN};
+            return {error: TokenError.INVALID_TOKEN};
         }
 
         if (expiry || expiry === 0) {
@@ -159,15 +167,15 @@ export class Token {
      */
     public async set (name: string, value: any): Promise<any> {
         if (name === '_timestamp') {
-            return {error: Errors.RESERVED_NAME};
+            return {error: TokenError.RESERVED_NAME};
         }
         // should not set if token expired or not newed yet
         if (this._expiry && !(await this.get('_timestamp'))) {
-            return {error: Errors.EXPIRED_TOKEN};
+            return {error: TokenError.EXPIRED_TOKEN};
         }
         return this._token ? this._cache.command(
             'hset', this._name, name, JSON.stringify(value)
-        ) : {error: Errors.INVALID_TOKEN};
+        ) : {error: TokenError.INVALID_TOKEN};
     }
 
     /**
@@ -207,7 +215,7 @@ export class Token {
      */
     public async delete (name: string): Promise<any> {
         if (!this._token) {
-            return {error: Errors.INVALID_TOKEN};
+            return {error: TokenError.INVALID_TOKEN};
         }
         return this._cache.command('hdel', this._name, name);
     }

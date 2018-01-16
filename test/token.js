@@ -9,7 +9,7 @@ const config = require('../test.config.js');
 
 describe('Token Module', function () {
 
-    const { Token, Errors } = require(`../${config.sourceFolder}/token`);
+    const { Token, TokenError } = require(`../${config.sourceFolder}/token`);
 
     let redisClient;
     let token;
@@ -35,8 +35,8 @@ describe('Token Module', function () {
 
     it('should not be able to set var & be invalid before renew', () => {
         return Promise.all([
-            expect(token.set('_timestamp', 231)).to.eventually.have.property('error', Errors.RESERVED_NAME),
-            expect(token.set('ab', 121)).to.eventually.have.property('error', Errors.EXPIRED_TOKEN),
+            expect(token.set('_timestamp', 231)).to.eventually.have.property('error', TokenError.RESERVED_NAME),
+            expect(token.set('ab', 121)).to.eventually.have.property('error', TokenError.EXPIRED_TOKEN),
             expect(token.verify()).to.eventually.be.false
         ]);
     });
@@ -59,7 +59,7 @@ describe('Token Module', function () {
     it('should have values after values are set', async () => {
         await token.set('var1', {a: 'var1', b: false});
 
-        expect(await token.set('_timestamp', 123)).to.deep.equal({error: Errors.RESERVED_NAME});
+        expect(await token.set('_timestamp', 123)).to.deep.equal({error: TokenError.RESERVED_NAME});
 
         expect(await token.get('var1')).to.deep.equal({a: 'var1', b: false});
 
@@ -89,7 +89,7 @@ describe('Token Module', function () {
         }).then(() => {
             setTimeout(() => {
                 Promise.all([
-                    expect(token.set()).to.eventually.have.property('error', Errors.EXPIRED_TOKEN),
+                    expect(token.set()).to.eventually.have.property('error', TokenError.EXPIRED_TOKEN),
                     expect(token.verify()).to.eventually.be.false,
                     expect(token.get('var1')).to.eventually.be.null,
                     expect(token.getAll()).to.eventually.deep.equal({})
@@ -119,9 +119,9 @@ describe('Token Module', function () {
     it('should set error value when token string is not set', () => {
         const invalidToken = new Token({ redisClient: redisClient });
         return Promise.all([
-            expect(invalidToken.set()).to.eventually.have.property('error', Errors.INVALID_TOKEN),
-            expect(invalidToken.renew()).to.eventually.have.property('error', Errors.INVALID_TOKEN),
-            expect(invalidToken.delete()).to.eventually.have.property('error', Errors.INVALID_TOKEN)
+            expect(invalidToken.set()).to.eventually.have.property('error', TokenError.INVALID_TOKEN),
+            expect(invalidToken.renew()).to.eventually.have.property('error', TokenError.INVALID_TOKEN),
+            expect(invalidToken.delete()).to.eventually.have.property('error', TokenError.INVALID_TOKEN)
         ]).then(() => invalidToken.destroy());
     });
 

@@ -175,9 +175,8 @@ export class Pdf {
         const phantomInstance = await this._phantom.create();
         const page = await phantomInstance.createPage();
 
-        await page.open(htmlFilePath).then(
-            () => page.property('dpi', dpi)
-        );
+        await page.open(htmlFilePath);
+        await page.property('dpi', dpi);
 
         await page.property('paperSize', {
             format,
@@ -197,11 +196,18 @@ export class Pdf {
             }
         });
 
-        return new Promise<string>(async (resolve) => {
-            await page.render(pdfFilePath, {format: 'pdf'});
-            phantomInstance.exit();
-            resolve(pdfFilePath);
-        });
+        await page.render(pdfFilePath, {format: 'pdf'});
+
+        await page.close();
+        phantomInstance.exit();
+
+        return pdfFilePath;
+
+        // return new Promise<string>(async (resolve) => {
+            // await page.render(pdfFilePath, {format: 'pdf'});
+            // phantomInstance.exit();
+            // resolve(pdfFilePath);
+        // });
     }
 
     /**

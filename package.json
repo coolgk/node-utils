@@ -1,6 +1,6 @@
 {
   "name": "@coolgk/utils",
-  "version": "1.0.8",
+  "version": "1.1.1",
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
   "homepage": "https://www.npmjs.com/package/@coolgk/utils",
   "bugs": {
@@ -41,11 +41,12 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "@coolgk/base64": "^1.0.8",
-    "@coolgk/cache": "^1.0.8",
+    "@coolgk/array": "^1.0.9",
+    "@coolgk/base64": "^1.0.9",
+    "@coolgk/cache": "^1.0.9",
     "@coolgk/queue": "^1.0.9",
-    "@coolgk/string": "^1.0.8",
-    "@coolgk/tmp": "^1.0.8",
+    "@coolgk/string": "^1.0.9",
+    "@coolgk/tmp": "^1.0.9",
     "@types/amqplib": "^0.5.6",
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/busboy": "^0.2.3",
