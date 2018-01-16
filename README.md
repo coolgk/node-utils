@@ -922,7 +922,7 @@ app.listen(8888);
 ```
 #### Vanilla App
 ```javascript
-const { formData, express, getFormData, FormDataError } = require('./formdata');
+const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
 const http = require('http');
 http.createServer(async (request, response) => {
 
