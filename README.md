@@ -2,11 +2,11 @@
 
 `npm install @coolgk/utils`
 
-replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
+you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
 
 - [amqp](#coolgkamqp)
-- [base64](#coolgkbase64)
 - [array](#coolgkarray)
+- [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
@@ -123,6 +123,41 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 | [options.prefetch] | <code>number</code> | <code>0</code> | 1 or 0, if to process request one at a time |
 
 
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
+
 ## @coolgk/base64
 a javascript / typescript module
 
@@ -195,41 +230,6 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>string</code> | base64 encoded url to decode |
-
-
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
 
 
 ## @coolgk/bcrypt
