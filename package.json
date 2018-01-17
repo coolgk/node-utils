@@ -37,6 +37,7 @@
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**",
     "tsc": "tsc --project tsconfig.json",
+    "tsc:watch": "tsc --project tsconfig.dev.json -w --pretty",
     "tsc:dev": "tsc --project tsconfig.dev.json",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
