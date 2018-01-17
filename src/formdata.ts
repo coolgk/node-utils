@@ -1,6 +1,6 @@
 /* tslint:disable */
 /***
-description: A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parse form data when you ask for it.
+description: A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parses form data when you ask for it.
 documentation: |
     #### Example Form
     ```html
@@ -82,7 +82,7 @@ documentation: |
 
     app.listen(8888);
     ```
-    #### Vanilla App
+    #### Native Node App
     ```javascript
     const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
     const http = require('http');
