@@ -222,7 +222,7 @@ function generateRootReadme (folder) {
                 const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
 
                 // travis
-                readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils) ');
+                readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/node-utils.svg?branch=master)](https://travis-ci.org/coolgk/node-utils) ');
                 // dependencies
                 readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/node-utils/status.svg)](https://david-dm.org/coolgk/node-utils) ');
                 // coverage
