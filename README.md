@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils) [![dependencies Status](https://david-dm.org/coolgk/utils/status.svg)](https://david-dm.org/coolgk/utils) [![Coverage Status](https://coveralls.io/repos/github/coolgk/utils/badge.svg?branch=develop)](https://coveralls.io/github/coolgk/utils?branch=develop)
+[![Build Status](https://travis-ci.org/coolgk/utils.svg?branch=master)](https://travis-ci.org/coolgk/utils) [![dependencies Status](https://david-dm.org/coolgk/node-utils/status.svg)](https://david-dm.org/coolgk/node-utils) [![Coverage Status](https://coveralls.io/repos/github/coolgk/node-utils/badge.svg)](https://coveralls.io/github/coolgk/node-utils)
 
 `npm install @coolgk/utils`
 
@@ -741,7 +741,7 @@ a javascript / typescript module
 
 `npm install @coolgk/formdata`
 
-A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parse form data when you ask for it.
+A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parses form data when you ask for it.
 #### Example Form
 ```html
 <form method="POST" enctype="multipart/form-data">
@@ -822,7 +822,7 @@ app.post('/all-files', async (request, response, next) => {
 
 app.listen(8888);
 ```
-#### Vanilla App
+#### Native Node App
 ```javascript
 const { formData, express, getFormData, FormDataError } = require('@coolgk/formdata');
 const http = require('http');
@@ -891,7 +891,7 @@ http.createServer(async (request, response) => {
 </dd>
 <dt><a href="#formData">formData(request, [globalOptions])</a> ⇒ <code>object</code></dt>
 <dd></dd>
-<dt><a href="#express">express([requestFieldName], [options])</a> ⇒ <code>function</code></dt>
+<dt><a href="#express">express([options])</a> ⇒ <code>function</code></dt>
 <dd></dd>
 </dl>
 
@@ -955,15 +955,15 @@ the return value contains all normal post fields and the file upload fields that
 
 <a name="express"></a>
 
-## express([requestFieldName], [options]) ⇒ <code>function</code>
+## express([options]) ⇒ <code>function</code>
 **Kind**: global function  
 **Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()  
 **See**: getFormData()  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [requestFieldName] | <code>string</code> | <code>&quot;&#x27;formdata&#x27;&quot;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 | [options] | <code>object</code> |  | see the "option" param of getFormData() |
+| [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
 ## @coolgk/jwt
