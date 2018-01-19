@@ -80,4 +80,8 @@ describe('Amqp Module', () => {
             ]);
         });
     });
+
+    // the route options should be able to take an array as input
+    it('a single consumer should be able to consume messages from multiple routes');
+
 });
