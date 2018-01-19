@@ -165,17 +165,19 @@ export class Amqp {
         });
     }
 
+    /* tslint:disable */
     /**
      * @param {function} callback - consumer(message) function should returns a promise
      * @param {object} [options]
      * @param {string} [options.route='#'] - exchange route
-     * @param {string} [options.queueName=''] - queue name for processing request
+     * @param {string} [options.queueName=''] - queue name for processing messages. consumers with the same queue name process messages in round robin style
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
      * @param {string} [options.exchangeType='topic'] - exchange type
      * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
-     * @param {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+     * @param {number} [options.prefetch=1] - 1 or 0, if to process request one at a time
      * @return {promise}
      */
+    /* tslint:enable */
     public consume (
         callback: (message: IMessage) => any,
         {
@@ -184,14 +186,16 @@ export class Amqp {
             exchangeName = 'defaultExchange',
             exchangeType = 'topic',
             priority = 0,
-            prefetch = 0
+            prefetch = 1
         }: IConsumeConfig = {}
     ): Promise<Replies.Consume> {
         return this._getChannel().then((channel: any) => {
             return channel.prefetch(prefetch).then(() => {
                 return channel.assertExchange(exchangeName, exchangeType, {durable: true});
             }).then(() => {
-                return channel.assertQueue(queueName, {durable: false});
+                // when the connection that declared it closes,
+                // the queue will be deleted because it is declared as exclusive.
+                return channel.assertQueue(queueName, {durable: false, exclusive: !queueName});
             }).then((queue: Replies.AssertQueue) => {
                 return channel.bindQueue(queue.queue, exchangeName, String(route)).then(
                     () => channel.consume(

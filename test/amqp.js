@@ -83,5 +83,7 @@ describe('Amqp Module', () => {
 
     // the route options should be able to take an array as input
     it('a single consumer should be able to consume messages from multiple routes');
+    it('publisher should be send message to all consumers');
+    it('publisher should be able to do round robin distribution');
 
 });
