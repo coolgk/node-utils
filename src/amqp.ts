@@ -68,6 +68,7 @@ export interface IConsumeConfig {
     priority?: number;
     prefetch?: number;
     exchangeType?: string;
+    fallbackExchange?: string;
 }
 
 export interface IMessage {
@@ -186,12 +187,20 @@ export class Amqp {
             exchangeName = 'defaultExchange',
             exchangeType = 'topic',
             priority = 0,
-            prefetch = 1
+            prefetch = 1,
+            fallbackExchange = ''
         }: IConsumeConfig = {}
     ): Promise<Replies.Consume> {
         return this._getChannel().then((channel: any) => {
             return channel.prefetch(prefetch).then(() => {
-                return channel.assertExchange(exchangeName, exchangeType, {durable: true});
+                return channel.assertExchange(
+                    exchangeName,
+                    exchangeType,
+                    {
+                        durable: true,
+                        arguments: fallbackExchange ? { 'alternate-exchange': fallbackExchange } : {}
+                    }
+                );
             }).then(() => {
                 // when the connection that declared it closes,
                 // the queue will be deleted because it is declared as exclusive.

@@ -85,5 +85,6 @@ describe('Amqp Module', () => {
     it('a single consumer should be able to consume messages from multiple routes');
     it('publisher should be send message to all consumers');
     it('publisher should be able to do round robin distribution');
+    it('should fall back to catch all alternative exchange');
 
 });
