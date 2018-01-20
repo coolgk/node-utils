@@ -42,7 +42,7 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "@coolgk/array": "^1.0.9",
+    "@coolgk/array": "^1.1.4",
     "@coolgk/base64": "^1.0.9",
     "@coolgk/cache": "^1.0.9",
     "@coolgk/queue": "^1.0.9",
@@ -98,8 +98,8 @@
   "pre-commit": {
     "silent": false,
     "run": [
-      "test:precommit",
-      "tslint"
+      "tslint",
+      "test:precommit"
     ]
   },
   "main": "./dist/index.js",
