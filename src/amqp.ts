@@ -9,6 +9,7 @@ dependencies:
     "amqplib": "^0.5.2"
     "uuid": "^3.1.0"
     "@types/uuid": "^3.4.3"
+    "@coolgk/array": "^1.1.4"
 example: |
     import { Amqp } from '@coolgk/amqp';
     // OR
@@ -48,9 +49,10 @@ example: |
 
 // npm install -S @types/amqplib amqplib @types/uuid uuid
 
-import { connect, Channel, Connection, Message, Replies } from 'amqplib';
+import { connect, Channel, Connection, Message, Replies, Options } from 'amqplib';
 import { v1 } from 'uuid';
 import { readFile } from 'fs';
+import { toArray } from '@coolgk/array';
 
 export interface IAmqpConfig {
     readonly url: string;
@@ -62,12 +64,13 @@ export interface IAmqpConfig {
 }
 
 export interface IConsumeConfig {
-    route?: string;
+    routes?: string | string[];
     queueName?: string;
     exchangeName?: string;
     priority?: number;
     prefetch?: number;
     exchangeType?: string;
+    fallbackExchange?: string;
 }
 
 export interface IMessage {
@@ -118,16 +121,16 @@ export class Amqp {
      * @param {*} message - message any type that can be JSON.stringify'ed
      * @param {function} [callback] - callback(message) for processing response from consumers
      * @param {object} [options]
-     * @param {string} [options.route='#'] - route name
+     * @param {string|string[]} [options.routes=['#']] - route names
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
-     * @return {promise<boolean>}
+     * @return {promise<boolean[]>}
      */
     public publish (
         message: any,
         callback?: (message: IResponseMessage) => any,
-        {route = '#', exchangeName = 'defaultExchange'}: {route?: string, exchangeName?: string} = {}
-    ): Promise<boolean> {
-        return this._getChannel().then((channel: Channel) => {
+        {routes = '#', exchangeName = 'defaultExchange'}: {routes?: string, exchangeName?: string} = {}
+    ): Promise<boolean[]> {
+        return this.getChannel().then((channel: Channel) => {
             if (callback) {
                 const messageId = this._uuid();
                 return channel.assertQueue('response' + messageId, {durable: false, autoDelete: true}).then((queue) => {
@@ -138,14 +141,14 @@ export class Amqp {
                                 responseMessage: JSON.parse(rawResponseMessage.content.toString())
                             });
                             channel.ack(rawResponseMessage);
-                            channel.deleteQueue(queue.queue);
                         }
                     });
 
-                    return channel.publish(
+                    return this._publish(
+                        channel,
                         exchangeName,
-                        String(route),
-                        Buffer.from(JSON.stringify(message)),
+                        routes,
+                        message,
                         {
                             persistent: true,
                             correlationId: messageId,
@@ -154,10 +157,12 @@ export class Amqp {
                     );
                 });
             }
-            return channel.publish(
+
+            return this._publish(
+                channel,
                 exchangeName,
-                String(route),
-                Buffer.from(JSON.stringify(message)),
+                routes,
+                message,
                 {
                     persistent: true
                 }
@@ -165,70 +170,87 @@ export class Amqp {
         });
     }
 
+    /* tslint:disable */
     /**
      * @param {function} callback - consumer(message) function should returns a promise
      * @param {object} [options]
-     * @param {string} [options.route='#'] - exchange route
-     * @param {string} [options.queueName=''] - queue name for processing request
+     * @param {string|string[]} [options.routes=['#']] - exchange routes
+     * @param {string} [options.queueName=''] - queue name for processing messages. consumers with the same queue name process messages in round robin style
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
      * @param {string} [options.exchangeType='topic'] - exchange type
      * @param {number} [options.priority=0] - priority, larger numbers indicate higher priority
-     * @param {number} [options.prefetch=0] - 1 or 0, if to process request one at a time
+     * @param {number} [options.prefetch=1] - 1 or 0, if to process request one at a time
      * @return {promise}
      */
+    /* tslint:enable */
     public consume (
         callback: (message: IMessage) => any,
         {
-            route = '#',
+            routes = ['#'],
             queueName = '',
             exchangeName = 'defaultExchange',
             exchangeType = 'topic',
             priority = 0,
-            prefetch = 0
+            prefetch = 1,
+            fallbackExchange = ''
         }: IConsumeConfig = {}
-    ): Promise<Replies.Consume> {
-        return this._getChannel().then((channel: any) => {
+    ): Promise<Replies.Consume[]> {
+        return this.getChannel().then((channel: any) => {
             return channel.prefetch(prefetch).then(() => {
-                return channel.assertExchange(exchangeName, exchangeType, {durable: true});
+                return channel.assertExchange(
+                    exchangeName,
+                    exchangeType,
+                    {
+                        durable: false,
+                        arguments: fallbackExchange ? { 'alternate-exchange': fallbackExchange } : {}
+                    }
+                );
             }).then(() => {
-                return channel.assertQueue(queueName, {durable: false});
+                // when the connection that declared it closes,
+                // the queue will be deleted because it is declared as exclusive.
+                return channel.assertQueue(queueName, {durable: false, exclusive: !queueName});
             }).then((queue: Replies.AssertQueue) => {
-                return channel.bindQueue(queue.queue, exchangeName, String(route)).then(
-                    () => channel.consume(
-                        queue.queue,
-                        (rawMessage: Message | null) => {
-                            Promise.resolve(
-                                callback({
-                                    rawMessage,
-                                    message: JSON.parse((rawMessage as Message).content.toString())
-                                })
-                            ).then((response: any = '') => {
-                                if (rawMessage
-                                    && rawMessage.properties.replyTo && rawMessage.properties.correlationId) {
-                                    channel.sendToQueue(
-                                        rawMessage.properties.replyTo,
-                                        Buffer.from(JSON.stringify(response)),
-                                        {
-                                            persistent: true,
-                                            correlationId: rawMessage.properties.correlationId
-                                        }
-                                    );
-                                }
-                                channel.ack(rawMessage as Message);
-                            });
-                        },
-                        { priority }
-                    )
+                const promises = [];
+                for (const route of toArray(routes)) {
+                    promises.push(channel.bindQueue(queue.queue, exchangeName, String(route)));
+                }
+                return Promise.all(promises).then(
+                    () => {
+                        return channel.consume(
+                            queue.queue,
+                            (rawMessage: Message | null) => {
+                                Promise.resolve(
+                                    callback({
+                                        rawMessage,
+                                        message: JSON.parse((rawMessage as Message).content.toString())
+                                    })
+                                ).then((response: any = '') => {
+                                    if (rawMessage
+                                        && rawMessage.properties.replyTo && rawMessage.properties.correlationId) {
+                                        channel.sendToQueue(
+                                            rawMessage.properties.replyTo,
+                                            Buffer.from(JSON.stringify(response)),
+                                            {
+                                                persistent: true,
+                                                correlationId: rawMessage.properties.correlationId
+                                            }
+                                        );
+                                    }
+                                    channel.ack(rawMessage as Message);
+                                });
+                            },
+                            { priority }
+                        );
+                    }
                 );
             });
         });
     }
 
     /**
-     * @return {promise}
-     * @ignore
+     * @return {promise} - promise<channel>
      */
-    private _getChannel (): any {
+    public getChannel (): any {
         if (!this._channel) {
             if (this._sslPem) {
                 return this._channel = new Promise((resolve, reject) => {
@@ -259,6 +281,28 @@ export class Amqp {
             }
         }
         return this._channel;
+    }
+
+    /**
+     * @ignore
+     */
+    private _publish (
+        channel: Channel, exchangeName: string, routes: string | string[], message: any, options: Options.Publish
+    ): Promise<boolean[]> {
+        const promises = [];
+
+        for (const route of toArray(routes)) {
+            promises.push(
+                channel.publish(
+                    exchangeName,
+                    String(route),
+                    Buffer.from(JSON.stringify(message)),
+                    options
+                )
+            );
+        }
+
+        return Promise.all(promises);
     }
 }
 

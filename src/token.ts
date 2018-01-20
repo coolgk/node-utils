@@ -105,6 +105,8 @@ export interface ITokenConfig extends IConfig {
     readonly redisClient: ICacheClient;
 }
 
+export { ICacheClient as IRedisClient };
+
 /**
  * Error Codes
  * @const
