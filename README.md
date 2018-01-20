@@ -69,13 +69,14 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp"></a>
 
 ## Amqp
-**Kind**: global class
+**Kind**: global class  
 
 * [Amqp](#Amqp)
     * [new Amqp(options)](#new_Amqp_new)
     * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
     * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
 
 <a name="new_Amqp_new"></a>
 
@@ -92,36 +93,41 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp+closeConnection"></a>
 
 ### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 <a name="Amqp+publish"></a>
 
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
 | [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
 | [options] | <code>object</code> |  |  |
-| [options.route] | <code>string</code> | <code>&quot;&#x27;#&#x27;&quot;</code> | route name |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
 | [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
 
 <a name="Amqp+consume"></a>
 
 ### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | callback | <code>function</code> |  | consumer(message) function should returns a promise |
 | [options] | <code>object</code> |  |  |
-| [options.route] | <code>string</code> | <code>&quot;&#x27;#&#x27;&quot;</code> | exchange route |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing request |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
 | [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
 | [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
 | [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>0</code> | 1 or 0, if to process request one at a time |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
 
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
 
 ## @coolgk/array
 a javascript / typescript module
@@ -151,7 +157,7 @@ console.log(toArray(e)); // [ { a: 1 } ]
 <a name="toArray"></a>
 
 ## toArray(data) ⇒ <code>array</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -198,7 +204,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="encode"></a>
 
 ## encode(data) ⇒ <code>string</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -207,7 +213,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="decode"></a>
 
 ## decode(data) ⇒ <code>string</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -216,7 +222,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="encodeUrl"></a>
 
 ## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -225,7 +231,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="decodeUrl"></a>
 
 ## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -265,7 +271,7 @@ encrypt(password).then((hash) => {
 <a name="encrypt"></a>
 
 ## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -275,7 +281,7 @@ encrypt(password).then((hash) => {
 <a name="verify"></a>
 
 ## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -352,7 +358,7 @@ Promise.all([
 <a name="Cache"></a>
 
 ## Cache
-**Kind**: global class
+**Kind**: global class  
 
 * [Cache](#Cache)
     * [new Cache(options)](#new_Cache_new)
@@ -374,7 +380,7 @@ Promise.all([
 <a name="Cache+set"></a>
 
 ### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -385,8 +391,8 @@ Promise.all([
 <a name="Cache+get"></a>
 
 ### cache.get(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)
-**Returns**: <code>promise</code> - - cached value
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -395,7 +401,7 @@ Promise.all([
 <a name="Cache+delete"></a>
 
 ### cache.delete(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -406,8 +412,8 @@ Promise.all([
 ### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
 get the cached value, if not set, resolve "callback()" and save the value then return it
 
-**Kind**: instance method of [<code>Cache</code>](#Cache)
-**Returns**: <code>promise</code> - - cached value
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -418,7 +424,7 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 <a name="Cache+command"></a>
 
 ### cache.command(command, ...params) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -453,7 +459,7 @@ captcha.verify(captchaResponse).then((response) => {
 <a name="Captcha"></a>
 
 ## Captcha
-**Kind**: global class
+**Kind**: global class  
 
 * [Captcha](#Captcha)
     * [new Captcha(options)](#new_Captcha_new)
@@ -471,7 +477,7 @@ captcha.verify(captchaResponse).then((response) => {
 <a name="Captcha+verify"></a>
 
 ### captcha.verify(response, [remoteip])
-**Kind**: instance method of [<code>Captcha</code>](#Captcha)
+**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -571,7 +577,7 @@ function read (file, columns) {
 <a name="Csv"></a>
 
 ## Csv
-**Kind**: global class
+**Kind**: global class  
 
 * [Csv](#Csv)
     * [new Csv([options])](#new_Csv_new)
@@ -596,7 +602,7 @@ function read (file, columns) {
 ### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
 parse a string as csv data and returns an array promise
 
-**Kind**: instance method of [<code>Csv</code>](#Csv)
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -612,8 +618,8 @@ parse a string as csv data and returns an array promise
 read a csv file. the return value can ONLY be used in a forEach() loop
 e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 
-**Kind**: instance method of [<code>Csv</code>](#Csv)
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -626,8 +632,8 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 <a name="Csv+createFile"></a>
 
 ### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -688,8 +694,8 @@ email.send({
 <a name="Email"></a>
 
 ## Email
-**Kind**: global class
-**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions
+**Kind**: global class  
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
 
 * [Email](#Email)
     * [new Email(options)](#new_Email_new)
@@ -714,8 +720,8 @@ email.send({
 <a name="Email+send"></a>
 
 ### email.send(options, [attachments]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Email</code>](#Email)
-**Returns**: <code>promise</code> - - message sent
+**Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -900,7 +906,7 @@ http.createServer(async (request, response) => {
 ## FormDataError : <code>object</code>
 Error Codes
 
-**Kind**: global constant
+**Kind**: global constant  
 **Properties**
 
 | Name | Type | Description |
@@ -918,8 +924,8 @@ Error Codes
 ## getFormData(request, [options]) ⇒ <code>promise.&lt;{}&gt;</code>
 the return value contains all normal post fields and the file upload fields that in "fileFieldNames" param
 
-**Kind**: global function
-**Returns**: <code>promise.&lt;{}&gt;</code> - - { fieldname: value, uploadedFileName: { error: ..., fieldname: ..., filename: ..., encoding: ..., mimetype: ..., size: ..., path: ..., remove: () => void } } "remove" is a callback function for deleting the uploaded file
+**Kind**: global function  
+**Returns**: <code>promise.&lt;{}&gt;</code> - - { fieldname: value, uploadedFileName: { error: ..., fieldname: ..., filename: ..., encoding: ..., mimetype: ..., size: ..., path: ..., remove: () => void } } "remove" is a callback function for deleting the uploaded file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -944,9 +950,9 @@ the return value contains all normal post fields and the file upload fields that
 <a name="formData"></a>
 
 ## formData(request, [globalOptions]) ⇒ <code>object</code>
-**Kind**: global function
-**Returns**: <code>object</code> - - { getData: (fileFieldNames, options) => ... } see "fileFieldNames" and "options" and the return value of getFormData()
-**See**: getFormData()
+**Kind**: global function  
+**Returns**: <code>object</code> - - { getData: (fileFieldNames, options) => ... } see "fileFieldNames" and "options" and the return value of getFormData()  
+**See**: getFormData()  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -956,9 +962,9 @@ the return value contains all normal post fields and the file upload fields that
 <a name="express"></a>
 
 ## express([options]) ⇒ <code>function</code>
-**Kind**: global function
-**Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()
-**See**: getFormData()
+**Kind**: global function  
+**Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()  
+**See**: getFormData()  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1004,7 +1010,7 @@ setTimeout(() => {
 <a name="Jwt"></a>
 
 ## Jwt
-**Kind**: global class
+**Kind**: global class  
 
 * [Jwt](#Jwt)
     * [new Jwt(options)](#new_Jwt_new)
@@ -1023,7 +1029,7 @@ setTimeout(() => {
 <a name="Jwt+generate"></a>
 
 ### jwt.generate(data, [expiry]) ⇒ <code>string</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1033,8 +1039,8 @@ setTimeout(() => {
 <a name="Jwt+verify"></a>
 
 ### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)
-**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1062,7 +1068,7 @@ console.log(round(100.958747, 4)); // 100.9587
 <a name="round"></a>
 
 ## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1138,7 +1144,7 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 <a name="Pdf"></a>
 
 ## Pdf
-**Kind**: global class
+**Kind**: global class  
 
 * [Pdf](#Pdf)
     * [new Pdf([options])](#new_Pdf_new)
@@ -1160,11 +1166,11 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 <a name="Pdf+createFromHtmlFile"></a>
 
 ### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)
-**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
 **See**: http://phantomjs.org/api/webpage/property/paper-size.html
 A4 page height: 842px
-for full page in PDF, set height of a page in html to 842px
+for full page in PDF, set height of a page in html to 842px  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1185,9 +1191,9 @@ for full page in PDF, set height of a page in html to 842px
 <a name="Pdf+createFromHtmlString"></a>
 
 ### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)
-**Returns**: <code>promise</code> - - filepath of the generated PDF
-**See**: createFromHtmlFile()
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise</code> - - filepath of the generated PDF  
+**See**: createFromHtmlFile()  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1244,7 +1250,7 @@ queue(c);
 <a name="queue"></a>
 
 ## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1299,8 +1305,8 @@ console.log(prepad0(1000, 2)); // 1000
 ## stripTags(a) ⇒ <code>string</code>
 strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
 
-**Kind**: global function
-**Returns**: <code>string</code> - - string with tags stripped
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1311,7 +1317,7 @@ strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" bec
 ## escapeHtml(value) ⇒ <code>string</code>
 escaping user input e.g. html code in a message box
 
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1322,7 +1328,7 @@ escaping user input e.g. html code in a message box
 ## unescapeHtml(string) ⇒ <code>string</code>
 unescaping strings escaped by escapeHtml()
 
-**Kind**: global function
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1333,8 +1339,8 @@ unescaping strings escaped by escapeHtml()
 ## prepad0(value, length) ⇒ <code>string</code>
 use padStart instead
 
-**Kind**: global function
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1378,8 +1384,8 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 <a name="generateFile"></a>
 
 ## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1393,8 +1399,8 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 <a name="generateDir"></a>
 
 ## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1408,8 +1414,8 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 <a name="generateTmpName"></a>
 
 ## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function
-**Returns**: <code>promise</code> - - { path: ... }
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1524,7 +1530,7 @@ import { createClient } from 'redis';
 <a name="Token"></a>
 
 ## Token
-**Kind**: global class
+**Kind**: global class  
 
 * [Token](#Token)
     * [new Token(options)](#new_Token_new)
@@ -1551,7 +1557,7 @@ import { createClient } from 'redis';
 <a name="Token+renew"></a>
 
 ### token.renew([expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1562,7 +1568,7 @@ import { createClient } from 'redis';
 ### token.set(name, value) ⇒ <code>promise</code>
 set a data field value
 
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1572,13 +1578,13 @@ set a data field value
 <a name="Token+verify"></a>
 
 ### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 <a name="Token+get"></a>
 
 ### token.get(name) ⇒ <code>promise</code>
 get the value of a data field
 
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1589,13 +1595,13 @@ get the value of a data field
 ### token.destroy() ⇒ <code>promise</code>
 delete the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 <a name="Token+delete"></a>
 
 ### token.delete(name) ⇒ <code>promise</code>
 delete a data field in the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1606,13 +1612,13 @@ delete a data field in the token
 ### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
 get the values of all data fields in the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)
+**Kind**: instance method of [<code>Token</code>](#Token)  
 <a name="TokenError"></a>
 
 ## TokenError : <code>object</code>
 Error Codes
 
-**Kind**: global constant
+**Kind**: global constant  
 **Properties**
 
 | Name | Type | Description |
@@ -1672,8 +1678,8 @@ console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); 
 ## bytesToString(value) ⇒ <code>string</code>
 or use https://www.npmjs.com/package/filesize
 
-**Kind**: global function
-**Returns**: <code>string</code> - value in KB, MB, GB or TB
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1682,8 +1688,8 @@ or use https://www.npmjs.com/package/filesize
 <a name="millisecondsToString"></a>
 
 ## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1723,8 +1729,8 @@ console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 ## getParams(url, pattern) ⇒ <code>object</code>
 a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
 
-**Kind**: global function
-**Returns**: <code>object</code> - - e.g. {userid: 123}
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
 
 | Param | Type | Description |
 | --- | --- | --- |

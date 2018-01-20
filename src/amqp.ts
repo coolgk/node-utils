@@ -123,7 +123,7 @@ export class Amqp {
      * @param {object} [options]
      * @param {string|string[]} [options.routes=['#']] - route names
      * @param {string} [options.exchangeName='defaultExchange'] - exchange name
-     * @return {promise<boolean>[]}
+     * @return {promise<boolean[]>}
      */
     public publish (
         message: any,
