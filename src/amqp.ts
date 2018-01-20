@@ -44,6 +44,12 @@ example: |
     amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
         console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
     });
+
+
+    // example to add:
+    // consume from (multiple) routes
+    // round robin consumers
+    // direct route + a catch all consumer
 */
 /* tslint:enable */
 
