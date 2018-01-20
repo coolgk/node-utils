@@ -150,8 +150,8 @@ keywords:
     - file
     - upload
 dependencies:
-    "@coolgk/array": "^1.0.9"
-    "@coolgk/tmp": "^1.0.9"
+    "@coolgk/array": "^2"
+    "@coolgk/tmp": "^2"
     "busboy": "^0.2.14"
     "@types/busboy": "^0.2.3"
     "@types/node": "^8.5.8"

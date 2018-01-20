@@ -4,7 +4,7 @@ keywords:
     - token
     - session token
 dependencies:
-    "@coolgk/cache": "^1.0.8"
+    "@coolgk/cache": "^2"
 engines:
     node: ">=8"
 example: |

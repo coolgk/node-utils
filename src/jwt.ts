@@ -4,7 +4,7 @@ description: a simple jwt token class
 keywords:
     - jwt
 dependencies:
-    "@coolgk/base64": "^1.0.8"
+    "@coolgk/base64": "^2"
 example: |
     import { Jwt } from '@coolgk/jwt';
     // OR

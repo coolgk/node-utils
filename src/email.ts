@@ -6,7 +6,7 @@ keywords:
 dependencies:
     "mime-types": "^2.1.17"
     "emailjs": "^1.0.12"
-    "@coolgk/string": "^1.0.8"
+    "@coolgk/string": "^2"
 example: |
     import { Email } from '@coolgk/email';
     // OR

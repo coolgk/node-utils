@@ -11,8 +11,8 @@ dependencies:
     "@types/csv-stringify": "^1.4.1"
     "csv-parse": "^2.0.0"
     "csv-stringify": "^2.0.0"
-    "@coolgk/queue": "^1.0.6"
-    "@coolgk/tmp": "^1.0.6"
+    "@coolgk/queue": "^2"
+    "@coolgk/tmp": "^2"
 example: |
     import { Csv } from '@coolgk/csv';
     // OR
