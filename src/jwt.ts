@@ -46,6 +46,10 @@ export interface IJwtConfig {
     secret: string;
 }
 
+export interface IPayload {
+    [index: string]: any;
+}
+
 export class Jwt {
 
     private _encodeUrl: typeof encodeUrl; // base64 encodeUrl function in "@coolgk/base64"
@@ -91,7 +95,7 @@ export class Jwt {
      * @param {string} token - token to verify
      * @return {boolean|object} - false or the payload of the token
      */
-    public verify (token: string = ''): boolean | {} {
+    public verify (token: string = ''): false | IPayload {
         const [unsignedToken, tokenSignature] = token.split('.');
         try {
             const payload = JSON.parse(this._decodeUrl(unsignedToken));
