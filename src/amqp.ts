@@ -9,7 +9,7 @@ dependencies:
     "amqplib": "^0.5.2"
     "uuid": "^3.1.0"
     "@types/uuid": "^3.4.3"
-    "@coolgk/array": "^1.1.4"
+    "@coolgk/array": "^2"
 example: |
     import { Amqp } from '@coolgk/amqp';
     // OR
@@ -44,6 +44,12 @@ example: |
     amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
         console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
     });
+
+
+    // example to add:
+    // consume from (multiple) routes
+    // round robin consumers
+    // direct route + a catch all consumer
 */
 /* tslint:enable */
 

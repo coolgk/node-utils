@@ -6,7 +6,7 @@ keywords:
 dependencies:
     "@types/phantom": "^3.2.3"
     "phantom": "^4.0.9"
-    "@coolgk/tmp": "^1.0.6"
+    "@coolgk/tmp": "^2"
 example: |
     // for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
 

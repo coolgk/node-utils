@@ -25,13 +25,17 @@ example: |
 
 */
 
+export interface IParams {
+    [index: string]: any;
+}
+
 /**
  * a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
  * @param {string} url - url after the domain name e.g. http://abc.com/user/:id url should be /user/:id
  * @param {string} pattern - e.g. /:userid/:name
  * @return {object} - e.g. {userid: 123}
  */
-export function getParams (url: string, pattern: string): {} {
+export function getParams (url: string, pattern: string): IParams {
     const params: {[key: string]: string, [key: number]: string} = {};
 
     if (pattern[0] !== '/') {

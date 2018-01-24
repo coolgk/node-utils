@@ -6,13 +6,13 @@ keywords:
     - csv parser
     - csr writer
 dependencies:
-    "@types/mongodb": "^2.2.17"
+    "@types/mongodb": "^3"
     "@types/csv-parse": "^1.1.11"
     "@types/csv-stringify": "^1.4.1"
     "csv-parse": "^2.0.0"
     "csv-stringify": "^2.0.0"
-    "@coolgk/queue": "^1.0.6"
-    "@coolgk/tmp": "^1.0.6"
+    "@coolgk/queue": "^2"
+    "@coolgk/tmp": "^2"
 example: |
     import { Csv } from '@coolgk/csv';
     // OR
