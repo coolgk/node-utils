@@ -125,4 +125,8 @@ describe('Token Module', function () {
         ]).then(() => invalidToken.destroy());
     });
 
+    it('should use the correct variable name when setting cache');
+
+    it('this._name should not be modified by classes that extends this class i.e. this._name should be private');
+
 });
