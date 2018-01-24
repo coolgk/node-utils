@@ -154,7 +154,7 @@ dependencies:
     "@coolgk/tmp": "^2"
     "busboy": "^0.2.14"
     "@types/busboy": "^0.2.3"
-    "@types/node": "^8.5.8"
+    "@types/node": "^9"
 */
 /* tslint:enable */
 

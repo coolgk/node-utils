@@ -6,7 +6,7 @@ keywords:
     - csv parser
     - csr writer
 dependencies:
-    "@types/mongodb": "^2.2.17"
+    "@types/mongodb": "^3"
     "@types/csv-parse": "^1.1.11"
     "@types/csv-stringify": "^1.4.1"
     "csv-parse": "^2.0.0"
