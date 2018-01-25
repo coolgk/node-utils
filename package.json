@@ -42,12 +42,12 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "@coolgk/array": "^2.0.2",
-    "@coolgk/base64": "^2.0.2",
-    "@coolgk/cache": "^2.0.2",
-    "@coolgk/queue": "^2.0.2",
-    "@coolgk/string": "^2.0.2",
-    "@coolgk/tmp": "^2.0.2",
+    "@coolgk/array": "^2.0.3",
+    "@coolgk/base64": "^2.0.3",
+    "@coolgk/cache": "^2.0.3",
+    "@coolgk/queue": "^2.0.3",
+    "@coolgk/string": "^2.0.3",
+    "@coolgk/tmp": "^2.0.3",
     "@types/amqplib": "^0.5.6",
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/busboy": "^0.2.3",
