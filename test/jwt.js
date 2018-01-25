@@ -40,4 +40,15 @@ describe('JWT Module', function () {
         expect(jwt.verify()).to.be.false;
         expect(jwt.verify('asdfa.fwqfqef')).to.be.false;
     });
+
+    it('should deal with secret being undefined', () => {
+        const jwt = new Jwt();
+        const token = jwt.generate({});
+        expect(jwt.verify(token)).to.have.deep.property('data', {});
+
+        const jwt2 = new Jwt({});
+        const token2 = jwt.generate();
+        expect(jwt.verify(token)).to.have.deep.property('data', {});
+    });
+
 });

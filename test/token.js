@@ -1,6 +1,6 @@
 'use strict';
 
-// const sinon = require('sinon');
+const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require("chai-as-promised"));
 const expect = chai.expect;
@@ -9,7 +9,7 @@ const config = require('../test.config.js');
 
 describe('Token Module', function () {
 
-    const { Token, TokenError } = require(`../${config.sourceFolder}/token`);
+    const { Token, TokenError, DEFAULT_PREFIX } = require(`../${config.sourceFolder}/token`);
 
     let redisClient;
     let token;
@@ -124,5 +124,81 @@ describe('Token Module', function () {
             expect(invalidToken.delete()).to.eventually.have.property('error', TokenError.INVALID_TOKEN)
         ]).then(() => invalidToken.destroy());
     });
+
+    it('should use the correct variable name when setting cache after token change', (done) => {
+        const cache = {
+            command: sinon.spy()
+        };
+
+        const tokenString = `token:test:${Math.random()}`;
+
+        const token = new Token({
+            cache,
+            expiry: 1,
+            token: tokenString
+        });
+
+        sinon.stub(token, 'get').returns(1);
+
+        token.set('abc', 123).then(() => {
+            expect(cache.command.calledOnce).to.be.true;
+            expect(
+                cache.command.calledWithExactly(
+                    'hset',
+                    `${DEFAULT_PREFIX}:${tokenString}`,
+                    'abc',
+                    JSON.stringify(123)
+                )
+            ).to.be.true;
+        }).then(() => {
+            const newToken = `new:${Math.random()}`
+            token.setToken(newToken);
+
+            return token.set('abc', 123).then(() => {
+                expect(cache.command.calledTwice).to.be.true;
+                expect(
+                    cache.command.calledWithExactly(
+                        'hset',
+                        `${DEFAULT_PREFIX}:${newToken}`,
+                        'abc',
+                        JSON.stringify(123)
+                    )
+                ).to.be.true;
+            });
+        }).then(() => done()).catch(done);
+    });
+
+    it(
+        'this._name should not be modified by classes that extends this class i.e. this._name should be private',
+        (done) => {
+            const cache = {
+                command: sinon.spy()
+            };
+
+            const tokenString = `token:test:${Math.random()}`;
+
+            const token = new Token({
+                cache,
+                expiry: 1,
+                token: tokenString
+            });
+
+            sinon.stub(token, 'get').returns(1);
+
+            token._token = 'kkk';
+
+            token.set('abc', 123).then(() => {
+                expect(
+                    cache.command.calledWithExactly(
+                        'hset',
+                        `${DEFAULT_PREFIX}:${tokenString}`,
+                        'abc',
+                        JSON.stringify(123)
+                    )
+                ).to.be.true;
+                done();
+            }).catch(done);
+        }
+    );
 
 });

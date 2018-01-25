@@ -41,25 +41,23 @@ import { createHmac } from 'crypto';
 import { decodeUrl, encodeUrl } from '@coolgk/base64';
 
 export interface IJwtConfig {
-    encodeUrl?: typeof encodeUrl; // DI for test
-    decodeUrl?: typeof decodeUrl; // DI for test
     secret: string;
+}
+
+export interface IPayload {
+    [index: string]: any;
 }
 
 export class Jwt {
 
-    private _encodeUrl: typeof encodeUrl; // base64 encodeUrl function in "@coolgk/base64"
-    private _decodeUrl: typeof decodeUrl; // base64 decodeUrl function in "@coolgk/base64"
     private _secret: string;
 
     /**
      * @param {object} options
      * @param {string} options.secret - for encryption
      */
-    public constructor (options: IJwtConfig) {
-        this._encodeUrl = options.encodeUrl || encodeUrl;
-        this._decodeUrl = options.decodeUrl || decodeUrl;
-        this._secret = options.secret;
+    public constructor ({ secret }: IJwtConfig = { secret: String(Math.random()) }) {
+        this._secret = secret;
     }
 
     /**
@@ -76,7 +74,7 @@ export class Jwt {
         }));
         */
         const issuedAt = Date.now();
-        const payload = this._encodeUrl(JSON.stringify({
+        const payload = encodeUrl(JSON.stringify({
             // jti: 12312, // jwt id
             exp: expiry ? expiry + issuedAt : 0,
             iat: issuedAt,
@@ -91,10 +89,10 @@ export class Jwt {
      * @param {string} token - token to verify
      * @return {boolean|object} - false or the payload of the token
      */
-    public verify (token: string = ''): boolean | {} {
+    public verify (token: string = ''): false | IPayload {
         const [unsignedToken, tokenSignature] = token.split('.');
         try {
-            const payload = JSON.parse(this._decodeUrl(unsignedToken));
+            const payload = JSON.parse(decodeUrl(unsignedToken));
             const signature = createHmac('sha256', this._secret).update(unsignedToken).digest('base64');
             // fail token if expiry date is set and expired or signatures do not match
             return (payload.exp === 0 || payload.exp >= Date.now())
