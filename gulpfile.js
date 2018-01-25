@@ -381,6 +381,7 @@ function parseFileMetaDoc (file, name) {
                             }),
                             // create package.json
                             new Promise((resolve, reject) => {
+                                const version = metaDoc.version;
                                 fs.writeFile(
                                     `${folder}/package.json`,
                                     JSON.stringify(
@@ -393,7 +394,8 @@ function parseFileMetaDoc (file, name) {
                                                 keywords: (metaDoc.keywords || []).concat('typescript'),
                                                 dependencies: metaDoc.dependencies,
                                                 devDependencies: undefined,
-                                                scripts: undefined
+                                                scripts: undefined,
+                                                version
                                             }
                                         )
                                     ),
