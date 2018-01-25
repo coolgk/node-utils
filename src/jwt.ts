@@ -56,8 +56,8 @@ export class Jwt {
      * @param {object} options
      * @param {string} options.secret - for encryption
      */
-    public constructor ({ secret }: IJwtConfig = { secret: String(Math.random()) }) {
-        this._secret = secret;
+    public constructor (options: IJwtConfig) {
+        this._secret = options && options.secret || String(Math.random());
     }
 
     /**

@@ -48,7 +48,11 @@ describe('JWT Module', function () {
 
         const jwt2 = new Jwt({});
         const token2 = jwt.generate();
-        expect(jwt.verify(token)).to.have.deep.property('data', {});
+        expect(jwt2.verify(token2)).to.not.have.property('data');
+
+        const jwt3 = new Jwt({secret: undefined});
+        const token3 = jwt.generate();
+        expect(jwt3.verify(token3)).to.not.have.property('data');
     });
 
 });
