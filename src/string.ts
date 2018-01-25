@@ -1,5 +1,6 @@
 /***
 description: string utility functions
+version: 2.0.3
 keywords:
     - stripTags
     - escapeHtml

@@ -1,5 +1,6 @@
 /***
 description: a email sender wrapper class
+version: 2.0.3
 keywords:
     - email
     - smtp sender

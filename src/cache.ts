@@ -1,5 +1,6 @@
 /***
 description: a redis wrapper
+version: 2.0.3
 keywords:
     - redis
     - cache

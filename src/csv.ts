@@ -1,6 +1,7 @@
 /* tslint:disable */
 /***
 description: read and write csv files
+version: 2.0.3
 keywords:
     - csv
     - csv parser
