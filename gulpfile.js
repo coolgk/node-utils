@@ -137,7 +137,7 @@ function generateSubPackages () {
     return del([`${distFolder}/**`, `${packageFolder}/**`])
     .then(() => createFolder(packageFolder))
     .then(() => generateSubPackageMetaData())
-    // .then(() => generateIndexFile())
+    .then(() => generateIndexFile())
     .then(() => compileTs())
     .then(() => addDistCodeToSubPackages());
 }
