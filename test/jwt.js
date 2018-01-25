@@ -40,4 +40,7 @@ describe('JWT Module', function () {
         expect(jwt.verify()).to.be.false;
         expect(jwt.verify('asdfa.fwqfqef')).to.be.false;
     });
+
+    it('should deal with secret being undefined');
+
 });
