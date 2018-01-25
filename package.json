@@ -42,12 +42,12 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
-    "@coolgk/array": "^2.0.1",
-    "@coolgk/base64": "^2.0.1",
-    "@coolgk/cache": "^2.0.1",
-    "@coolgk/queue": "^2.0.1",
-    "@coolgk/string": "^2.0.1",
-    "@coolgk/tmp": "^2.0.1",
+    "@coolgk/array": "^2.0.2",
+    "@coolgk/base64": "^2.0.2",
+    "@coolgk/cache": "^2.0.2",
+    "@coolgk/queue": "^2.0.2",
+    "@coolgk/string": "^2.0.2",
+    "@coolgk/tmp": "^2.0.2",
     "@types/amqplib": "^0.5.6",
     "@types/bcrypt-nodejs": "0.0.30",
     "@types/busboy": "^0.2.3",
@@ -91,7 +91,7 @@
     "retire": "^1.4.0",
     "sinon": "^4.2.1",
     "snyk": "^1.69.3",
-    "source-map-support": "^0.5.2",
+    "source-map-support": "^0.5.3",
     "tslint": "^5.9.1",
     "typescript": "^2.6.2"
   },
