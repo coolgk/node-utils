@@ -107,6 +107,8 @@ export interface ITokenConfig extends IConfig {
 
 export { ICacheClient as IRedisClient };
 
+export const DEFAULT_PREFIX = 'token';
+
 /**
  * Error Codes
  * @const
@@ -123,10 +125,11 @@ export enum TokenError {
 
 export class Token {
 
-    protected _token: string;
+    private _token: string;
     private _cache: Cache;
     private _expiry: number;
     private _name: string;
+    private _prefix: string;
 
     /**
      * @param {object} options
@@ -139,8 +142,8 @@ export class Token {
         this._cache = (options as ITokenConfig).redisClient ?
             new Cache(options as ITokenConfig) : (options as ITokenConfigWithCache).cache;
         this._expiry = options.expiry || 0;
-        this._token = options.token;
-        this._name = `${options.prefix || 'token'}:${this._token}`;
+        this._prefix = options.prefix || DEFAULT_PREFIX;
+        this.setToken(options.token);
     }
 
     /**
@@ -238,6 +241,15 @@ export class Token {
             }
         }
         return {};
+    }
+
+    /**
+     * set a new token string
+     * @param {string} token - new token string
+     */
+    public setToken (token: string) {
+        this._token = token;
+        this._name = `${this._prefix}:${this._token}`;
     }
 }
 
