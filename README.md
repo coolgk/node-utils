@@ -1547,6 +1547,7 @@ import { createClient } from 'redis';
     * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
     * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
     * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
+    * [.setToken(token)](#Token+setToken)
 
 <a name="new_Token_new"></a>
 
@@ -1619,6 +1620,17 @@ delete a data field in the token
 get the values of all data fields in the token
 
 **Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+setToken"></a>
+
+### token.setToken(token)
+set a new token string
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | new token string |
+
 <a name="TokenError"></a>
 
 ## TokenError : <code>object</code>
