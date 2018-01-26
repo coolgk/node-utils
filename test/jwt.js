@@ -9,7 +9,7 @@ const config = require('../test.config.js');
 
 describe('JWT Module', function () {
 
-    const { Jwt } = require(`../${config.sourceFolder}/jwt`);
+    const { Jwt, JwtError } = require(`../${config.sourceFolder}/jwt`);
 
     const jwt = new Jwt({secret: 'abc'});
 
@@ -42,17 +42,20 @@ describe('JWT Module', function () {
     });
 
     it('should deal with secret being undefined', () => {
-        const jwt = new Jwt();
-        const token = jwt.generate({});
-        expect(jwt.verify(token)).to.have.deep.property('data', {});
+        expect(() => new Jwt()).to.throw(JwtError.SECRET_CANNOT_BE_EMPTY);
+        // const jwt = new Jwt();
+        // const token = jwt.generate({});
+        // expect(jwt.verify(token)).to.have.deep.property('data', {});
 
-        const jwt2 = new Jwt({});
-        const token2 = jwt.generate();
-        expect(jwt2.verify(token2)).to.not.have.property('data');
+        expect(() => new Jwt({})).to.throw(JwtError.SECRET_CANNOT_BE_EMPTY);
+        // const jwt2 = new Jwt({});
+        // const token2 = jwt.generate();
+        // expect(jwt2.verify(token2)).to.not.have.property('data');
 
-        const jwt3 = new Jwt({secret: undefined});
-        const token3 = jwt.generate();
-        expect(jwt3.verify(token3)).to.not.have.property('data');
+        expect(() => new Jwt({secret: undefined})).to.throw(JwtError.SECRET_CANNOT_BE_EMPTY);
+        // const jwt3 = new Jwt({secret: undefined});
+        // const token3 = jwt.generate();
+        // expect(jwt3.verify(token3)).to.not.have.property('data');
     });
 
 });
