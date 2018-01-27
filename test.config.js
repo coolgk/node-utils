@@ -10,7 +10,7 @@
 module.exports = {
     sourceFolder: 'dist',
     amqp: {
-        host: process.env.AMQP_HOST
+        url: process.env.AMQP_URL
     },
     redis: {
         host: process.env.REDIS_HOST,
