@@ -1,6 +1,7 @@
 /* tslint:disable */
 /***
 description: This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+version: 2.0.3
 documentation: |
     1. Put async functions in a queue and limit the number of async functions that run concurrently.
     2. Run async functions in order

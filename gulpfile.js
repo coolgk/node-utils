@@ -118,15 +118,16 @@ gulp.task('test', ['pre-test'], () => {
 });
 
 gulp.task('publish', ['generate-all-packages'], () => {
-    return new Promise((resolve) => {
-        fs.readdir(packageFolder, (error, folders) => {
-            const promises = [];
-            folders.forEach((folder) => {
-                promises.push(execCommand(`cd ${packageFolder}/${folder} && npm publish --access=public`));
-            });
-            resolve(Promise.all(promises));
-        });
-    });
+    return execCommand(`cd ${packageFolder}/utils && npm publish --access=public`);
+    // return new Promise((resolve) => {
+        // fs.readdir(packageFolder, (error, folders) => {
+            // const promises = [];
+            // folders.forEach((folder) => {
+                // promises.push(execCommand(`cd ${packageFolder}/${folder} && npm publish --access=public`));
+            // });
+            // resolve(Promise.all(promises));
+        // });
+    // });
 });
 
 gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
@@ -380,6 +381,7 @@ function parseFileMetaDoc (file, name) {
                             }),
                             // create package.json
                             new Promise((resolve, reject) => {
+                                const version = metaDoc.version;
                                 fs.writeFile(
                                     `${folder}/package.json`,
                                     JSON.stringify(
@@ -392,7 +394,8 @@ function parseFileMetaDoc (file, name) {
                                                 keywords: (metaDoc.keywords || []).concat('typescript'),
                                                 dependencies: metaDoc.dependencies,
                                                 devDependencies: undefined,
-                                                scripts: undefined
+                                                scripts: undefined,
+                                                version
                                             }
                                         )
                                     ),

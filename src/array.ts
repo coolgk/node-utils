@@ -1,5 +1,6 @@
 /***
 description: array utilities
+version: 2.0.3
 keywords:
     - toArray
 example: |

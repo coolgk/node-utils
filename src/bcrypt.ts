@@ -1,5 +1,6 @@
 /***
 description: just a promise wrapper
+version: 2.0.3
 keywords:
     - bcrypt
 dependencies:

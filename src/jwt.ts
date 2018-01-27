@@ -1,6 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple jwt token class
+version: 2.0.5
 keywords:
     - jwt
 dependencies:
@@ -48,6 +49,10 @@ export interface IPayload {
     [index: string]: any;
 }
 
+export enum JwtError {
+    SECRET_CANNOT_BE_EMPTY = 'SECRET_CANNOT_BE_EMPTY'
+}
+
 export class Jwt {
 
     private _secret: string;
@@ -57,7 +62,10 @@ export class Jwt {
      * @param {string} options.secret - for encryption
      */
     public constructor (options: IJwtConfig) {
-        this._secret = options && options.secret || String(Math.random());
+        if (!options || !options.secret) {
+            throw new Error(JwtError.SECRET_CANNOT_BE_EMPTY);
+        }
+        this._secret = options.secret;
     }
 
     /**

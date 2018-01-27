@@ -8,7 +8,7 @@ const expect = chai.expect;
 const config = require('../test.config.js');
 
 describe('PDF Module', function () {
-    this.timeout(5000);
+    this.timeout(10000);
 
     const { Pdf, Format, Orientation } = require(`../${config.sourceFolder}/pdf`);
 
