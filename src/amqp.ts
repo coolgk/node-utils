@@ -16,7 +16,7 @@ example: |
     // const { Amqp } = require('@coolgk/amqp');
 
     const amqp = new Amqp({
-        url: 'amqp://localhost/vhost'
+        host: 'amqp://localhost/vhost'
     });
 
     const message = {
@@ -61,7 +61,7 @@ import { readFile } from 'fs';
 import { toArray } from '@coolgk/array';
 
 export interface IAmqpConfig {
-    readonly url: string;
+    readonly host: string;
     readonly connect?: typeof connect;
     readonly uuid?: typeof v1;
     readonly sslPem?: string;
@@ -91,7 +91,7 @@ export interface IResponseMessage {
 
 export class Amqp {
 
-    private _url: string;
+    private _host: string;
     private _sslPem: string;
     private _sslCa: string;
     private _sslPass: string;
@@ -102,13 +102,13 @@ export class Amqp {
 
     /**
      * @param {object} options
-     * @param {string} options.url - connection string e.g. amqp://localhost
+     * @param {string} options.host - connection string e.g. amqp://localhost
      * @param {string} [options.sslPem] - pem file path
      * @param {string} [options.sslCa] - sslCa file path
      * @param {string} [options.sslPass] - password
      */
     constructor (options: IAmqpConfig) {
-        this._url = options.url;
+        this._host = options.host;
         this._sslPem = options.sslPem || '';
         this._sslCa = options.sslCa || '';
         this._sslPass = options.sslPass || '';
@@ -276,12 +276,12 @@ export class Amqp {
                         );
                     })
                 ).then(
-                    (options) => this._connect(this._url, options).then(
+                    (options) => this._connect(this._host, options).then(
                         (connection) => (this._connection = connection).createChannel()
                     )
                 );
             } else {
-                return this._channel = this._connect(this._url).then(
+                return this._channel = this._connect(this._host).then(
                     (connection) => (this._connection = connection).createChannel()
                 );
             }

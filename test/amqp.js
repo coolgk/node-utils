@@ -16,7 +16,7 @@ describe('Amqp Module', () => {
 
     beforeEach(() => {
         amqp = new Amqp({
-            url: config.amqp.url
+            host: config.amqp.host
         });
     });
 

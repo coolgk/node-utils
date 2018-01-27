@@ -2,18 +2,18 @@
 
 // source .env
 // .env file
-// export AMQP_URL=
-// export REDIS_URL=
+// export AMQP_HOST=
+// export REDIS_HOST=
 // export REDIS_PASSWORD=
 // export REDIS_PORT=
 
 module.exports = {
     sourceFolder: 'dist',
     amqp: {
-        url: process.env.AMQP_URL
+        host: process.env.AMQP_HOST
     },
     redis: {
-        url: process.env.REDIS_URL,
+        host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: process.env.REDIS_PORT
     }

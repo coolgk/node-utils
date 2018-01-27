@@ -16,7 +16,7 @@ describe('Token Module', function () {
 
     before(() => {
         redisClient = require('redis').createClient({
-            host: config.redis.url,
+            host: config.redis.host,
             port: config.redis.port,
             password: config.redis.password
         });
