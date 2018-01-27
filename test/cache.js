@@ -18,7 +18,7 @@ describe('Cache Module', function () {
 
     before(() => {
         client = createClient({
-            host: config.redis.url,
+            host: config.redis.host,
             port: config.redis.port,
             password: config.redis.password
         });

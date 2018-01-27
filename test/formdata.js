@@ -164,21 +164,31 @@ describe('Formdata Module', function () {
 
             expect(data.b[0]).to.have.property('error').and.be.not.ok;
             expect(data.b[0]).to.have.property('fieldname', 'b');
-            expect(data.b[0]).to.have.property('filename', 'test.svg');
+            // expect(data.b[0]).to.have.property('filename', 'test.svg');
             expect(data.b[0]).to.have.property('encoding');
-            expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
+            // expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
             expect(data.b[0]).to.have.property('size').and.above(10);
             expect(data.b[0]).to.have.property('path');
             expect(data.b[0]).to.have.property('remove');
 
             expect(data.b[1]).to.have.property('error').and.be.not.ok;
             expect(data.b[1]).to.have.property('fieldname', 'b');
-            expect(data.b[1]).to.have.property('filename', 'test.csv');
+            // expect(data.b[1]).to.have.property('filename', 'test.csv');
             expect(data.b[1]).to.have.property('encoding');
-            expect(data.b[1]).to.have.property('mimetype');
+            // expect(data.b[1]).to.have.property('mimetype');
             expect(data.b[1]).to.have.property('size').and.above(10);
             expect(data.b[1]).to.have.property('path');
             expect(data.b[1]).to.have.property('remove');
+
+            expect(
+                data.b.map(
+                    (file) => ({name: file.filename, type: file.mimetype})
+                )
+            ).to.have.deep.members([
+                {name: 'test.svg', type: 'image/svg+xml'},
+                {name: 'test.csv', type: 'application/octet-stream'}
+            ]);
+            expect(data.b).to.have.lengthOf(2);
 
             expect(data).to.have.property('d');
             expect(data.d).to.have.property('error').and.be.not.ok;
@@ -206,21 +216,31 @@ describe('Formdata Module', function () {
 
             expect(data.b[0]).to.have.property('error').and.be.not.ok;
             expect(data.b[0]).to.have.property('fieldname', 'b');
-            expect(data.b[0]).to.have.property('filename', 'test.svg');
+            // expect(data.b[0]).to.have.property('filename', 'test.svg');
             expect(data.b[0]).to.have.property('encoding');
-            expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
+            // expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
             expect(data.b[0]).to.have.property('size').and.above(10);
             expect(data.b[0]).to.have.property('path');
             expect(data.b[0]).to.have.property('remove');
 
             expect(data.b[1]).to.have.property('error').and.be.not.ok;
             expect(data.b[1]).to.have.property('fieldname', 'b');
-            expect(data.b[1]).to.have.property('filename', 'test.csv');
+            // expect(data.b[1]).to.have.property('filename', 'test.csv');
             expect(data.b[1]).to.have.property('encoding');
             expect(data.b[1]).to.have.property('mimetype');
             expect(data.b[1]).to.have.property('size').and.above(10);
             expect(data.b[1]).to.have.property('path');
             expect(data.b[1]).to.have.property('remove');
+
+            expect(
+                data.b.map(
+                    (file) => ({name: file.filename, type: file.mimetype})
+                )
+            ).to.have.deep.members([
+                {name: 'test.svg', type: 'image/svg+xml'},
+                {name: 'test.csv', type: 'application/octet-stream'}
+            ]);
+            expect(data.b).to.have.lengthOf(2);
 
             expect(data).to.have.property('d').and.is.an('array').and.have.lengthOf(2);
             expect(data.d[0]).to.equal('32323');
@@ -360,9 +380,9 @@ describe('Formdata Module', function () {
 
             expect(data.b[0]).to.have.property('error', FormDataError.FILE_SIZE_EXCEEDED_LIMIT);
             expect(data.b[0]).to.have.property('fieldname', 'b');
-            expect(data.b[0]).to.have.property('filename', 'test.svg');
+            // expect(data.b[0]).to.have.property('filename', 'test.svg');
             expect(data.b[0]).to.have.property('encoding');
-            expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
+            // expect(data.b[0]).to.have.property('mimetype', 'image/svg+xml');
             expect(data.b[0]).to.have.property('size');
             expect(data.b[0]).to.have.property('path');
             expect(data.b[0]).to.have.property('remove');
@@ -370,13 +390,24 @@ describe('Formdata Module', function () {
 
             expect(data.b[1]).to.have.property('error', FormDataError.FILE_SIZE_EXCEEDED_LIMIT);
             expect(data.b[1]).to.have.property('fieldname', 'b');
-            expect(data.b[1]).to.have.property('filename', 'test.csv');
+            // expect(data.b[1]).to.have.property('filename', 'test.csv');
             expect(data.b[1]).to.have.property('encoding');
             expect(data.b[1]).to.have.property('mimetype');
             expect(data.b[1]).to.have.property('size');
             expect(data.b[1]).to.have.property('path');
             expect(data.b[1]).to.have.property('remove');
             expect(fs.existsSync(data.b[1].path)).to.be.false;
+
+            expect(
+                data.b.map(
+                    (file) => ({name: file.filename, type: file.mimetype})
+                )
+            ).to.have.deep.members([
+                {name: 'test.svg', type: 'image/svg+xml'},
+                {name: 'test.csv', type: 'application/octet-stream'}
+            ]);
+            expect(data.b).to.have.lengthOf(2);
+
         });
     });
 
