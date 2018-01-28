@@ -1,3 +1,4 @@
+/* tslint:disable */
 /***
 description: an API (without cookie) and HTTP (with cookie) session handler
 version: 1.0.0
@@ -6,6 +7,7 @@ keywords:
     - session handler
     - session without cookie
     - restful session
+    - express session
 dependencies:
     "@coolgk/token": "^2"
     "@coolgk/jwt": "^2"
@@ -14,24 +16,127 @@ dependencies:
 documentation: |
     When working without cookie, this class reads the session token from the **Authorization** header.
     e.g. **Authorization : Bearer cn389ncoiwuencr...**
-    #### Example Form
+    #### Express Middleware
     ```javascript
-    import { Session } from '@coolgk/session';
+    // express middleware
+    const session = require('@coolgk/session');
+    const app = require('express')();
+
+    app.use(
+        session.express({
+            redisClient: require('redis').createClient({
+                host: process.env.REDIS_HOST,
+                port: process.env.REDIS_PORT,
+                password: process.env.REDIS_PASSWORD
+            }),
+            secret: '123'
+        })
+    );
+
+    app.get('/login', async (request, response, next) => {
+        const accessToken = await request.session.init();
+        await request.session.set('user', { id: 1, username: 'abc' });
+        response.json({ accessToken });
+        // output
+        // {"accessToken":"eyJleHAiOjAsIml..."}
+    });
+
+    app.get('/user', async (request, response, next) => {
+        response.json(await request.session.get('user'));
+        // output
+        // {"id":1,"username":"abc"}
+    });
+
+    app.get('/session', async (request, response, next) => {
+        response.json(await request.session.getAll());
+        // output
+        // {"user":{"id":1,"username":"abc"}}
+    });
+
+    app.get('/logout', async (request, response, next) => {
+        await request.session.destroy();
+        response.json(await request.session.getAll());
+        // output
+        // {}
+    });
+
+    app.listen(8888);
+    ```
+    #### Native Node App
+    ```javascript
+    import { Session } from './session';
+    // OR
+    // const { Session } = require('@coolgk/session');
+
+    const http = require('http');
+    http.createServer(async (request, response) => {
+
+        const session = new Session({
+            redisClient: require('redis').createClient({
+                host: process.env.REDIS_HOST,
+                port: process.env.REDIS_PORT,
+                password: process.env.REDIS_PASSWORD
+            }),
+            secret: '123',
+            request,
+            response
+        });
+
+        // ... some middelware
+        // ... in some routes
+        // set sesstion
+        await session.start();
+        await session.set('user', {id: 1, username: 'user@example.com'});
+
+        // check session
+        const verified = await session.verifyAndRenew();
+        if (verified) {
+            // session exists, logged in, do something
+        } else {
+            // deny access or show login screen
+        }
+
+        // show session data
+        response.end(
+            JSON.stringify(
+                await session.getAll()
+            )
+        ); // {"user":{"id":1,"username":"user@example.com"}}
+
+    }).listen(8888);
+    ```
+    #### To use without cookie
+    Create a session without the **"response"** property and the sessoin object will read the session id from the **Authorization** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
+    ```javascript
+    const session = new Session({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123',
+        request
+    });
     ```
 */
+/* tslint:enable */
 
 import { Token, IRedisClient } from '@coolgk/token';
 import { Jwt, IPayload } from '@coolgk/jwt';
 import { CookieSerializeOptions, serialize, parse } from 'cookie';
 import { ServerResponse, IncomingMessage } from 'http';
 
-export interface IConfig {
-    readonly request: IncomingMessage;
+export interface IBaseConfig {
     readonly secret: string;
-    readonly expiry: number;
     readonly redisClient: IRedisClient;
+    readonly expiry?: number;
     readonly cookie?: CookieSerializeOptions;
     readonly response?: ServerResponse;
+    [index: string]: any;
+}
+
+export interface IConfig extends IBaseConfig {
+    readonly request: IncomingMessage;
 }
 
 export interface ISignature {
@@ -64,7 +169,7 @@ export class Session extends Token {
      * @param {object} [response] - the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor.
      * @param {object} [cookie] - cookie options
      * @param {string} [cookie.domain] - Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain.
-     * @param {function} [cookie.encode=ecodeURIComponent] - Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value.
+     * @param {function} [cookie.encode=encodeURIComponent] - Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value.
      * @param {date} [cookie.expires] - Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
      * @param {boolean} [cookie.httpOnly] - Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set.
      * @param {number} [cookie.maxAge] - Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set.
@@ -74,8 +179,12 @@ export class Session extends Token {
      */
     /* tslint:enable */
     public constructor (options: IConfig) {
-        const cookies = parse(String(options.request.headers.cookie || ''));
-        const token = cookies[COOKIE_NAME] || String(options.request.headers.authorization).replace(/^Bearer /, '');
+        const cookies = options.request.headers.cookie ? parse(options.request.headers.cookie as string) : {};
+        let token = cookies[COOKIE_NAME];
+
+        if (!token && typeof(options.request.headers.authorization) === 'string') {
+            token = (options.request.headers.authorization as string).substr(7); // remove Bearer text from the header
+        }
 
         super({
             token,
@@ -114,7 +223,7 @@ export class Session extends Token {
     public async start (signature: ISignature = {}): Promise<string> {
         this._sessionToken = this._jwt.generate({ signature });
         this.setToken(this._sessionToken);
-        await this.renew();
+        await this._renewCacheAndCookie();
         return this._sessionToken;
     }
 
@@ -127,7 +236,7 @@ export class Session extends Token {
         if (this._response) {
             this._response.setHeader(
                 'Set-Cookie',
-                serialize(COOKIE_NAME, '', { ...this._cookie, maxAge: 0, expires: new Date()})
+                serialize(COOKIE_NAME, '', { ...this._cookie, maxAge: 0, expires: new Date(0)})
             );
         }
         return destroyPromise;
@@ -141,41 +250,94 @@ export class Session extends Token {
      */
     /* tslint:enable */
     public async verify (signature: ISignature = {}): Promise<boolean> {
-        const tokenData = this._jwt.verify(this._sessionToken);
+        const tokenData = this._verifyJwt();
         if (!tokenData
-            || !tokenData.data
-            || JSON.stringify((tokenData.data as IPayload).signature) !== JSON.stringify(signature)
+            || !(tokenData as IPayload).data
+            || JSON.stringify((tokenData as IPayload).data.signature) !== JSON.stringify(signature)
         ) {
             return false;
         }
-        return super.verify();
+        return await super.verify();
     }
 
+    /* tslint:disable */
     /**
+     * verify and renew token, renew only if token is valid (has a valid signature) and not expired
+     * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
      * verify the session token, if valid, renew this token
+     * @param {number} [expiry] - in seconds
      * @return {promise<boolean>}
      */
-    public async verifyAndRenew (signature: ISignature = {}): Promise<boolean> {
+    /* tslint:enable */
+    public async verifyAndRenew (signature: ISignature = {}, expiry?: number): Promise<boolean> {
         if (await this.verify(signature)) {
-            await this.renew();
+            await this._renewCacheAndCookie(expiry);
             return true;
         }
         return false;
     }
 
     /**
-     * renew session
-     * @return {promise}
+     * renew session optionally with a different expiry time
+     * @param {number} [expiry] - in seconds
+     * @return {promise} - false if session has not been started or has a invalid token string
      */
     public async renew (expiry?: number): Promise<any> {
+        // has a valid jwt token and has not expired
+        if (this._verifyJwt() && await super.verify()) {
+            return this._renewCacheAndCookie(expiry);
+        }
+        return false;
+    }
+
+    /**
+     * set header for renewing cookie and update cache expiry time
+     * @ignore
+     * @private
+     * @param {number} [expiry] - in seconds
+     * @memberof Session
+     */
+    private _renewCacheAndCookie (expiry?: number): Promise<any> {
         if (this._response) {
             this._response.setHeader(
                 'Set-Cookie',
-                serialize(COOKIE_NAME, this._sessionToken, this._cookie)
+                serialize(
+                    COOKIE_NAME,
+                    this._sessionToken,
+                    expiry ? { ...this._cookie, maxAge: expiry } : this._cookie
+                )
             );
         }
         return super.renew(expiry);
     }
+
+    /**
+     * verify session jwt token
+     * @ignore
+     * @private
+     * @returns {(boolean | IPayload)}
+     * @memberof Session
+     */
+    private _verifyJwt (): boolean | IPayload {
+        return this._jwt.verify(this._sessionToken);
+    }
 }
 
 export default Session;
+
+export interface IExpressConfig extends IBaseConfig {
+    requestFieldName?: string;
+}
+// for assigngin property to request
+export interface IRequest extends IncomingMessage {
+    [key: string]: any;
+}
+
+export function express (
+    options: IExpressConfig
+): (request: IRequest, response: ServerResponse, next: () => void) => void {
+    return (request, response, next) => {
+        request[options.requestFieldName || 'session'] = new Session({ ...options, request, response });
+        next();
+    };
+}

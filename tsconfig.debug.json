@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "dist",
+        "outDir": "dist",
+        "target": "ES2016",
+        "module": "commonjs",
+        "pretty": false,
+        "removeComments": false,
+        "inlineSourceMap": true,
+        "strict": true
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
+}

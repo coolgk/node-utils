@@ -38,9 +38,10 @@
     "scan": "nsp check",
     "tslint": "tslint --exclude src/test.ts src/**/*",
     "tsc": "tsc --project tsconfig.json",
-    "tsc:watch": "tsc --project tsconfig.dev.json -w --pretty",
+    "tsc:watch": "tsc --project tsconfig.debug.json -w --pretty",
     "tsc:dev": "tsc --project tsconfig.dev.json",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "debug": "export $(cat .env | xargs) && nodemon --watch ./dist --inspect=0.0.0.0:9229 --nolazy ./dist/test.js"
   },
   "dependencies": {
     "@coolgk/array": "^2.0.3",
@@ -84,6 +85,7 @@
     "coveralls": "^3.0.0",
     "del": "^3.0.0",
     "eslint": "^4.16.0",
+    "express": "^4.16.2",
     "gulp": "^3.9.1",
     "gulp-header": "^1.8.9",
     "gulp-sourcemaps": "^2.6.4",

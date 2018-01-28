@@ -104,7 +104,7 @@ export class Cache {
      * @param {string} name - name of the variable
      * @return {promise} - cached value
      */
-    public get (name: string): Promise<{}> {
+    public get (name: string): Promise<any> {
         return this.command('get', name).then((value) => JSON.parse(value));
     }
 
@@ -112,7 +112,7 @@ export class Cache {
      * @param {string|string[]} name - name(s) of the variable
      * @return {promise}
      */
-    public delete (name: string | string[]): Promise<{}> {
+    public delete (name: string | string[]): Promise<any> {
         return this.command('del', name);
     }
 
@@ -123,7 +123,7 @@ export class Cache {
      * @param {number} [expiry = 0] - expire time in seconds. 0 = never expire
      * @return {promise} - cached value
      */
-    public getSetIfNull (name: string, callback: () => any, expiry = 0): Promise<{}> {
+    public getSetIfNull (name: string, callback: () => any, expiry = 0): Promise<any> {
         return this.get(name).then((cachedValue) => {
             if (null === cachedValue) {
                 return Promise.resolve(callback()).then(
