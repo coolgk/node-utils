@@ -246,7 +246,7 @@ export interface IRequest extends IncomingMessage {
 /**
  * the return value contains all normal post fields and the file upload fields that in "fileFieldNames" param
  *
- * @param {object} request - http.IncomingMessage, request parameter in createServer()'s callback or express request
+ * @param {object} request - the request object in http.createServer() callback or express request
  * @param {object} [options]
  * @param {boolean} [options.array=false] - if to always get form data as array. By default values could either be string or array e.g. fieldname = val1, fieldname = [val1, val2]. if array is true, fieldname = val1 becomes fieldname = [val1]
  * @param {string[]|string} [options.fileFieldNames] - name of the file upload fields. Only file fields in this list are parsed, other files are ignored i.e. if someone sends a random huge file onto your server, it will not be stored in disk or memory.

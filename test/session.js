@@ -1,50 +1,72 @@
 'use strict';
 
-// const sinon = require('sinon');
+const sinon = require('sinon');
 const chai = require('chai');
-chai.use(require("chai-as-promised"));
+// chai.use(require("chai-as-promised"));
 const expect = chai.expect;
 
 const config = require('../test.config.js');
 
-describe('Token Module', function () {
+describe.skip('Token Module', function () {
 
-    // const { Session } = require(`../${config.sourceFolder}/session`);
+    const { Session, COOKIE_NAME } = require(`../${config.sourceFolder}/session`);
 
-    // let redisClient;
-    // let token;
+    let session;
+    let sessionConfig;
 
-    // const session = new Session();
+    const request = {
+        headers: {
+            authorization: ''
+        },
+        cookie: `${COOKIE_NAME}=value;`
+    };
 
-    // session.set();
-    // session.get();
-    // session.renew();
+    const response = {};
+
+    sinon.stub(response, 'setHeader').callsFake((header, value) => {
+        request.cookie = `${COOKIE_NAME}=${value};`;
+    })
 
     before(() => {
-        // redisClient = require('redis').createClient({
-            // host: config.redis.host,
-            // port: config.redis.port,
-            // password: config.redis.password
-        // });
+        sessionConfig = {
+            redisClient: require('redis').createClient({
+                host: config.redis.host,
+                port: config.redis.port,
+                password: config.redis.password
+            }),
+            expiry: 1,
+            secret: '123',
+            request,
+            response,
+            cookie: {
+                httpOnly: true
+            }
+        };
+    });
 
-        // token = new Token({
-            // redisClient: redisClient,
-            // expiry: 1,
-            // token: `token:test:${Math.random()}`
-        // });
+    beforeEach(() => {
+        request.cookie = '';
+        request.headers.authorization = '';
+        session = new Session(sessionConfig);
+    });
+
+    afterEach(() => {
+        return session.destroy();
     });
 
     after(async () => {
-        // await token.destroy();
-        // redisClient.quit();
+        sessionConfig.redisClient.quit();
     });
 
-    // it('should not be able to set var & be invalid before renew', () => {
+    it('', () => {
+
+        // session.set();
+
         // return Promise.all([
-            // expect(token.set('_timestamp', 231)).to.eventually.have.property('error', TokenError.RESERVED_NAME),
-            // expect(token.set('ab', 121)).to.eventually.have.property('error', TokenError.EXPIRED_TOKEN),
-            // expect(token.verify()).to.eventually.be.false
+        //     expect(token.set('_timestamp', 231)).to.eventually.have.property('error', TokenError.RESERVED_NAME),
+        //     expect(token.set('ab', 121)).to.eventually.have.property('error', TokenError.EXPIRED_TOKEN),
+        //     expect(token.verify()).to.eventually.be.false
         // ]);
-    // });
+    });
 
 });
