@@ -22,6 +22,7 @@
         ],
         "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
         "array-type": [true, "array"],
-        "no-unused-expression": [true, "allow-fast-null-checks"]
+        "no-unused-expression": [true, "allow-fast-null-checks"],
+        "max-line-length": [true, {"limit": 140, "ignore-pattern": "//"}]
     }
 }

@@ -185,6 +185,7 @@ export class Token {
     }
 
     /**
+     * verify if token has expired
      * @return {promise<boolean>}
      */
     public async verify (): Promise<boolean> {
