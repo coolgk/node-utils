@@ -21,8 +21,120 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
-- [url](#coolgkurl)
 - [unit](#coolgkunit)
+- [url](#coolgkurl)
+
+## @coolgk/amqp
+a javascript / typescript module
+
+`npm install @coolgk/amqp`
+
+a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+## Examples
+```javascript
+import { Amqp } from '@coolgk/amqp';
+// OR
+// const { Amqp } = require('@coolgk/amqp');
+
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
+});
+
+const message = {
+    a: 1,
+    b: 'b'
+};
+
+// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
+});
+
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
+
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+});
+
+
+// example to add:
+// consume from (multiple) routes
+// round robin consumers
+// direct route + a catch all consumer
+
+```
+<a name="Amqp"></a>
+
+## Amqp
+**Kind**: global class  
+
+* [Amqp](#Amqp)
+    * [new Amqp(options)](#new_Amqp_new)
+    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
+
+<a name="new_Amqp_new"></a>
+
+### new Amqp(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.url | <code>string</code> | connection string e.g. amqp://localhost |
+| [options.sslPem] | <code>string</code> | pem file path |
+| [options.sslCa] | <code>string</code> | sslCa file path |
+| [options.sslPass] | <code>string</code> | password |
+
+<a name="Amqp+closeConnection"></a>
+
+### amqp.closeConnection() ⇒ <code>void</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+<a name="Amqp+publish"></a>
+
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
+| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+
+<a name="Amqp+consume"></a>
+
+### amqp.consume(callback, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | consumer(message) function should returns a promise |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
+| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
+
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
 
 ## @coolgk/array
 a javascript / typescript module
@@ -381,6 +493,165 @@ captcha.verify(captchaResponse).then((response) => {
 |  | <code>promise</code> |  |
 
 
+## @coolgk/csv
+a javascript / typescript module
+
+`npm install @coolgk/csv`
+
+read and write csv files
+## Examples
+```javascript
+import { Csv } from '@coolgk/csv';
+// OR
+// const { Csv } = require('@coolgk/csv');
+
+const csv = new Csv({
+    tmpConfig: { dir: '/tmp/csv' } // optional
+});
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row) => {
+            return row.map((value) => 'formatted-' + value);
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    // read lines as object
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+            // {
+                // 'column 1': 'formatted-1',
+                // 'column 2': 'formatted-2',
+                // 'column 3': 'formatted-3',
+                // h4: 'formatted-4',
+                // h5: 'formatted-5'
+            // } 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+
+    // without columns/headers
+    // read lines as array
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+}
+
+```
+<a name="Csv"></a>
+
+## Csv
+**Kind**: global class  
+
+* [Csv](#Csv)
+    * [new Csv([options])](#new_Csv_new)
+    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
+    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
+    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+
+<a name="new_Csv_new"></a>
+
+### new Csv([options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+<a name="Csv+parse"></a>
+
+### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
+parse a string as csv data and returns an array promise
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>string</code> |  | a csv string |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+readFile"></a>
+
+### csv.readFile(file, [options]) ⇒ <code>object</code>
+read a csv file. the return value can ONLY be used in a forEach() loop
+e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| file | <code>string</code> |  | file path |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+createFile"></a>
+
+### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
+| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
+| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
+
+
 ## @coolgk/email
 a javascript / typescript module
 
@@ -706,165 +977,6 @@ the return value contains all normal post fields and the file upload fields that
 | --- | --- | --- | --- |
 | [options] | <code>object</code> |  | see the "option" param of getFormData() |
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
-
-
-## @coolgk/csv
-a javascript / typescript module
-
-`npm install @coolgk/csv`
-
-read and write csv files
-## Examples
-```javascript
-import { Csv } from '@coolgk/csv';
-// OR
-// const { Csv } = require('@coolgk/csv');
-
-const csv = new Csv({
-    tmpConfig: { dir: '/tmp/csv' } // optional
-});
-
-const arrayData = [
-    [1,2,3,4,5],
-    [6,7,7,8,9],
-    [0,5,8,90,65]
-];
-
-const objectData = [
-    {col1: 'ab', col2: 'cd', col3: 'ef'},
-    {col1: '2ab', col2: '2cd', col3: '2ef'},
-    {col1: '3ab', col2: '3cd', col3: '3ef'}
-];
-
-csv.createFile(
-    arrayData,
-    {
-        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-        formatter: (row) => {
-            return row.map((value) => 'formatted-' + value);
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
-    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
-});
-
-csv.createFile(
-    objectData,
-    {
-        columns: ['col1', 'col2', 'col3'],
-        formatter: (row) => {
-            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
-    read(csvFilePath, ['col1', 'col2', 'col3']);
-});
-
-function read (file, columns) {
-    // with columns/headers
-    // read lines as object
-    const lines = csv.readFile(file, {columns: columns});
-    lines.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index);
-            // {
-                // 'column 1': 'formatted-1',
-                // 'column 2': 'formatted-2',
-                // 'column 3': 'formatted-3',
-                // h4: 'formatted-4',
-                // h5: 'formatted-5'
-            // } 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-
-    // without columns/headers
-    // read lines as array
-    const lines2 = csv.readFile(file);
-    lines2.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-}
-
-```
-<a name="Csv"></a>
-
-## Csv
-**Kind**: global class  
-
-* [Csv](#Csv)
-    * [new Csv([options])](#new_Csv_new)
-    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
-    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
-
-<a name="new_Csv_new"></a>
-
-### new Csv([options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Csv+parse"></a>
-
-### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
-parse a string as csv data and returns an array promise
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>string</code> |  | a csv string |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+readFile"></a>
-
-### csv.readFile(file, [options]) ⇒ <code>object</code>
-read a csv file. the return value can ONLY be used in a forEach() loop
-e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| file | <code>string</code> |  | file path |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+createFile"></a>
-
-### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
-| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
-| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
 ## @coolgk/jwt
@@ -1777,48 +1889,6 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
-
-
 ## @coolgk/unit
 a javascript / typescript module
 
@@ -1887,114 +1957,44 @@ or use https://www.npmjs.com/package/filesize
 | value | <code>number</code> | number of milliseconds |
 
 
-## @coolgk/amqp
+## @coolgk/url
 a javascript / typescript module
 
-`npm install @coolgk/amqp`
+`npm install @coolgk/url`
 
-a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+a simple function for parsing parameters in a url
 ## Examples
 ```javascript
-import { Amqp } from '@coolgk/amqp';
+import { getParams } from '@coolgk/url';
 // OR
-// const { Amqp } = require('@coolgk/amqp');
+// const { getParams } = require('@coolgk/url');
 
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
+const url = '/123';
+const pattern = '/:id';
 
-const message = {
-    a: 1,
-    b: 'b'
-};
+console.log(getParams(url, pattern)); // { id: '123' }
 
-// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
 
-// consumer.js
-// consume message and return (send) a response back to publisher
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message); // consumer received ignore response
-                                               // consumer received { a: 1, b: 'b' }
-    return {
-        response: 'response message'
-    }
-});
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
 
-// publisher.js
-// publish a message, no response from consumer
-amqp.publish('ignore response');
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
 
-// publish a message and handle response from consumer
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-});
-
-
-// example to add:
-// consume from (multiple) routes
-// round robin consumers
-// direct route + a catch all consumer
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 
 ```
-<a name="Amqp"></a>
+<a name="getParams"></a>
 
-## Amqp
-**Kind**: global class  
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
 
-* [Amqp](#Amqp)
-    * [new Amqp(options)](#new_Amqp_new)
-    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
-    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
-
-<a name="new_Amqp_new"></a>
-
-### new Amqp(options)
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| options | <code>object</code> |  |
-| options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.sslPem] | <code>string</code> | pem file path |
-| [options.sslCa] | <code>string</code> | sslCa file path |
-| [options.sslPass] | <code>string</code> | password |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
-<a name="Amqp+closeConnection"></a>
-
-### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-<a name="Amqp+publish"></a>
-
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
-| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-
-<a name="Amqp+consume"></a>
-
-### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | consumer(message) function should returns a promise |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
-| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
-
-<a name="Amqp+getChannel"></a>
-
-### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  
