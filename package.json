@@ -41,7 +41,8 @@
     "tsc:watch": "tsc --project tsconfig.debug.json -w --pretty",
     "tsc:dev": "tsc --project tsconfig.dev.json",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "debug": "export $(cat .env | xargs) && nodemon --watch ./dist --inspect=0.0.0.0:9229 --nolazy ./dist/test.js"
+    "debug": "export $(cat .env | xargs) && nodemon --watch ./dist --inspect=0.0.0.0:9229 --nolazy ./dist/test.js",
+    "package": "gulp package"
   },
   "dependencies": {
     "@coolgk/array": "^2.0.3",

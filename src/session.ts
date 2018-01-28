@@ -1,6 +1,6 @@
 /* tslint:disable */
 /***
-description: an API (without cookie) and HTTP (with cookie) session handler
+description: An API (without cookie) and HTTP (with cookie) session handler.
 version: 1.0.0
 keywords:
     - session
@@ -14,7 +14,7 @@ dependencies:
     "cookie": "^0.3.1"
     "@types/cookie": "^0.3.1"
 documentation: |
-    When working without cookie, this class reads the session token from the **Authorization** header.
+    When working without cookie, this class reads the session token from the **"Authorization"** header.
     e.g. **Authorization : Bearer cn389ncoiwuencr...**
     #### Express Middleware
     ```javascript
@@ -32,6 +32,17 @@ documentation: |
             secret: '123'
         })
     );
+
+    app.use(async (request, response, next) => {
+        // allow access if it's the login page or with a valid session
+        if ('/login' === request.url || await request.session.verifyAndRenew()) {
+            next();
+        } else { // deny access
+            response.send('Please Login');
+            // output
+            // 'Please Login'
+        }
+    });
 
     app.get('/login', async (request, response, next) => {
         const accessToken = await request.session.init();
@@ -64,7 +75,7 @@ documentation: |
     ```
     #### Native Node App
     ```javascript
-    import { Session } from './session';
+    import { Session } from '@coolgk/session';
     // OR
     // const { Session } = require('@coolgk/session');
 
@@ -88,7 +99,7 @@ documentation: |
         await session.start();
         await session.set('user', {id: 1, username: 'user@example.com'});
 
-        // check session
+        // check session and renew if verified
         const verified = await session.verifyAndRenew();
         if (verified) {
             // session exists, logged in, do something
@@ -106,7 +117,7 @@ documentation: |
     }).listen(8888);
     ```
     #### To use without cookie
-    Create a session without the **"response"** property and the sessoin object will read the session id from the **Authorization** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
+    Create a session without the **"response"** property and the sessoin object will read the session id from the **"Authorization"** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
     ```javascript
     const session = new Session({
         redisClient: require('redis').createClient({
@@ -148,9 +159,6 @@ export const COOKIE_NAME = 'accessToken';
 
 /**
  * This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
- * @export
- * @class Session
- * @extends {Token}
  */
 export class Session extends Token {
 
@@ -162,20 +170,20 @@ export class Session extends Token {
     /* tslint:disable */
     /**
      * @param {object} options
-     * @param {object} redisClient - redis client from redis.createClient()
-     * @param {string} secret - a string for encrypting the session token
-     * @param {object} request - the request object in http.createServer() or express request
-     * @param {expiry} [expiry=3600] - session expiry time in seconds
-     * @param {object} [response] - the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor.
-     * @param {object} [cookie] - cookie options
-     * @param {string} [cookie.domain] - Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain.
-     * @param {function} [cookie.encode=encodeURIComponent] - Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value.
-     * @param {date} [cookie.expires] - Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
-     * @param {boolean} [cookie.httpOnly] - Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set.
-     * @param {number} [cookie.maxAge] - Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set.
-     * @param {string} [cookie.path] - Specifies the value for the Path Set-Cookie attribute. By default, the path is considered the "default path". By default, no maximum age is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
-     * @param {string | boolean} [cookie.sameSite] - Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute
-     * @param {boolean} [cookie.secure] - Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set.
+     * @param {object} options.redisClient - redis client from redis.createClient()
+     * @param {string} options.secret - a string for encrypting the session token
+     * @param {object} options.request - the request object in http.createServer() or express request
+     * @param {expiry} [options.expiry=3600] - session expiry time in seconds
+     * @param {object} [options.response] - the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor.
+     * @param {object} [options.cookie] - cookie options
+     * @param {string} [options.cookie.domain] - Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain.
+     * @param {function} [options.cookie.encode=encodeURIComponent] - Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value.
+     * @param {date} [options.cookie.expires] - Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
+     * @param {boolean} [options.cookie.httpOnly] - Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set.
+     * @param {number} [options.cookie.maxAge] - Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set.
+     * @param {string} [options.cookie.path] - Specifies the value for the Path Set-Cookie attribute. By default, the path is considered the "default path". By default, no maximum age is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
+     * @param {string | boolean} [options.cookie.sameSite] - Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute
+     * @param {boolean} [options.cookie.secure] - Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set.
      */
     /* tslint:enable */
     public constructor (options: IConfig) {
@@ -199,17 +207,27 @@ export class Session extends Token {
         this._response = options.response;
     }
 
+    /* tslint:disable */
     /**
-     * @alias Session.start
+     * an alias of the start() method.
+     * initialising a new session
+     * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
+     * @return {promise<string>} - a session token string
      */
-    public init (signature: ISignature = {}): Promise<any> {
+    /* tslint:enable */
+    public init (signature: ISignature = {}): Promise<string> {
         return this.start(signature);
     }
 
+    /* tslint:disable */
     /**
-     * @alias Session.start
+     * an alias of the start() method.
+     * initialising a new session
+     * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
+     * @return {promise<string>} - a session token string
      */
-    public rotate (signature: ISignature = {}): Promise<any> {
+    /* tslint:enable */
+    public rotate (signature: ISignature = {}): Promise<string> {
         return this.start(signature);
     }
 
