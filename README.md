@@ -17,11 +17,11 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
-- [session](#coolgksession)
 - [string](#coolgkstring)
+- [session](#coolgksession)
 - [tmp](#coolgktmp)
-- [token](#coolgktoken)
 - [unit](#coolgkunit)
+- [token](#coolgktoken)
 - [url](#coolgkurl)
 
 ## @coolgk/amqp
@@ -1054,6 +1054,35 @@ setTimeout(() => {
 | token | <code>string</code> | token to verify |
 
 
+## @coolgk/number
+a javascript / typescript module
+
+`npm install @coolgk/number`
+
+number utitlies
+## Examples
+```javascript
+import { round } from '@coolgk/number';
+// OR
+// const { round } = require('@coolgk/number');
+
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
+
+```
+<a name="round"></a>
+
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
+
+
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1179,35 +1208,6 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/number
-a javascript / typescript module
-
-`npm install @coolgk/number`
-
-number utitlies
-## Examples
-```javascript
-import { round } from '@coolgk/number';
-// OR
-// const { round } = require('@coolgk/number');
-
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
-
-```
-<a name="round"></a>
-
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
 ## @coolgk/queue
 a javascript / typescript module
 
@@ -1263,6 +1263,96 @@ queue(c);
 | --- | --- | --- | --- |
 | callback | <code>function</code> |  | callback function that returns a promise or any other types |
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
+
+
+## @coolgk/string
+a javascript / typescript module
+
+`npm install @coolgk/string`
+
+string utility functions
+## Examples
+```javascript
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
+// OR
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
+
+```
+## Functions
+
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
 ## @coolgk/session
@@ -1421,7 +1511,7 @@ This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk
 | [options.cookie.expires] | <code>date</code> |  | Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
 | [options.cookie.httpOnly] | <code>boolean</code> |  | Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set. |
 | [options.cookie.maxAge] | <code>number</code> |  | Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set. |
-| [options.cookie.path] | <code>string</code> |  | Specifies the value for the Path Set-Cookie attribute. By default, the path is considered the "default path". By default, no maximum age is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
+| [options.cookie.path] | <code>string</code> | <code>&quot;&#x27;/&#x27;&quot;</code> | Specifies the value for the Path Set-Cookie attribute. |
 | [options.cookie.sameSite] | <code>string</code> \| <code>boolean</code> |  | Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute |
 | [options.cookie.secure] | <code>boolean</code> |  | Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set. |
 
@@ -1505,96 +1595,6 @@ renew session optionally with a different expiry time
 | [expiry] | <code>number</code> | in seconds |
 
 
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
 ## @coolgk/tmp
 a javascript / typescript module
 
@@ -1671,6 +1671,74 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 | [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
 | [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
 | [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+
+## @coolgk/unit
+a javascript / typescript module
+
+`npm install @coolgk/unit`
+
+unit conversion
+## Examples
+```javascript
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+
+```
+## Functions
+
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | value in byte |
+
+<a name="millisecondsToString"></a>
+
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | number of milliseconds |
 
 
 ## @coolgk/token
@@ -1887,74 +1955,6 @@ Error Codes
 | INVALID_TOKEN | <code>string</code> | invalid token string |
 | RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
-## Examples
-```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
-// OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
-
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
-
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
-
-```
-## Functions
-
-<dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
-</dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="bytesToString"></a>
-
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
-
-**Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
-
-<a name="millisecondsToString"></a>
-
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
 
 
 ## @coolgk/url
