@@ -93,6 +93,7 @@
     "coveralls": "^3.0.0",
     "del": "^3.0.0",
     "eslint": "^4.16.0",
+    "eslint-config-google": "^0.9.1",
     "express": "^4.16.2",
     "gulp": "^3.9.1",
     "gulp-header": "^1.8.9",
