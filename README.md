@@ -13,16 +13,16 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [csv](#coolgkcsv)
 - [email](#coolgkemail)
 - [formdata](#coolgkformdata)
-- [jwt](#coolgkjwt)
 - [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
-- [string](#coolgkstring)
 - [session](#coolgksession)
+- [string](#coolgkstring)
 - [tmp](#coolgktmp)
-- [unit](#coolgkunit)
 - [token](#coolgktoken)
+- [unit](#coolgkunit)
 - [url](#coolgkurl)
+- [jwt](#coolgkjwt)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -979,81 +979,6 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
-## @coolgk/jwt
-a javascript / typescript module
-
-`npm install @coolgk/jwt`
-
-a simple jwt token class
-## Examples
-```javascript
-import { Jwt } from '@coolgk/jwt';
-// OR
-// const { Jwt } = require('@coolgk/jwt');
-
-const jwt = new Jwt({secret: 'abc'});
-
-const string = 'http://example.com/a/b/c?a=1';
-
-const token = jwt.generate(string);
-
-console.log(
-    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-const token2 = jwt.generate(string, 200);
-
-console.log(
-    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-setTimeout(() => {
-    console.log(jwt.verify(token2)); // false
-}, 250);
-
-```
-<a name="Jwt"></a>
-
-## Jwt
-**Kind**: global class  
-
-* [Jwt](#Jwt)
-    * [new Jwt(options)](#new_Jwt_new)
-    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
-    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
-
-<a name="new_Jwt_new"></a>
-
-### new Jwt(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.secret | <code>string</code> | for encryption |
-
-<a name="Jwt+generate"></a>
-
-### jwt.generate(data, [expiry]) ⇒ <code>string</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
-| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
-
-<a name="Jwt+verify"></a>
-
-### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | token to verify |
-
-
 ## @coolgk/number
 a javascript / typescript module
 
@@ -1263,96 +1188,6 @@ queue(c);
 | --- | --- | --- | --- |
 | callback | <code>function</code> |  | callback function that returns a promise or any other types |
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
-
-
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
 ## @coolgk/session
@@ -1595,6 +1430,96 @@ renew session optionally with a different expiry time
 | [expiry] | <code>number</code> | in seconds |
 
 
+## @coolgk/string
+a javascript / typescript module
+
+`npm install @coolgk/string`
+
+string utility functions
+## Examples
+```javascript
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
+// OR
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
+
+```
+## Functions
+
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
+
+
 ## @coolgk/tmp
 a javascript / typescript module
 
@@ -1739,6 +1664,123 @@ or use https://www.npmjs.com/package/filesize
 | Param | Type | Description |
 | --- | --- | --- |
 | value | <code>number</code> | number of milliseconds |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
+
+
+## @coolgk/jwt
+a javascript / typescript module
+
+`npm install @coolgk/jwt`
+
+a simple jwt token class
+## Examples
+```javascript
+import { Jwt } from '@coolgk/jwt';
+// OR
+// const { Jwt } = require('@coolgk/jwt');
+
+const jwt = new Jwt({secret: 'abc'});
+
+const string = 'http://example.com/a/b/c?a=1';
+
+const token = jwt.generate(string);
+
+console.log(
+    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+const token2 = jwt.generate(string, 200);
+
+console.log(
+    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+setTimeout(() => {
+    console.log(jwt.verify(token2)); // false
+}, 250);
+
+```
+<a name="Jwt"></a>
+
+## Jwt
+**Kind**: global class  
+
+* [Jwt](#Jwt)
+    * [new Jwt(options)](#new_Jwt_new)
+    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
+    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
+
+<a name="new_Jwt_new"></a>
+
+### new Jwt(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.secret | <code>string</code> | for encryption |
+
+<a name="Jwt+generate"></a>
+
+### jwt.generate(data, [expiry]) ⇒ <code>string</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
+| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
+
+<a name="Jwt+verify"></a>
+
+### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | token to verify |
 
 
 ## @coolgk/token
@@ -1955,46 +1997,4 @@ Error Codes
 | INVALID_TOKEN | <code>string</code> | invalid token string |
 | RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
-
-
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
 
