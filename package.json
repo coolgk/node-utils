@@ -1,6 +1,6 @@
 {
   "name": "@coolgk/utils",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
   "homepage": "https://www.npmjs.com/package/@coolgk/utils",
   "bugs": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/coolgk/node-utils.git"
   },
-  "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params",
+  "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params, session, form data",
   "keywords": [
     "array",
     "string",
@@ -28,7 +28,14 @@
     "tmp",
     "token",
     "unit conversion",
-    "url params"
+    "url params",
+    "session",
+    "express",
+    "formdata",
+    "middleware",
+    "multipart",
+    "x-www-form-urlencoded",
+    "form"
   ],
   "scripts": {
     "pretest": "tsc --project tsconfig.dev.json",
@@ -86,6 +93,7 @@
     "coveralls": "^3.0.0",
     "del": "^3.0.0",
     "eslint": "^4.16.0",
+    "eslint-config-google": "^0.9.1",
     "express": "^4.16.2",
     "gulp": "^3.9.1",
     "gulp-header": "^1.8.9",

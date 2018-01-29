@@ -178,7 +178,7 @@ describe('Session Module', function () {
         expect(
             sessionConfig.response.setHeader.calledWith(
                 'Set-Cookie',
-                `${COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=10; HttpOnly`
+                `${COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=10; Path=/; HttpOnly`
             )
         ).to.be.true;
 
@@ -194,7 +194,7 @@ describe('Session Module', function () {
         expect(
             sessionConfig.response.setHeader.calledWith(
                 'Set-Cookie',
-                `${COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=22; HttpOnly`
+                `${COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=22; Path=/; HttpOnly`
             )
         ).to.be.true;
 
@@ -203,7 +203,7 @@ describe('Session Module', function () {
         expect(
             sessionConfig.response.setHeader.calledWith(
                 'Set-Cookie',
-                `${COOKIE_NAME}=; Max-Age=0; Expires=${new Date(0).toUTCString()}; HttpOnly`
+                `${COOKIE_NAME}=; Max-Age=0; Path=/; Expires=${new Date(0).toUTCString()}; HttpOnly`
             )
         ).to.be.true;
 

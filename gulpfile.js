@@ -395,6 +395,7 @@ function parseFileMetaDoc (file, name) {
                                                 dependencies: metaDoc.dependencies,
                                                 devDependencies: undefined,
                                                 scripts: undefined,
+                                                'pre-commit': undefined,
                                                 version
                                             }
                                         )

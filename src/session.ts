@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: An API (without cookie) and HTTP (with cookie) session handler.
-version: 1.0.0
+version: 1.0.1
 keywords:
     - session
     - session handler
@@ -181,7 +181,7 @@ export class Session extends Token {
      * @param {date} [options.cookie.expires] - Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
      * @param {boolean} [options.cookie.httpOnly] - Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set.
      * @param {number} [options.cookie.maxAge] - Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set.
-     * @param {string} [options.cookie.path] - Specifies the value for the Path Set-Cookie attribute. By default, the path is considered the "default path". By default, no maximum age is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application.
+     * @param {string} [options.cookie.path='/'] - Specifies the value for the Path Set-Cookie attribute.
      * @param {string | boolean} [options.cookie.sameSite] - Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute
      * @param {boolean} [options.cookie.secure] - Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set.
      */
@@ -203,7 +203,7 @@ export class Session extends Token {
 
         this._jwt = new Jwt({ secret: options.secret });
         this._sessionToken = token;
-        this._cookie = { ...options.cookie, maxAge: options.expiry };
+        this._cookie = { path: '/', ...options.cookie, maxAge: options.expiry };
         this._response = options.response;
     }
 
