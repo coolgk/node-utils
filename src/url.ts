@@ -27,7 +27,7 @@ example: |
 */
 
 export interface IParams {
-    [index: string]: any;
+    [index: string]: string;
 }
 
 /**
