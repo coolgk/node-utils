@@ -130,6 +130,8 @@ gulp.task('publish', ['generate-all-packages'], () => {
     // });
 });
 
+gulp.task('dependencyCheck', ['package'], dependencyCheck);
+
 gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
 gulp.task('package', ['generate-sub-packages'], generateRootPackage);
 gulp.task('generate-sub-packages', generateSubPackages);
@@ -433,6 +435,18 @@ function createFolder (path) {
 
 function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n";
+}
+
+function dependencyCheck () {
+    const promises = [];
+    fs.readdir(packageFolder, (error, folders) => {
+        for (const folder of folders) {
+            promises.push(
+                execCommand(`nsp check ${packageFolder}/${folder}`)
+            );
+        }
+    })
+    return Promise.all(promises);
 }
 
 function execCommand (command, options = {mute: false}) {
