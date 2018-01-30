@@ -19,10 +19,10 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
 - [string](#coolgkstring)
-- [unit](#coolgkunit)
-- [url](#coolgkurl)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
+- [unit](#coolgkunit)
+- [url](#coolgkurl)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -171,6 +171,131 @@ console.log(toArray(e)); // [ { a: 1 } ]
 | data | <code>\*</code> | any data to be type cast to array |
 
 
+## @coolgk/base64
+a javascript / typescript module
+
+`npm install @coolgk/base64`
+
+base64 encoded decode functions
+## Examples
+```javascript
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+// OR
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
+
+const a = 'https://www.google.co.uk/?a=b'
+const hash = encode(a);
+const urlHash = encodeUrl(a);
+
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encode"></a>
+
+## encode(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decode"></a>
+
+## decode(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | encoded hash |
+
+<a name="encodeUrl"></a>
+
+## encodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decodeUrl"></a>
+
+## decodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | base64 encoded url to decode |
+
+
+## @coolgk/bcrypt
+a javascript / typescript module
+
+`npm install @coolgk/bcrypt`
+
+just a promise wrapper
+## Examples
+```javascript
+import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
+
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dd></dd>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encrypt"></a>
+
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
+
+<a name="verify"></a>
+
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
+
+
 ## @coolgk/cache
 a javascript / typescript module
 
@@ -312,131 +437,6 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 | --- | --- | --- |
 | command | <code>string</code> | redis command to run |
 | ...params | <code>array</code> | params for the command |
-
-
-## @coolgk/bcrypt
-a javascript / typescript module
-
-`npm install @coolgk/bcrypt`
-
-just a promise wrapper
-## Examples
-```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
-// OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
-<dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encrypt"></a>
-
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
-
-<a name="verify"></a>
-
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
-
-
-## @coolgk/base64
-a javascript / typescript module
-
-`npm install @coolgk/base64`
-
-base64 encoded decode functions
-## Examples
-```javascript
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
-// OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
-
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
-
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
-
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encode"></a>
-
-## encode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decode"></a>
-
-## decode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | encoded hash |
-
-<a name="encodeUrl"></a>
-
-## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decodeUrl"></a>
-
-## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | base64 encoded url to decode |
 
 
 ## @coolgk/captcha
@@ -1270,7 +1270,7 @@ a javascript / typescript module
 
 `npm install @coolgk/session`
 
-An API (without cookie) and HTTP (with cookie) session handler.
+An session handler works without cookie (and with cookie too).
 When working without cookie, this class reads the session token from the **"Authorization"** header.
 e.g. **Authorization : Bearer cn389ncoiwuencr...**
 #### Express Middleware
@@ -1286,13 +1286,13 @@ app.use(
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD
         }),
-        secret: '123'
+        secret: '123' // secret is required for creating the session token / id
     })
 );
 
 app.use(async (request, response, next) => {
-    // allow access if it's the login page or with a valid session
-    if ('/login' === request.url || await request.session.verifyAndRenew()) {
+    // allow access if it's the login page or the request has a valid session
+    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
         next();
     } else { // deny access
         response.send('Please Login');
@@ -1302,26 +1302,32 @@ app.use(async (request, response, next) => {
 });
 
 app.get('/login', async (request, response, next) => {
+    // start a new session (create a new session id)
     const accessToken = await request.session.init();
+    // set session variables
     await request.session.set('user', { id: 1, username: 'abc' });
+    // send session token/id back
     response.json({ accessToken });
     // output
     // {"accessToken":"eyJleHAiOjAsIml..."}
 });
 
 app.get('/user', async (request, response, next) => {
+    // get session variable
     response.json(await request.session.get('user'));
     // output
     // {"id":1,"username":"abc"}
 });
 
 app.get('/session', async (request, response, next) => {
+    // get all session values
     response.json(await request.session.getAll());
     // output
     // {"user":{"id":1,"username":"abc"}}
 });
 
 app.get('/logout', async (request, response, next) => {
+    // destroy current session
     await request.session.destroy();
     response.json(await request.session.getAll());
     // output
@@ -1593,116 +1599,6 @@ use padStart instead
 | --- | --- | --- | --- |
 | value | <code>number</code> |  | an integer in string or number format |
 | length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
-## Examples
-```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
-// OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
-
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
-
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
-
-```
-## Functions
-
-<dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
-</dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="bytesToString"></a>
-
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
-
-**Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
-
-<a name="millisecondsToString"></a>
-
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
-
-
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
 
 
 ## @coolgk/tmp
@@ -1997,4 +1893,114 @@ Error Codes
 | INVALID_TOKEN | <code>string</code> | invalid token string |
 | RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
+
+
+## @coolgk/unit
+a javascript / typescript module
+
+`npm install @coolgk/unit`
+
+unit conversion
+## Examples
+```javascript
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+
+```
+## Functions
+
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | value in byte |
+
+<a name="millisecondsToString"></a>
+
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | number of milliseconds |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
