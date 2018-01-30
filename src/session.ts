@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
-description: An session handler works without cookie (and with cookie too).
-version: 1.0.2
+description: An session handler that works without cookie (and with cookie too).
+version: 1.0.3
 keywords:
     - session
     - session handler
@@ -14,9 +14,10 @@ dependencies:
     "cookie": "^0.3.1"
     "@types/cookie": "^0.3.1"
 documentation: |
+
     When working without cookie, this class reads the session token from the **"Authorization"** header.
     e.g. **Authorization : Bearer cn389ncoiwuencr...**
-    #### Express Middleware
+    #### Express Middleware Example
     ```javascript
     // express middleware
     const session = require('@coolgk/session');
@@ -79,7 +80,7 @@ documentation: |
 
     app.listen(8888);
     ```
-    #### Native Node App
+    #### Native Node App Example
     ```javascript
     import { Session } from '@coolgk/session';
     // OR

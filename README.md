@@ -14,7 +14,6 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [email](#coolgkemail)
 - [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
-- [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
@@ -23,6 +22,7 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [token](#coolgktoken)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
+- [number](#coolgknumber)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -1054,35 +1054,6 @@ setTimeout(() => {
 | token | <code>string</code> | token to verify |
 
 
-## @coolgk/number
-a javascript / typescript module
-
-`npm install @coolgk/number`
-
-number utitlies
-## Examples
-```javascript
-import { round } from '@coolgk/number';
-// OR
-// const { round } = require('@coolgk/number');
-
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
-
-```
-<a name="round"></a>
-
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1270,10 +1241,11 @@ a javascript / typescript module
 
 `npm install @coolgk/session`
 
-An session handler works without cookie (and with cookie too).
+An session handler that works without cookie (and with cookie too).
+
 When working without cookie, this class reads the session token from the **"Authorization"** header.
 e.g. **Authorization : Bearer cn389ncoiwuencr...**
-#### Express Middleware
+#### Express Middleware Example
 ```javascript
 // express middleware
 const session = require('@coolgk/session');
@@ -1336,7 +1308,7 @@ app.get('/logout', async (request, response, next) => {
 
 app.listen(8888);
 ```
-#### Native Node App
+#### Native Node App Example
 ```javascript
 import { Session } from '@coolgk/session';
 // OR
@@ -1895,6 +1867,48 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
+
+
 ## @coolgk/unit
 a javascript / typescript module
 
@@ -1963,44 +1977,31 @@ or use https://www.npmjs.com/package/filesize
 | value | <code>number</code> | number of milliseconds |
 
 
-## @coolgk/url
+## @coolgk/number
 a javascript / typescript module
 
-`npm install @coolgk/url`
+`npm install @coolgk/number`
 
-a simple function for parsing parameters in a url
+number utitlies
 ## Examples
 ```javascript
-import { getParams } from '@coolgk/url';
+import { round } from '@coolgk/number';
 // OR
-// const { getParams } = require('@coolgk/url');
+// const { round } = require('@coolgk/number');
 
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
 ```
-<a name="getParams"></a>
+<a name="round"></a>
 
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
+## round(value, precision) ⇒ <code>number</code>
 **Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
