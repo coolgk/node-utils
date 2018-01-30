@@ -1,11 +1,12 @@
 /***
 description: wrapper functions, generate tmp file or folders
-version: 2.0.3
+version: 2.0.4
 keywords:
     - temp
     - tmp
 dependencies:
     "tmp": "0.0.33"
+    "@types/tmp": "0.0.33"
 example: |
     import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
     // OR
@@ -23,7 +24,7 @@ example: |
 
 // https://github.com/raszi/node-tmp
 // npm i -S tmp
-import tmp = require('tmp');
+import { file, dir, tmpName } from 'tmp';
 
 export interface ITmpConfig {
     mode?: number;
@@ -102,7 +103,8 @@ export function generate (action: string, options: ITmpConfig = {}): Promise<any
         if (!options.prefix) {
             options.prefix = Date.now() + '';
         }
-        tmp[action](
+        const actions: { [index: string]: any } = { file, dir, tmpName };
+        actions[action](
             {
                 tries: 10,
                 ...options

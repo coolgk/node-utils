@@ -14,15 +14,15 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [email](#coolgkemail)
 - [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
-- [pdf](#coolgkpdf)
+- [number](#coolgknumber)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
 - [string](#coolgkstring)
+- [pdf](#coolgkpdf)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
-- [number](#coolgknumber)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -135,41 +135,6 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 ### amqp.getChannel() ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 **Returns**: <code>promise</code> - - promise<channel>  
-
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
-
 
 ## @coolgk/base64
 a javascript / typescript module
@@ -1054,129 +1019,33 @@ setTimeout(() => {
 | token | <code>string</code> | token to verify |
 
 
-## @coolgk/pdf
+## @coolgk/number
 a javascript / typescript module
 
-`npm install @coolgk/pdf`
+`npm install @coolgk/number`
 
-html to PDF module. create PDF files from html string or file.
+number utitlies
 ## Examples
 ```javascript
-// for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
-
-import { Pdf, Format, Orientation } from '@coolgk/pdf';
+import { round } from '@coolgk/number';
 // OR
-// const { Pdf, Format, Orientation } = require('@coolgk/pdf');
+// const { round } = require('@coolgk/number');
 
-const pdf = new Pdf({
-    tmpConfig: { dir: '/tmp/pdf' } // optional
-});
-
-pdf.createFromHtmlFile(
-    '/tmp/test.html',
-    {
-        header: {
-            height: '1cm',
-            contents: "<strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
-        },
-        footer: {
-            height: '1cm',
-            contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
-        },
-        margin: '0.5cm'
-    }
-).then((pdfFile) => {
-    console.log(pdfFile);
-});
-
-const htmlCode = `<!DOCTYPE html><html><head>
-        <title>CCES</title>
-        <style>
-            .pagebreak { page-break-after: always; }
-            h2, h1 { color: red }
-        </style>
-    </head>
-    <body>
-        <div>
-            <h1>page 1</h1>
-            <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
-        </div>
-        <div class="pagebreak"></div>
-        <div>
-            <h2>page 2</h2>
-            <table>
-                <tr>
-                    <td>texgt</td>
-                    <td>text</td>
-                </tr>
-            </table>
-        </div>
-    </body>
-</html>`;
-
-pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
-    console.log(pdfFile);
-});
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
 ```
-<a name="Pdf"></a>
+<a name="round"></a>
 
-## Pdf
-**Kind**: global class  
-
-* [Pdf](#Pdf)
-    * [new Pdf([options])](#new_Pdf_new)
-    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.createFromHtmlString(htmlString, [options])](#Pdf+createFromHtmlString) ⇒ <code>promise</code>
-
-<a name="new_Pdf_new"></a>
-
-### new Pdf([options])
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Pdf+createFromHtmlFile"></a>
-
-### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
-**See**: http://phantomjs.org/api/webpage/property/paper-size.html
-A4 page height: 842px
-for full page in PDF, set height of a page in html to 842px  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| htmlFilePath | <code>string</code> |  | file path of an html |
-| [options.pdfFilePath] | <code>string</code> |  | file path is automatically generated if empty |
-| [options.delay] | <code>number</code> | <code>1</code> | delay in seconds before generating pdf. wait for js generated contents. |
-| [options.margin] | <code>string</code> \| <code>number</code> | <code>0</code> | e.g. 1cm or {top: '50px', left: '20px'} |
-| [options.orientation] | <code>string</code> | <code>&quot;&#x27;portrait&#x27;&quot;</code> | e.g. portrait or landscape |
-| [options.format] | <code>string</code> | <code>&quot;&#x27;A4&#x27;&quot;</code> | e.g. A4 |
-| [options.header] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.header.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
-| [options.header.contents] | <code>string</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.footer] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.footer.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
-| [options.footer.contents] | <code>string</code> \| <code>number</code> |  | e.g. html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.dpi] | <code>number</code> | <code>96</code> | e.g. 96 |
-
-<a name="Pdf+createFromHtmlString"></a>
-
-### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise</code> - - filepath of the generated PDF  
-**See**: createFromHtmlFile()  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
-| [options] | <code>object</code> | see options in createFromHtmlFile() |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
 
 ## @coolgk/queue
@@ -1234,6 +1103,41 @@ queue(c);
 | --- | --- | --- | --- |
 | callback | <code>function</code> |  | callback function that returns a promise or any other types |
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
+
+
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
 
 
 ## @coolgk/session
@@ -1573,82 +1477,129 @@ use padStart instead
 | length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
-## @coolgk/tmp
+## @coolgk/pdf
 a javascript / typescript module
 
-`npm install @coolgk/tmp`
+`npm install @coolgk/pdf`
 
-wrapper functions, generate tmp file or folders
+html to PDF module. create PDF files from html string or file.
 ## Examples
 ```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
+// for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
+
+import { Pdf, Format, Orientation } from '@coolgk/pdf';
 // OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
+// const { Pdf, Format, Orientation } = require('@coolgk/pdf');
 
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+const pdf = new Pdf({
+    tmpConfig: { dir: '/tmp/pdf' } // optional
+});
 
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+pdf.createFromHtmlFile(
+    '/tmp/test.html',
+    {
+        header: {
+            height: '1cm',
+            contents: "<strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
+        },
+        footer: {
+            height: '1cm',
+            contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
+        },
+        margin: '0.5cm'
+    }
+).then((pdfFile) => {
+    console.log(pdfFile);
+});
 
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+const htmlCode = `<!DOCTYPE html><html><head>
+        <title>CCES</title>
+        <style>
+            .pagebreak { page-break-after: always; }
+            h2, h1 { color: red }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>page 1</h1>
+            <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
+        </div>
+        <div class="pagebreak"></div>
+        <div>
+            <h2>page 2</h2>
+            <table>
+                <tr>
+                    <td>texgt</td>
+                    <td>text</td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>`;
+
+pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
+    console.log(pdfFile);
+});
 
 ```
-## Functions
+<a name="Pdf"></a>
 
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
+## Pdf
+**Kind**: global class  
 
-<a name="generateFile"></a>
+* [Pdf](#Pdf)
+    * [new Pdf([options])](#new_Pdf_new)
+    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.createFromHtmlString(htmlString, [options])](#Pdf+createFromHtmlString) ⇒ <code>promise</code>
 
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+<a name="new_Pdf_new"></a>
+
+### new Pdf([options])
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
 
-<a name="generateDir"></a>
+<a name="Pdf+createFromHtmlFile"></a>
 
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
+### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
+**See**: http://phantomjs.org/api/webpage/property/paper-size.html
+A4 page height: 842px
+for full page in PDF, set height of a page in html to 842px  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| htmlFilePath | <code>string</code> |  | file path of an html |
+| [options.pdfFilePath] | <code>string</code> |  | file path is automatically generated if empty |
+| [options.delay] | <code>number</code> | <code>1</code> | delay in seconds before generating pdf. wait for js generated contents. |
+| [options.margin] | <code>string</code> \| <code>number</code> | <code>0</code> | e.g. 1cm or {top: '50px', left: '20px'} |
+| [options.orientation] | <code>string</code> | <code>&quot;&#x27;portrait&#x27;&quot;</code> | e.g. portrait or landscape |
+| [options.format] | <code>string</code> | <code>&quot;&#x27;A4&#x27;&quot;</code> | e.g. A4 |
+| [options.header] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.header.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
+| [options.header.contents] | <code>string</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.footer] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.footer.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
+| [options.footer.contents] | <code>string</code> \| <code>number</code> |  | e.g. html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.dpi] | <code>number</code> | <code>96</code> | e.g. 96 |
+
+<a name="Pdf+createFromHtmlString"></a>
+
+### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise</code> - - filepath of the generated PDF  
+**See**: createFromHtmlFile()  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
+| [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
 ## @coolgk/token
@@ -1867,46 +1818,82 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
-## @coolgk/url
+## @coolgk/tmp
 a javascript / typescript module
 
-`npm install @coolgk/url`
+`npm install @coolgk/tmp`
 
-a simple function for parsing parameters in a url
+wrapper functions, generate tmp file or folders
 ## Examples
 ```javascript
-import { getParams } from '@coolgk/url';
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
 // OR
-// const { getParams } = require('@coolgk/url');
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
 
-const url = '/123';
-const pattern = '/:id';
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
-console.log(getParams(url, pattern)); // { id: '123' }
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
 
 ```
-<a name="getParams"></a>
+## Functions
 
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+</dl>
 
+<a name="generateFile"></a>
+
+## generateFile([options]) ⇒ <code>promise</code>
 **Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateDir"></a>
+
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateTmpName"></a>
+
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
 
 
 ## @coolgk/unit
@@ -1977,31 +1964,44 @@ or use https://www.npmjs.com/package/filesize
 | value | <code>number</code> | number of milliseconds |
 
 
-## @coolgk/number
+## @coolgk/url
 a javascript / typescript module
 
-`npm install @coolgk/number`
+`npm install @coolgk/url`
 
-number utitlies
+a simple function for parsing parameters in a url
 ## Examples
 ```javascript
-import { round } from '@coolgk/number';
+import { getParams } from '@coolgk/url';
 // OR
-// const { round } = require('@coolgk/number');
+// const { getParams } = require('@coolgk/url');
 
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 
 ```
-<a name="round"></a>
+<a name="getParams"></a>
 
-## round(value, precision) ⇒ <code>number</code>
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
 **Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
