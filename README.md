@@ -10,19 +10,19 @@ you can either use the standalone modules or @coolgk/utils as an all-in-one pack
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
-- [csv](#coolgkcsv)
 - [email](#coolgkemail)
 - [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
 - [number](#coolgknumber)
+- [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
 - [string](#coolgkstring)
-- [pdf](#coolgkpdf)
-- [tmp](#coolgktmp)
 - [token](#coolgktoken)
+- [tmp](#coolgktmp)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
+- [csv](#coolgkcsv)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -135,6 +135,41 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 ### amqp.getChannel() ⇒ <code>promise</code>
 **Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 **Returns**: <code>promise</code> - - promise<channel>  
+
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
 
 ## @coolgk/base64
 a javascript / typescript module
@@ -456,165 +491,6 @@ captcha.verify(captchaResponse).then((response) => {
 | response | <code>string</code> | repsonse from recaptcha |
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
-
-
-## @coolgk/csv
-a javascript / typescript module
-
-`npm install @coolgk/csv`
-
-read and write csv files
-## Examples
-```javascript
-import { Csv } from '@coolgk/csv';
-// OR
-// const { Csv } = require('@coolgk/csv');
-
-const csv = new Csv({
-    tmpConfig: { dir: '/tmp/csv' } // optional
-});
-
-const arrayData = [
-    [1,2,3,4,5],
-    [6,7,7,8,9],
-    [0,5,8,90,65]
-];
-
-const objectData = [
-    {col1: 'ab', col2: 'cd', col3: 'ef'},
-    {col1: '2ab', col2: '2cd', col3: '2ef'},
-    {col1: '3ab', col2: '3cd', col3: '3ef'}
-];
-
-csv.createFile(
-    arrayData,
-    {
-        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-        formatter: (row) => {
-            return row.map((value) => 'formatted-' + value);
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
-    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
-});
-
-csv.createFile(
-    objectData,
-    {
-        columns: ['col1', 'col2', 'col3'],
-        formatter: (row) => {
-            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
-    read(csvFilePath, ['col1', 'col2', 'col3']);
-});
-
-function read (file, columns) {
-    // with columns/headers
-    // read lines as object
-    const lines = csv.readFile(file, {columns: columns});
-    lines.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index);
-            // {
-                // 'column 1': 'formatted-1',
-                // 'column 2': 'formatted-2',
-                // 'column 3': 'formatted-3',
-                // h4: 'formatted-4',
-                // h5: 'formatted-5'
-            // } 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-
-    // without columns/headers
-    // read lines as array
-    const lines2 = csv.readFile(file);
-    lines2.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-}
-
-```
-<a name="Csv"></a>
-
-## Csv
-**Kind**: global class  
-
-* [Csv](#Csv)
-    * [new Csv([options])](#new_Csv_new)
-    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
-    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
-
-<a name="new_Csv_new"></a>
-
-### new Csv([options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Csv+parse"></a>
-
-### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
-parse a string as csv data and returns an array promise
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>string</code> |  | a csv string |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+readFile"></a>
-
-### csv.readFile(file, [options]) ⇒ <code>object</code>
-read a csv file. the return value can ONLY be used in a forEach() loop
-e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| file | <code>string</code> |  | file path |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+createFile"></a>
-
-### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
-| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
-| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
 ## @coolgk/email
@@ -1048,6 +924,131 @@ console.log(round(100.958747, 4)); // 100.9587
 | precision | <code>number</code> | <code>2</code> | precision |
 
 
+## @coolgk/pdf
+a javascript / typescript module
+
+`npm install @coolgk/pdf`
+
+html to PDF module. create PDF files from html string or file.
+## Examples
+```javascript
+// for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
+
+import { Pdf, Format, Orientation } from '@coolgk/pdf';
+// OR
+// const { Pdf, Format, Orientation } = require('@coolgk/pdf');
+
+const pdf = new Pdf({
+    tmpConfig: { dir: '/tmp/pdf' } // optional
+});
+
+pdf.createFromHtmlFile(
+    '/tmp/test.html',
+    {
+        header: {
+            height: '1cm',
+            contents: "<strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
+        },
+        footer: {
+            height: '1cm',
+            contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
+        },
+        margin: '0.5cm'
+    }
+).then((pdfFile) => {
+    console.log(pdfFile);
+});
+
+const htmlCode = `<!DOCTYPE html><html><head>
+        <title>CCES</title>
+        <style>
+            .pagebreak { page-break-after: always; }
+            h2, h1 { color: red }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>page 1</h1>
+            <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
+        </div>
+        <div class="pagebreak"></div>
+        <div>
+            <h2>page 2</h2>
+            <table>
+                <tr>
+                    <td>texgt</td>
+                    <td>text</td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>`;
+
+pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
+    console.log(pdfFile);
+});
+
+```
+<a name="Pdf"></a>
+
+## Pdf
+**Kind**: global class  
+
+* [Pdf](#Pdf)
+    * [new Pdf([options])](#new_Pdf_new)
+    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.createFromHtmlString(htmlString, [options])](#Pdf+createFromHtmlString) ⇒ <code>promise</code>
+
+<a name="new_Pdf_new"></a>
+
+### new Pdf([options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+<a name="Pdf+createFromHtmlFile"></a>
+
+### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
+**See**: http://phantomjs.org/api/webpage/property/paper-size.html
+A4 page height: 842px
+for full page in PDF, set height of a page in html to 842px  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| htmlFilePath | <code>string</code> |  | file path of an html |
+| [options.pdfFilePath] | <code>string</code> |  | file path is automatically generated if empty |
+| [options.delay] | <code>number</code> | <code>1</code> | delay in seconds before generating pdf. wait for js generated contents. |
+| [options.margin] | <code>string</code> \| <code>number</code> | <code>0</code> | e.g. 1cm or {top: '50px', left: '20px'} |
+| [options.orientation] | <code>string</code> | <code>&quot;&#x27;portrait&#x27;&quot;</code> | e.g. portrait or landscape |
+| [options.format] | <code>string</code> | <code>&quot;&#x27;A4&#x27;&quot;</code> | e.g. A4 |
+| [options.header] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.header.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
+| [options.header.contents] | <code>string</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.footer] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.footer.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
+| [options.footer.contents] | <code>string</code> \| <code>number</code> |  | e.g. html code e.g. Page ${pageNumber} of ${numberOfPages} |
+| [options.dpi] | <code>number</code> | <code>96</code> | e.g. 96 |
+
+<a name="Pdf+createFromHtmlString"></a>
+
+### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
+**Returns**: <code>promise</code> - - filepath of the generated PDF  
+**See**: createFromHtmlFile()  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
+| [options] | <code>object</code> | see options in createFromHtmlFile() |
+
+
 ## @coolgk/queue
 a javascript / typescript module
 
@@ -1105,39 +1106,94 @@ queue(c);
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
-## @coolgk/array
+## @coolgk/string
 a javascript / typescript module
 
-`npm install @coolgk/array`
+`npm install @coolgk/string`
 
-array utilities
+string utility functions
 ## Examples
 ```javascript
-import { toArray } from '@coolgk/array';
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
 // OR
-// const { toArray } = require('@coolgk/array');
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
 
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
+const str = '<h1>test</h1><script>alert(1)</script>'
 
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
 
 ```
-<a name="toArray"></a>
+## Functions
 
-## toArray(data) ⇒ <code>array</code>
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
 ## @coolgk/session
@@ -1385,221 +1441,6 @@ renew session optionally with a different expiry time
 | Param | Type | Description |
 | --- | --- | --- |
 | [expiry] | <code>number</code> | in seconds |
-
-
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
-## @coolgk/pdf
-a javascript / typescript module
-
-`npm install @coolgk/pdf`
-
-html to PDF module. create PDF files from html string or file.
-## Examples
-```javascript
-// for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
-
-import { Pdf, Format, Orientation } from '@coolgk/pdf';
-// OR
-// const { Pdf, Format, Orientation } = require('@coolgk/pdf');
-
-const pdf = new Pdf({
-    tmpConfig: { dir: '/tmp/pdf' } // optional
-});
-
-pdf.createFromHtmlFile(
-    '/tmp/test.html',
-    {
-        header: {
-            height: '1cm',
-            contents: "<strong style='color: red'>Page ${pageNumber} of ${numberOfPages} - ${pageNumber}</strong>"
-        },
-        footer: {
-            height: '1cm',
-            contents: 'footer <strong>Page ${pageNumber} of ${numberOfPages}</strong>'
-        },
-        margin: '0.5cm'
-    }
-).then((pdfFile) => {
-    console.log(pdfFile);
-});
-
-const htmlCode = `<!DOCTYPE html><html><head>
-        <title>CCES</title>
-        <style>
-            .pagebreak { page-break-after: always; }
-            h2, h1 { color: red }
-        </style>
-    </head>
-    <body>
-        <div>
-            <h1>page 1</h1>
-            <p>some text <img src='https://dummyimage.com/600x400/3bbda9/f516ae.jpg'></p>
-        </div>
-        <div class="pagebreak"></div>
-        <div>
-            <h2>page 2</h2>
-            <table>
-                <tr>
-                    <td>texgt</td>
-                    <td>text</td>
-                </tr>
-            </table>
-        </div>
-    </body>
-</html>`;
-
-pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
-    console.log(pdfFile);
-});
-
-```
-<a name="Pdf"></a>
-
-## Pdf
-**Kind**: global class  
-
-* [Pdf](#Pdf)
-    * [new Pdf([options])](#new_Pdf_new)
-    * [.createFromHtmlFile(htmlFilePath)](#Pdf+createFromHtmlFile) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.createFromHtmlString(htmlString, [options])](#Pdf+createFromHtmlString) ⇒ <code>promise</code>
-
-<a name="new_Pdf_new"></a>
-
-### new Pdf([options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Pdf+createFromHtmlFile"></a>
-
-### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
-**See**: http://phantomjs.org/api/webpage/property/paper-size.html
-A4 page height: 842px
-for full page in PDF, set height of a page in html to 842px  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| htmlFilePath | <code>string</code> |  | file path of an html |
-| [options.pdfFilePath] | <code>string</code> |  | file path is automatically generated if empty |
-| [options.delay] | <code>number</code> | <code>1</code> | delay in seconds before generating pdf. wait for js generated contents. |
-| [options.margin] | <code>string</code> \| <code>number</code> | <code>0</code> | e.g. 1cm or {top: '50px', left: '20px'} |
-| [options.orientation] | <code>string</code> | <code>&quot;&#x27;portrait&#x27;&quot;</code> | e.g. portrait or landscape |
-| [options.format] | <code>string</code> | <code>&quot;&#x27;A4&#x27;&quot;</code> | e.g. A4 |
-| [options.header] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.header.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
-| [options.header.contents] | <code>string</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.footer] | <code>string</code> \| <code>object</code> |  | html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.footer.height] | <code>string</code> \| <code>number</code> |  | e.g. 1cm or 100px |
-| [options.footer.contents] | <code>string</code> \| <code>number</code> |  | e.g. html code e.g. Page ${pageNumber} of ${numberOfPages} |
-| [options.dpi] | <code>number</code> | <code>96</code> | e.g. 96 |
-
-<a name="Pdf+createFromHtmlString"></a>
-
-### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise</code> - - filepath of the generated PDF  
-**See**: createFromHtmlFile()  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
-| [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
 ## @coolgk/token
@@ -2004,4 +1845,163 @@ a simple function to get params in a url e.g. with url: user/123, pattern: user/
 | --- | --- | --- |
 | url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
 | pattern | <code>string</code> | e.g. /:userid/:name |
+
+
+## @coolgk/csv
+a javascript / typescript module
+
+`npm install @coolgk/csv`
+
+read and write csv files
+## Examples
+```javascript
+import { Csv } from '@coolgk/csv';
+// OR
+// const { Csv } = require('@coolgk/csv');
+
+const csv = new Csv({
+    tmpConfig: { dir: '/tmp/csv' } // optional
+});
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row) => {
+            return row.map((value) => 'formatted-' + value);
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    // read lines as object
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+            // {
+                // 'column 1': 'formatted-1',
+                // 'column 2': 'formatted-2',
+                // 'column 3': 'formatted-3',
+                // h4: 'formatted-4',
+                // h5: 'formatted-5'
+            // } 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+
+    // without columns/headers
+    // read lines as array
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+}
+
+```
+<a name="Csv"></a>
+
+## Csv
+**Kind**: global class  
+
+* [Csv](#Csv)
+    * [new Csv([options])](#new_Csv_new)
+    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
+    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
+    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+
+<a name="new_Csv_new"></a>
+
+### new Csv([options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+<a name="Csv+parse"></a>
+
+### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
+parse a string as csv data and returns an array promise
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>string</code> |  | a csv string |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+readFile"></a>
+
+### csv.readFile(file, [options]) ⇒ <code>object</code>
+read a csv file. the return value can ONLY be used in a forEach() loop
+e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| file | <code>string</code> |  | file path |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+createFile"></a>
+
+### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
+| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
+| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
