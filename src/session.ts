@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
-description: An API (without cookie) and HTTP (with cookie) session handler.
-version: 1.0.1
+description: An session handler that works without cookie (and with cookie too).
+version: 1.0.3
 keywords:
     - session
     - session handler
@@ -14,9 +14,10 @@ dependencies:
     "cookie": "^0.3.1"
     "@types/cookie": "^0.3.1"
 documentation: |
+
     When working without cookie, this class reads the session token from the **"Authorization"** header.
     e.g. **Authorization : Bearer cn389ncoiwuencr...**
-    #### Express Middleware
+    #### Express Middleware Example
     ```javascript
     // express middleware
     const session = require('@coolgk/session');
@@ -29,13 +30,13 @@ documentation: |
                 port: process.env.REDIS_PORT,
                 password: process.env.REDIS_PASSWORD
             }),
-            secret: '123'
+            secret: '123' // secret is required for creating the session token / id
         })
     );
 
     app.use(async (request, response, next) => {
-        // allow access if it's the login page or with a valid session
-        if ('/login' === request.url || await request.session.verifyAndRenew()) {
+        // allow access if it's the login page or the request has a valid session
+        if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
             next();
         } else { // deny access
             response.send('Please Login');
@@ -45,26 +46,32 @@ documentation: |
     });
 
     app.get('/login', async (request, response, next) => {
+        // start a new session (create a new session id)
         const accessToken = await request.session.init();
+        // set session variables
         await request.session.set('user', { id: 1, username: 'abc' });
+        // send session token/id back
         response.json({ accessToken });
         // output
         // {"accessToken":"eyJleHAiOjAsIml..."}
     });
 
     app.get('/user', async (request, response, next) => {
+        // get session variable
         response.json(await request.session.get('user'));
         // output
         // {"id":1,"username":"abc"}
     });
 
     app.get('/session', async (request, response, next) => {
+        // get all session values
         response.json(await request.session.getAll());
         // output
         // {"user":{"id":1,"username":"abc"}}
     });
 
     app.get('/logout', async (request, response, next) => {
+        // destroy current session
         await request.session.destroy();
         response.json(await request.session.getAll());
         // output
@@ -73,7 +80,7 @@ documentation: |
 
     app.listen(8888);
     ```
-    #### Native Node App
+    #### Native Node App Example
     ```javascript
     import { Session } from '@coolgk/session';
     // OR

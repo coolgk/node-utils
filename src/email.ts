@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 2.0.3
+version: 2.0.4
 keywords:
     - email
     - smtp sender
@@ -8,6 +8,7 @@ dependencies:
     "mime-types": "^2.1.17"
     "emailjs": "^1.0.12"
     "@coolgk/string": "^2"
+    "@types/mime-types": "^2.1.0"
 example: |
     import { Email } from '@coolgk/email';
     // OR
@@ -51,14 +52,14 @@ example: |
 // npm i -S emailjs mime-types
 
 import emailjs = require('emailjs');
-import mimeTypes = require('mime-types');
+import { lookup } from 'mime-types';
 import { basename } from 'path';
 import { stripTags } from '@coolgk/string';
 
 export interface IEmailConfig {
     readonly host: string;
     readonly stripTags?: typeof stripTags;
-    readonly getMimeType?: typeof mimeTypes.lookup;
+    readonly getMimeType?: typeof lookup;
     readonly user?: string;
     readonly password?: string;
     readonly port?: number;
@@ -75,7 +76,7 @@ export interface IEmailClient {
 export interface IEmailConfigWithClient {
     readonly emailClient: IEmailClient; // DI for test
     readonly stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
-    readonly getMimeType?: typeof mimeTypes.lookup; // DI for test
+    readonly getMimeType?: typeof lookup; // DI for test
 }
 
 export interface IEmailAddress {
@@ -105,7 +106,7 @@ export interface ISendConfig {
 export class Email {
     private _emailClient: IEmailClient;
     private _stripTags: typeof stripTags; // DI for test, from @coolgk/stripTags.js
-    private _getMimeType: typeof mimeTypes.lookup;
+    private _getMimeType: typeof lookup;
 
     /**
      * @param {object} options
@@ -123,7 +124,7 @@ export class Email {
         this._emailClient = (options as IEmailConfigWithClient).emailClient ?
             (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailConfig);
         this._stripTags = options.stripTags || stripTags;
-        this._getMimeType = options.getMimeType || mimeTypes.lookup;
+        this._getMimeType = options.getMimeType || lookup;
     }
 
     /**
@@ -157,7 +158,7 @@ export class Email {
                     attachment.name = basename(attachment.path);
                 }
                 if (!attachment.type) {
-                    attachment.type = this._getMimeType(attachment.path);
+                    attachment.type = this._getMimeType(attachment.path) || undefined;
                 }
             });
         }
