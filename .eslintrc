@@ -56,7 +56,9 @@
         "no-loop-func": 0,
         "arrow-body-style": 0,
         "consistent-return": 0,
-        "accessor-pairs": 0
+        "accessor-pairs": 0,
+        "object-curly-spacing": ["error", "always"],
+        "padded-blocks": 0
     },
     "env": {
         "es6": true,

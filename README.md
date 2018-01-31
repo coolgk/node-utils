@@ -4,25 +4,27 @@
 
 you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
 
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+
 - [amqp](#coolgkamqp)
+- [array](#coolgkarray)
 - [base64](#coolgkbase64)
-- [cache](#coolgkcache)
 - [bcrypt](#coolgkbcrypt)
-- [email](#coolgkemail)
-- [csv](#coolgkcsv)
+- [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
+- [csv](#coolgkcsv)
+- [email](#coolgkemail)
 - [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
-- [pdf](#coolgkpdf)
 - [number](#coolgknumber)
+- [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
-- [url](#coolgkurl)
 - [unit](#coolgkunit)
-- [array](#coolgkarray)
+- [url](#coolgkurl)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -30,6 +32,8 @@ a javascript / typescript module
 `npm install @coolgk/amqp`
 
 a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { Amqp } from '@coolgk/amqp';
@@ -76,7 +80,7 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp"></a>
 
 ## Amqp
-**Kind**: global class  
+**Kind**: global class
 
 * [Amqp](#Amqp)
     * [new Amqp(options)](#new_Amqp_new)
@@ -100,11 +104,11 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp+closeConnection"></a>
 
 ### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)
 <a name="Amqp+publish"></a>
 
 ### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -117,7 +121,7 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp+consume"></a>
 
 ### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -133,8 +137,45 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 <a name="Amqp+getChannel"></a>
 
 ### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)
+**Returns**: <code>promise</code> - - promise<channel>
+
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
 
 ## @coolgk/base64
 a javascript / typescript module
@@ -142,6 +183,8 @@ a javascript / typescript module
 `npm install @coolgk/base64`
 
 base64 encoded decode functions
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
@@ -176,7 +219,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="encode"></a>
 
 ## encode(data) ⇒ <code>string</code>
-**Kind**: global function  
+**Kind**: global function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -185,7 +228,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="decode"></a>
 
 ## decode(data) ⇒ <code>string</code>
-**Kind**: global function  
+**Kind**: global function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -194,7 +237,7 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="encodeUrl"></a>
 
 ## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
+**Kind**: global function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -203,11 +246,64 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 <a name="decodeUrl"></a>
 
 ## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
+**Kind**: global function
 
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>string</code> | base64 encoded url to decode |
+
+
+## @coolgk/bcrypt
+a javascript / typescript module
+
+`npm install @coolgk/bcrypt`
+
+just a promise wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
+
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dd></dd>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encrypt"></a>
+
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: global function
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
+
+<a name="verify"></a>
+
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+**Kind**: global function
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/cache
@@ -216,6 +312,8 @@ a javascript / typescript module
 `npm install @coolgk/cache`
 
 a redis wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { Cache } from '@coolgk/cache';
@@ -279,7 +377,7 @@ Promise.all([
 <a name="Cache"></a>
 
 ## Cache
-**Kind**: global class  
+**Kind**: global class
 
 * [Cache](#Cache)
     * [new Cache(options)](#new_Cache_new)
@@ -301,7 +399,7 @@ Promise.all([
 <a name="Cache+set"></a>
 
 ### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Kind**: instance method of [<code>Cache</code>](#Cache)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -312,8 +410,8 @@ Promise.all([
 <a name="Cache+get"></a>
 
 ### cache.get(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
+**Kind**: instance method of [<code>Cache</code>](#Cache)
+**Returns**: <code>promise</code> - - cached value
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -322,7 +420,7 @@ Promise.all([
 <a name="Cache+delete"></a>
 
 ### cache.delete(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Kind**: instance method of [<code>Cache</code>](#Cache)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -333,8 +431,8 @@ Promise.all([
 ### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
 get the cached value, if not set, resolve "callback()" and save the value then return it
 
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
+**Kind**: instance method of [<code>Cache</code>](#Cache)
+**Returns**: <code>promise</code> - - cached value
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -345,7 +443,7 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 <a name="Cache+command"></a>
 
 ### cache.command(command, ...params) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Kind**: instance method of [<code>Cache</code>](#Cache)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -353,55 +451,60 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 | ...params | <code>array</code> | params for the command |
 
 
-## @coolgk/bcrypt
+## @coolgk/captcha
 a javascript / typescript module
 
-`npm install @coolgk/bcrypt`
+`npm install @coolgk/captcha`
 
-just a promise wrapper
+recapcha wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
+import { Captcha } from '@coolgk/captcha';
 // OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
+// const { Captcha } = require('@coolgk/captcha');
 
-const password = 'abc123';
+const captcha = new Captcha({
+    secret: '-------'
+});
 
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
+const captchaResponse = '---------';
+
+captcha.verify(captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
 });
 
 ```
-## Functions
+<a name="Captcha"></a>
 
-<dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
-<dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
-<dd></dd>
-</dl>
+## Captcha
+**Kind**: global class
 
-<a name="encrypt"></a>
+* [Captcha](#Captcha)
+    * [new Captcha(options)](#new_Captcha_new)
+    * [.verify(response, [remoteip])](#Captcha+verify)
 
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function  
+<a name="new_Captcha_new"></a>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
-
-<a name="verify"></a>
-
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function  
+### new Captcha(options)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
+| options | <code>object</code> |  |
+| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
+
+<a name="Captcha+verify"></a>
+
+### captcha.verify(response, [remoteip])
+**Kind**: instance method of [<code>Captcha</code>](#Captcha)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| response | <code>string</code> | repsonse from recaptcha |
+| [remoteip] | <code>string</code> | ip address |
+|  | <code>promise</code> |  |
 
 
 ## @coolgk/csv
@@ -410,6 +513,8 @@ a javascript / typescript module
 `npm install @coolgk/csv`
 
 read and write csv files
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { Csv } from '@coolgk/csv';
@@ -495,7 +600,7 @@ function read (file, columns) {
 <a name="Csv"></a>
 
 ## Csv
-**Kind**: global class  
+**Kind**: global class
 
 * [Csv](#Csv)
     * [new Csv([options])](#new_Csv_new)
@@ -520,7 +625,7 @@ function read (file, columns) {
 ### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
 parse a string as csv data and returns an array promise
 
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Kind**: instance method of [<code>Csv</code>](#Csv)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -536,8 +641,8 @@ parse a string as csv data and returns an array promise
 read a csv file. the return value can ONLY be used in a forEach() loop
 e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+**Kind**: instance method of [<code>Csv</code>](#Csv)
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -550,8 +655,8 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 <a name="Csv+createFile"></a>
 
 ### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+**Kind**: instance method of [<code>Csv</code>](#Csv)
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -563,58 +668,103 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
-## @coolgk/captcha
+## @coolgk/email
 a javascript / typescript module
 
-`npm install @coolgk/captcha`
+`npm install @coolgk/email`
 
-recapcha wrapper
+a email sender wrapper class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { Captcha } from '@coolgk/captcha';
+import { Email } from '@coolgk/email';
 // OR
-// const { Captcha } = require('@coolgk/captcha');
+// const { Email } = require('@coolgk/email');
 
-const captcha = new Captcha({
-    secret: '-------'
-});
+const email = new Email({host: 'localhost'});
 
-const captchaResponse = '---------';
-
-captcha.verify(captchaResponse).then((response) => {
-    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
-                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.k.gong@example.com'
+    },
+    to: [
+        {
+            name: 'Dan Go',
+            email: 'dan@example.com'
+        },
+        'gong@example.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here
+        <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/tmp/test.png',
+            name: 'screenshot.png'
+        },
+        {
+            path:"/tmp/test.png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
 });
 
 ```
-<a name="Captcha"></a>
+<a name="Email"></a>
 
-## Captcha
-**Kind**: global class  
+## Email
+**Kind**: global class
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions
 
-* [Captcha](#Captcha)
-    * [new Captcha(options)](#new_Captcha_new)
-    * [.verify(response, [remoteip])](#Captcha+verify)
+* [Email](#Email)
+    * [new Email(options)](#new_Email_new)
+    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
 
-<a name="new_Captcha_new"></a>
+<a name="new_Email_new"></a>
 
-### new Captcha(options)
+### new Email(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| [options.user] | <code>string</code> |  | username for logging into smtp |
+| [options.password] | <code>string</code> |  | password for logging into smtp |
+| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
+| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
+| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
+| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
+| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
+| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+
+<a name="Email+send"></a>
+
+### email.send(options, [attachments]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Email</code>](#Email)
+**Returns**: <code>promise</code> - - message sent
 
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> |  |
-| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
-
-<a name="Captcha+verify"></a>
-
-### captcha.verify(response, [remoteip])
-**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| response | <code>string</code> | repsonse from recaptcha |
-| [remoteip] | <code>string</code> | ip address |
-|  | <code>promise</code> |  |
+| options.subject | <code>string</code> | email subject |
+| [options.message] | <code>string</code> | html email message |
+| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
+| options.to[].name | <code>string</code> | name of the recipient |
+| options.to[].email | <code>string</code> | email address of the recipient |
+| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
+| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
+| attachments.path | <code>string</code> | file path |
+| [attachments.name] | <code>string</code> | file name |
+| [attachments.type] | <code>string</code> | file mime type |
+| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
+| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
 
 
 ## @coolgk/formdata
@@ -623,6 +773,8 @@ a javascript / typescript module
 `npm install @coolgk/formdata`
 
 A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parses form data when you ask for it.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 #### Example Form
 ```html
 <form method="POST" enctype="multipart/form-data">
@@ -781,7 +933,7 @@ http.createServer(async (request, response) => {
 ## FormDataError : <code>object</code>
 Error Codes
 
-**Kind**: global constant  
+**Kind**: global constant
 **Properties**
 
 | Name | Type | Description |
@@ -799,8 +951,8 @@ Error Codes
 ## getFormData(request, [options]) ⇒ <code>promise.&lt;{}&gt;</code>
 the return value contains all normal post fields and the file upload fields that in "fileFieldNames" param
 
-**Kind**: global function  
-**Returns**: <code>promise.&lt;{}&gt;</code> - - { fieldname: value, uploadedFileName: { error: ..., fieldname: ..., filename: ..., encoding: ..., mimetype: ..., size: ..., path: ..., remove: () => void } } "remove" is a callback function for deleting the uploaded file  
+**Kind**: global function
+**Returns**: <code>promise.&lt;{}&gt;</code> - - { fieldname: value, uploadedFileName: { error: ..., fieldname: ..., filename: ..., encoding: ..., mimetype: ..., size: ..., path: ..., remove: () => void } } "remove" is a callback function for deleting the uploaded file
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -825,9 +977,9 @@ the return value contains all normal post fields and the file upload fields that
 <a name="formData"></a>
 
 ## formData(request, [globalOptions]) ⇒ <code>object</code>
-**Kind**: global function  
-**Returns**: <code>object</code> - - { getData: (fileFieldNames, options) => ... } see "fileFieldNames" and "options" and the return value of getFormData()  
-**See**: getFormData()  
+**Kind**: global function
+**Returns**: <code>object</code> - - { getData: (fileFieldNames, options) => ... } see "fileFieldNames" and "options" and the return value of getFormData()
+**See**: getFormData()
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -837,111 +989,14 @@ the return value contains all normal post fields and the file upload fields that
 <a name="express"></a>
 
 ## express([options]) ⇒ <code>function</code>
-**Kind**: global function  
-**Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()  
-**See**: getFormData()  
+**Kind**: global function
+**Returns**: <code>function</code> - - (request, response, next) => ... see the return value of getFormData()
+**See**: getFormData()
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [options] | <code>object</code> |  | see the "option" param of getFormData() |
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
-
-
-## @coolgk/email
-a javascript / typescript module
-
-`npm install @coolgk/email`
-
-a email sender wrapper class
-## Examples
-```javascript
-import { Email } from '@coolgk/email';
-// OR
-// const { Email } = require('@coolgk/email');
-
-const email = new Email({host: 'localhost'});
-
-email.send({
-    subject: 'hello this is email subject',
-    from: {
-            name: 'Daniel Gong',
-            email: 'daniel.k.gong@example.com'
-    },
-    to: [
-        {
-            name: 'Dan Go',
-            email: 'dan@example.com'
-        },
-        'gong@example.com'
-    ],
-    message: '<html><body><h1>test</h1>some message here
-        <img src="cid:my-image" width="500" height="250"></body></html>',
-    attachments: [
-        {
-            path: '/tmp/test.png',
-            name: 'screenshot.png'
-        },
-        {
-            path:"/tmp/test.png",
-            headers:{"Content-ID": "<my-image>"}
-        }
-    ]
-}).then((sentMessage) => {
-    console.log(sentMessage);
-}).catch((error) => {
-    console.log(error);
-});
-
-```
-<a name="Email"></a>
-
-## Email
-**Kind**: global class  
-**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
-
-* [Email](#Email)
-    * [new Email(options)](#new_Email_new)
-    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
-
-<a name="new_Email_new"></a>
-
-### new Email(options)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| [options.user] | <code>string</code> |  | username for logging into smtp |
-| [options.password] | <code>string</code> |  | password for logging into smtp |
-| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
-| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
-| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
-| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
-| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
-| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
-
-<a name="Email+send"></a>
-
-### email.send(options, [attachments]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Email</code>](#Email)  
-**Returns**: <code>promise</code> - - message sent  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.subject | <code>string</code> | email subject |
-| [options.message] | <code>string</code> | html email message |
-| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
-| options.to[].name | <code>string</code> | name of the recipient |
-| options.to[].email | <code>string</code> | email address of the recipient |
-| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
-| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
-| attachments.path | <code>string</code> | file path |
-| [attachments.name] | <code>string</code> | file name |
-| [attachments.type] | <code>string</code> | file mime type |
-| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
-| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
 
 
 ## @coolgk/jwt
@@ -950,6 +1005,8 @@ a javascript / typescript module
 `npm install @coolgk/jwt`
 
 a simple jwt token class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { Jwt } from '@coolgk/jwt';
@@ -982,7 +1039,7 @@ setTimeout(() => {
 <a name="Jwt"></a>
 
 ## Jwt
-**Kind**: global class  
+**Kind**: global class
 
 * [Jwt](#Jwt)
     * [new Jwt(options)](#new_Jwt_new)
@@ -1001,7 +1058,7 @@ setTimeout(() => {
 <a name="Jwt+generate"></a>
 
 ### jwt.generate(data, [expiry]) ⇒ <code>string</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1011,12 +1068,43 @@ setTimeout(() => {
 <a name="Jwt+verify"></a>
 
 ### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)
+**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token
 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | token to verify |
+
+
+## @coolgk/number
+a javascript / typescript module
+
+`npm install @coolgk/number`
+
+number utitlies
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { round } from '@coolgk/number';
+// OR
+// const { round } = require('@coolgk/number');
+
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
+
+```
+<a name="round"></a>
+
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
 
 ## @coolgk/pdf
@@ -1025,6 +1113,8 @@ a javascript / typescript module
 `npm install @coolgk/pdf`
 
 html to PDF module. create PDF files from html string or file.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 // for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
@@ -1087,7 +1177,7 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 <a name="Pdf"></a>
 
 ## Pdf
-**Kind**: global class  
+**Kind**: global class
 
 * [Pdf](#Pdf)
     * [new Pdf([options])](#new_Pdf_new)
@@ -1109,11 +1199,11 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 <a name="Pdf+createFromHtmlFile"></a>
 
 ### pdf.createFromHtmlFile(htmlFilePath) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF  
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)
+**Returns**: <code>promise.&lt;string&gt;</code> - - filepath of the generated PDF
 **See**: http://phantomjs.org/api/webpage/property/paper-size.html
 A4 page height: 842px
-for full page in PDF, set height of a page in html to 842px  
+for full page in PDF, set height of a page in html to 842px
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1134,9 +1224,9 @@ for full page in PDF, set height of a page in html to 842px
 <a name="Pdf+createFromHtmlString"></a>
 
 ### pdf.createFromHtmlString(htmlString, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Pdf</code>](#Pdf)  
-**Returns**: <code>promise</code> - - filepath of the generated PDF  
-**See**: createFromHtmlFile()  
+**Kind**: instance method of [<code>Pdf</code>](#Pdf)
+**Returns**: <code>promise</code> - - filepath of the generated PDF
+**See**: createFromHtmlFile()
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1144,201 +1234,63 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/number
+## @coolgk/queue
 a javascript / typescript module
 
-`npm install @coolgk/number`
+`npm install @coolgk/queue`
 
-number utitlies
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 ## Examples
 ```javascript
-import { round } from '@coolgk/number';
+import { queue } from '@coolgk/queue';
 // OR
-// const { round } = require('@coolgk/number');
+// const { queue } = require('@coolgk/queue');
 
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
+
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
 
 ```
-<a name="round"></a>
+<a name="queue"></a>
 
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+## queue(callback, [limit]) ⇒ <code>promise</code>
+**Kind**: global function
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
-## @coolgk/tmp
-a javascript / typescript module
-
-`npm install @coolgk/tmp`
-
-wrapper functions, generate tmp file or folders
-## Examples
-```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
-// OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
-
-```
-## Functions
-
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
-
-<a name="generateFile"></a>
-
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateDir"></a>
-
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/session
@@ -1347,6 +1299,8 @@ a javascript / typescript module
 `npm install @coolgk/session`
 
 An session handler that works without cookie (and with cookie too).
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 
 When working without cookie, this class reads the session token from the **"Authorization"** header.
 e.g. **Authorization : Bearer cn389ncoiwuencr...**
@@ -1474,7 +1428,7 @@ const session = new Session({
 ## Session
 This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
 
-**Kind**: global class  
+**Kind**: global class
 
 * [Session](#Session)
     * [new Session(options)](#new_Session_new)
@@ -1514,8 +1468,8 @@ This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk
 an alias of the start() method.
 initialising a new session
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+**Kind**: instance method of [<code>Session</code>](#Session)
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1527,8 +1481,8 @@ initialising a new session
 an alias of the start() method.
 initialising a new session
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+**Kind**: instance method of [<code>Session</code>](#Session)
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1539,8 +1493,8 @@ initialising a new session
 ### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
 initialising a new session
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+**Kind**: instance method of [<code>Session</code>](#Session)
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1551,13 +1505,13 @@ initialising a new session
 ### session.destroy() ⇒ <code>promise</code>
 destory the current session
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
+**Kind**: instance method of [<code>Session</code>](#Session)
 <a name="Session+verify"></a>
 
 ### session.verify(signature) ⇒ <code>promise.&lt;boolean&gt;</code>
 verify the session token
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
+**Kind**: instance method of [<code>Session</code>](#Session)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1568,7 +1522,7 @@ verify the session token
 ### session.verifyAndRenew(signature, [expiry]) ⇒ <code>promise.&lt;boolean&gt;</code>
 verify and renew token, renew only if token is valid (has a valid signature) and not expired
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
+**Kind**: instance method of [<code>Session</code>](#Session)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1580,157 +1534,184 @@ verify and renew token, renew only if token is valid (has a valid signature) and
 ### session.renew([expiry]) ⇒ <code>promise</code>
 renew session optionally with a different expiry time
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string  
+**Kind**: instance method of [<code>Session</code>](#Session)
+**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string
 
 | Param | Type | Description |
 | --- | --- | --- |
 | [expiry] | <code>number</code> | in seconds |
 
 
-## @coolgk/url
+## @coolgk/string
 a javascript / typescript module
 
-`npm install @coolgk/url`
+`npm install @coolgk/string`
 
-a simple function for parsing parameters in a url
+string utility functions
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { getParams } from '@coolgk/url';
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
 // OR
-// const { getParams } = require('@coolgk/url');
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
 
-const url = '/123';
-const pattern = '/:id';
+const str = '<h1>test</h1><script>alert(1)</script>'
 
-console.log(getParams(url, pattern)); // { id: '123' }
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
 
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
-## Examples
-```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
-// OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
-
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
-
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
 
 ```
 ## Functions
 
 <dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
 </dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function
+**Returns**: <code>string</code> - - string with tags stripped
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
+
+
+## @coolgk/tmp
+a javascript / typescript module
+
+`npm install @coolgk/tmp`
+
+wrapper functions, generate tmp file or folders
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
+// OR
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
+
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+
+```
+## Functions
+
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
 <dd></dd>
 </dl>
 
-<a name="bytesToString"></a>
+<a name="generateFile"></a>
 
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
+## generateFile([options]) ⇒ <code>promise</code>
+**Kind**: global function
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
 
-**Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
+<a name="generateDir"></a>
 
-<a name="millisecondsToString"></a>
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file
 
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
+<a name="generateTmpName"></a>
 
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function
+**Returns**: <code>promise</code> - - { path: ... }
 
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
 
 
 ## @coolgk/token
@@ -1739,6 +1720,8 @@ a javascript / typescript module
 `npm install @coolgk/token`
 
 an expirable, revocable, renewable token with data storage
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
 import { Token } from '@coolgk/token';
@@ -1837,7 +1820,7 @@ import { createClient } from 'redis';
 <a name="Token"></a>
 
 ## Token
-**Kind**: global class  
+**Kind**: global class
 
 * [Token](#Token)
     * [new Token(options)](#new_Token_new)
@@ -1865,7 +1848,7 @@ import { createClient } from 'redis';
 <a name="Token+renew"></a>
 
 ### token.renew([expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1876,7 +1859,7 @@ import { createClient } from 'redis';
 ### token.set(name, value) ⇒ <code>promise</code>
 set a data field value
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1888,13 +1871,13 @@ set a data field value
 ### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
 verify if token has expired
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 <a name="Token+get"></a>
 
 ### token.get(name) ⇒ <code>promise</code>
 get the value of a data field
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1905,13 +1888,13 @@ get the value of a data field
 ### token.destroy() ⇒ <code>promise</code>
 delete the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 <a name="Token+delete"></a>
 
 ### token.delete(name) ⇒ <code>promise</code>
 delete a data field in the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1922,13 +1905,13 @@ delete a data field in the token
 ### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
 get the values of all data fields in the token
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 <a name="Token+setToken"></a>
 
 ### token.setToken(token)
 set a new token string
 
-**Kind**: instance method of [<code>Token</code>](#Token)  
+**Kind**: instance method of [<code>Token</code>](#Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1939,7 +1922,7 @@ set a new token string
 ## TokenError : <code>object</code>
 Error Codes
 
-**Kind**: global constant  
+**Kind**: global constant
 **Properties**
 
 | Name | Type | Description |
@@ -1949,59 +1932,116 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
-## @coolgk/queue
+## @coolgk/unit
 a javascript / typescript module
 
-`npm install @coolgk/queue`
+`npm install @coolgk/unit`
 
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+unit conversion
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { queue } from '@coolgk/queue';
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
 // OR
-// const { queue } = require('@coolgk/queue');
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
 
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
 
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
 
 ```
-<a name="queue"></a>
+## Functions
 
-## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function  
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function
+**Returns**: <code>string</code> - value in KB, MB, GB or TB
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | value in byte |
+
+<a name="millisecondsToString"></a>
+
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | number of milliseconds |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function
+**Returns**: <code>object</code> - - e.g. {userid: 123}
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
