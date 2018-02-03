@@ -1,11 +1,12 @@
 'use strict';
 
-// source .env
+// export $(cat .env | xargs) && command...
 // .env file
-// export AMQP_HOST=
-// export REDIS_HOST=
-// export REDIS_PASSWORD=
-// export REDIS_PORT=
+// AMQP_HOST=
+// REDIS_HOST=
+// REDIS_PASSWORD=
+// REDIS_PORT=
+// MONGO_URL=
 
 module.exports = {
     sourceFolder: 'dist',
@@ -16,15 +17,9 @@ module.exports = {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: process.env.REDIS_PORT
+    },
+    mongo: {
+        url: process.env.MONGO_URL,
+        dbName: process.env.MONGO_DB_NAME
     }
 };
-
-// module.exports = Object.assign(
-    // {
-        // sourceFolder: 'dist',
-        // amqp: {
-            // url: ''
-        // }
-    // },
-    // require('./test.config.local.js')
-// );
