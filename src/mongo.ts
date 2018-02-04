@@ -30,6 +30,17 @@ export interface IResult {
     [index: string]: any;
 }
 
+export interface IDbRefs {
+    [index: string]: {
+        fields: {
+            [index: string]: 1 | 0
+        },
+        filters: {
+            [index: string]: any
+        }
+    }
+}
+
 export interface IFindConfig {
     filters?: {
         [index: string]: any
@@ -42,16 +53,8 @@ export interface IFindConfig {
     };
     limit?: number;
     skip?: number;
-    dbRefs?: {
-        [index: string]: {
-            fields: {
-                [index: string]: 1 | 0
-            },
-            filters: {
-                [index: string]: any
-            }
-        }
-    };
+    dbRefs?: IDbRefs;
+    cursor: boolean;
 }
 
 export interface IConfig {
@@ -101,7 +104,22 @@ export class Mongo {
     }
 
     public async find (options: IFindConfig): Cursor | IResult[] {
-        const result = this._collection.find(options.filters)
+
+        const cursor = this._collection.find(options.filters as object, {
+            sort: options.sort,
+            limit: options.limit,
+            skip: options.skip,
+            projection: options.fields
+        });
+
+        if (options.cursor) {
+            cursor.map(
+                (row) => options.dbRefs ? this.attachDbRefs([row], options.dbRefs).then(
+                    (data) => data[0]
+                ) : Promise.resolve(row)
+            );
+            return cursor;
+        }
 
         return this.query('find', options.filters || {}).then((cursor) => {
             let result = {
@@ -133,6 +151,136 @@ export class Mongo {
             });
         });
     }
+
+
+    public attachDbRefs (data, dbRefs, fieldConfig = this._fields) {
+        let dbRefValues = {};
+        this._findDbRefs(
+            data,
+            dbRefs,
+            dbRefValues,
+            {
+                dataType: 'object',
+                multiple: data instanceof Array || data.constructor.name === 'Cursor',
+                object: fieldConfig
+            }
+        );
+
+        if (Object.keys(dbRefValues).length === 0) {
+            return Promise.resolve(data);
+        }
+
+        let promises = [];
+        for (let collection in dbRefValues) {
+            promises.push(
+                this.query(
+                    {
+                        method: 'find',
+                        collection: collection
+                    },
+                    {
+                        _id: {
+                            // $in: ids
+                            $in: dbRefValues[collection].ids
+                        }
+                    },
+                    dbRefs[collection]
+                ).then((cursor) => {
+                    return cursor.toArray().then(
+                        (rows) => {
+                            rows.forEach((item) => {
+                                // refById[item._id].forEach((ref) => {
+                                dbRefValues[collection].refs[item._id].forEach((ref) => {
+                                    ref.parent[ref.field] = item;
+                                });
+                            });
+                            return this.attachDbRefs(rows, dbRefs, dbRefValues[collection].model.getFields());
+                        }
+                    );
+                })
+            );
+        }
+
+        return Promise.all(promises).then(() => data);
+    }
+
+    // find all dbRef fields from the data array
+    private _findDbRefs (data, dbRefs = {}, dbRefValues = {}, fieldConfig = {}, parentRef = {}) {
+        if (!fieldConfig) {
+            return;
+        }
+
+        if (fieldConfig.array) {
+            for (let index = data.length - 1; index >= 0; index--) {
+                for (const row of data) {
+                    this._findDbRefs(
+                        row,
+                        dbRefs,
+                        dbRefValues,
+                        {
+                            ...fieldConfig,
+                            array: false
+                        },
+                        {
+                            parent: data,
+                            field: index
+                        }
+                    );
+                }
+            }
+        } else {
+            switch (fieldConfig.type.toLowerCase()) {
+                case 'object':
+                    for (const field in data) {
+                        if (field !== '_id') {
+                            this._findDbRefs(
+                                data[field],
+                                dbRefs,
+                                dbRefValues,
+                                fieldConfig.object[field],
+                                {
+                                    parent: data,
+                                    field
+                                }
+                            );
+                        }
+                    }
+                    break;
+                case 'dbref':
+                    if (data) {
+                        if (!fieldConfig.model) {
+                            throw new Error(`undefined "model" property for dbRef type: ${JSON.stringify(fieldConfig)}`);
+                        }
+
+                        const collection = fieldConfig.model.getCollectionName();
+
+                        // dbRefs is defined in query
+                        if (dbRefs[collection]) {
+                            if (!dbRefValues[collection]) {
+                                // dbRefValues[collection] = [];
+                                dbRefValues[collection] = {
+                                    model: new (fieldConfig.model)(),
+                                    refs: {},
+                                    ids: []
+                                };
+                            }
+
+                            // clear db ref data, if cannot find refereced data, result will be {} instead of the origin ObjectID or DBRef
+                            parentRef.parent[parentRef.field] = {};
+                            const id = data.constructor.name === 'ObjectID' ? data : data.oid;
+                            if (!dbRefValues[collection].refs[id]) {
+                                dbRefValues[collection].refs[id] = [];
+                                dbRefValues[collection].ids.push(id);
+                            }
+                            dbRefValues[collection].refs[id].push(parentRef);
+                        }
+
+                    }
+                    break;
+            }
+        }
+    }
+
 
 }
 
