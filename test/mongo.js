@@ -26,95 +26,101 @@ describe.only('Mongo Module', function () {
     before((done) => {
 
         class Model1 extends Mongo {
-            setFields () {
-                this._setField('string', {
-                    type: 'string',
-                    default: 'xyz',
-                    setter: (value) => {
-                        return value + '-setter';
-                    }
-                });
-                this._setField('number', {
-                    type: 'number'
-                });
-                this._setField('boolean', {
-                    type: 'boolean'
-                });
-                this._setField('date', {
-                    type: 'date'
-                });
-                this._setField('dbRef', {
-                    type: 'dbRef',
-                    model: Model2
-                });
-                this._setField('enum', {
-                    type: 'enum',
-                    enum: ['abc', 'xyz']
-                });
-                this._setField('object', {
-                    type: 'object',
+            getFields () {
+                return {
+                    string: {
+                        type: 'string',
+                        default: 'xyz',
+                        setter: (value) => {
+                            return value + '-setter';
+                        }
+                    },
+                    number: {
+                        type: 'number'
+                    },
+                    boolean: {
+                        type: 'boolean'
+                    },
+                    date: {
+                        type: 'date'
+                    },
+                    dbRef: {
+                        type: 'dbRef',
+                        model: Model2
+                    },
+                    enum: {
+                        type: 'enum',
+                        enum: ['abc', 'xyz']
+                    },
                     object: {
-                        string: {
-                            type: 'string'
-                        },
-                        number: {
-                            type: 'number'
+                        type: 'object',
+                        object: {
+                            string: {
+                                type: 'string'
+                            },
+                            number: {
+                                type: 'number'
+                            }
+                        }
+                    },
+                    stringArray: {
+                        type: 'string',
+                        array: true
+                    },
+                    objectArray: {
+                        type: 'object',
+                        array: true,
+                        object: {
+                            date: {
+                                type: 'date'
+                            },
+                            dbRef: {
+                                type: 'dbRef',
+                                model: Model3
+                            }
                         }
                     }
-                });
-                this._setField('stringArray', {
-                    type: 'string',
-                    array: true
-                });
-                this._setField('objectArray', {
-                    type: 'object',
-                    array: true,
-                    object: {
-                        date: {
-                            type: 'date'
-                        },
-                        dbRef: {
-                            type: 'dbRef',
-                            model: Model3
-                        }
-                    }
-                });
+                };
             }
-            getCollectionName () {
+            static getCollectionName () {
                 return model1Name;
             }
         }
 
         class Model2 extends Mongo {
-            setFields () {
-                this._setField('ref', {
-                    type: 'dbRef',
-                    model: Model3
-                });
-                this._setField('string', {
-                    type: 'string'
-                });
-                this._setField('number', {
-                    type: 'number'
-                });
+            getFields () {
+                return {
+                    ref: {
+                        type: 'dbRef',
+                        model: Model3
+                    },
+                    string: {
+                        type: 'string'
+                    },
+                    number: {
+                        type: 'number'
+                    }
+                };
             }
-            getCollectionName () {
+            static getCollectionName () {
                 return model2Name;
             }
         }
 
         class Model3 extends Mongo {
-            setFields () {
-                this._setField('enum', {
-                    type: 'enum',
-                    array: true,
-                    enum: ['aaa', 222, false]
-                });
-                this._setField('boolean', {
-                    type: 'boolean'
-                });
+            getFields () {
+                return {
+                    enum: {
+                        type: 'enum',
+                        array: true,
+                        enum: ['aaa', 222, false]
+                    },
+                    boolean: {
+                        type: 'boolean'
+                    }
+                };
             }
-            getCollectionName () {
+            static getCollectionName () {
                 return model3Name;
             }
         }
@@ -130,13 +136,13 @@ describe.only('Mongo Module', function () {
 
             db = client.db(config.mongo.dbName);
             const collection1 = db.collection(
-                (new Model1()).getCollectionName()
+                Model1.getCollectionName()
             );
             const collection2 = db.collection(
-                (new Model2()).getCollectionName()
+                Model2.getCollectionName()
             );
             const collection3 = db.collection(
-                (new Model3()).getCollectionName()
+                Model3.getCollectionName()
             );
 
             model3Documents = [
