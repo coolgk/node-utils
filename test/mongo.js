@@ -26,7 +26,7 @@ describe.only('Mongo Module', function () {
     before((done) => {
 
         class Model1 extends Mongo {
-            getFields () {
+            static getFields () {
                 return {
                     string: {
                         type: 'string',
@@ -88,7 +88,7 @@ describe.only('Mongo Module', function () {
         }
 
         class Model2 extends Mongo {
-            getFields () {
+            static getFields () {
                 return {
                     ref: {
                         type: 'dbRef',
@@ -108,7 +108,7 @@ describe.only('Mongo Module', function () {
         }
 
         class Model3 extends Mongo {
-            getFields () {
+            static getFields () {
                 return {
                     enum: {
                         type: 'enum',
