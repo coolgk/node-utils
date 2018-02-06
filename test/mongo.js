@@ -419,13 +419,13 @@ describe.only('Mongo Module', function () {
                 }
             });
 
-            const documents = model1Documents.slice();
-
-            for (const row of documents) {
-                row.dbRef = model2Documents.filter((model2Row) => {
-                    return model2Row._id.toHexString() === row.dbRef.toHexString();
-                }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop();
-            }
+            const documents = model1Documents.map((row) => {
+                return Object.assign({}, row, {
+                    dbRef: model2Documents.filter((model2Row) => {
+                        return model2Row._id.toHexString() === row.dbRef.toHexString();
+                    }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop()
+                });
+            });
 
             expect(result).to.deep.equal(documents);
         });
@@ -446,18 +446,26 @@ describe.only('Mongo Module', function () {
                 }
             });
 
-            const documents = model1Documents.slice();
-
-            for (const row of documents) {
-                row.dbRef = model2Documents.filter((model2Row) => {
-                    return model2Row._id.toHexString() === row.dbRef.toHexString();
-                }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop();
-                for (const item of row.objectArray) {
-                    item.dbRef = model3Documents.filter((model3Row) => {
-                        return model3Row._id.toHexString() === item.dbRef.toHexString();
-                    }).map((row) => ({ _id: row._id, enum: row.enum })).pop();
-                }
-            }
+            const documents = model1Documents.map((row) => {
+                return Object.assign({}, row, {
+                    dbRef: model2Documents.filter((model2Row) => {
+                        return model2Row._id.toHexString() === row.dbRef.toHexString();
+                    }).map((row) => ({
+                        _id: row._id,
+                        string: row.string,
+                        ref: model3Documents.filter((model3Row) => {
+                            return model3Row._id.toHexString() === row.ref.toHexString();
+                        }).map((row) => ({ _id: row._id, enum: row.enum })).pop()
+                    })).pop(),
+                    objectArray: row.objectArray.map((item) => {
+                        return Object.assign(item, {
+                            dbRef: model3Documents.filter((model3Row) => {
+                                return model3Row._id.toHexString() === item.dbRef.toHexString();
+                            }).map((row) => ({ _id: row._id, enum: row.enum })).pop()
+                        });
+                    })
+                });
+            });
 
             expect(result).to.deep.equal(documents);
         });
