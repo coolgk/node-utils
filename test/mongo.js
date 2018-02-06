@@ -291,12 +291,8 @@ describe.only('Mongo Module', function () {
         // await model.disconnect();
     });
 
-    describe('find', () => {
-        it('should find all', async () => {
-            const result = await model.find();
-            expect(result).to.deep.equal(model1Documents);
-        });
-
+    describe.skip('deprecated tests', () => {
+        /*
         it('should do basic filtering', async () => {
             const result = await model.find({
                 filters: {
@@ -363,6 +359,48 @@ describe.only('Mongo Module', function () {
             expect(result.count()).to.equal(model1Documents.length);
         });
 
+        it('should return data as cursor and show total count', async () => {
+            const result = await model.find({
+                limit: 2,
+                cursor: true,
+                count: true
+            });
+
+            expect(result).is.a(Cursor);
+            expect(result.count()).to.equal(model1Documents.length);
+
+            return new Promise((resolve) => {
+                result.forEach(
+                    async (row) => {
+                        const item = await row;
+                        for (const property in model1Documents[0]) {
+                            expect(item).to.have.property(property);
+                        }
+                    },
+                    () => resolve()
+                );
+            });
+        });
+
+        it('should filter ObjectIds by string', async () => {
+            const result = await model.find({
+                filters: {
+                    _id: model1Documents[0]._id.toHexString(),
+                    dbref: model1Documents[0].dbRef.toHexString()
+                }
+            });
+            expect(result).to.deep.equal([model1Documents[0]]);
+        });
+
+    */
+    });
+
+    describe('find', () => {
+        it('should find all', async () => {
+            const result = await model.find();
+            expect(result).to.deep.equal(model1Documents);
+        });
+
         it('should select dbref fields', async () => {
             const result = await model.find({
                 dbRefs: {
@@ -419,29 +457,6 @@ describe.only('Mongo Module', function () {
             expect(result).to.deep.equal(documents);
         });
 
-        it('should return data as cursor and show total count', async () => {
-            const result = await model.find({
-                limit: 2,
-                cursor: true,
-                count: true
-            });
-
-            expect(result).is.a(Cursor);
-            expect(result.count()).to.equal(model1Documents.length);
-
-            return new Promise((resolve) => {
-                result.forEach(
-                    async (row) => {
-                        const item = await row;
-                        for (const property in model1Documents[0]) {
-                            expect(item).to.have.property(property);
-                        }
-                    },
-                    () => resolve()
-                );
-            });
-        });
-
         it('should filter dbref fields', async () => {
             const result = await model.find({
                 dbRefs: {
@@ -471,25 +486,13 @@ describe.only('Mongo Module', function () {
             );
         });
 
-        it('should filter ObjectIds by string', async () => {
-            const result = await model.find({
-                filters: {
-                    _id: model1Documents[0]._id.toHexString(),
-                    dbref: model1Documents[0].dbRef.toHexString()
-                }
-            });
-            expect(result).to.deep.equal([model1Documents[0]]);
-        });
-
         it('should be able to query other collection', async () => {
-            const result = await model.find({
-                collection: model2Name
-            });
+            const result = await model.getConnection().collection(model2Name).find();
             expect(result).to.deep.equal(model2Documents);
         });
 
         it('should not cause dbRef infinite loops');
-        it('should call getter functions?');
+        // it('should call getter functions?');
     });
 
     describe('save & update', () => {

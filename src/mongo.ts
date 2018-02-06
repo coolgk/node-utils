@@ -100,7 +100,6 @@ export class Mongo {
         this._collection = this._connection.collection(this.constructor.getCollectionName());
     }
 
-
     public getObjectID (id: ObjectID | string): ObjectID | undefined {
         return ObjectID.isValid(id) ? new ObjectID(id) : undefined;
     }
@@ -117,80 +116,49 @@ export class Mongo {
         return this._collection;
     }
 
-    public async find (query: { [index: string]: any }, options: IFindConfig): Cursor | IResult[] {
-
-        const cursor = this._collection.find(query, options);
-
-        if (options.dbRefs) {
-            const dbRefsInData: IDbRefsInData = {};
-            this._findDbRefs(
-                cursor,
-                options.dbRefs,
-                {
-                    type: DataType.OBJECT,
-                    array: true,
-                    object: this._fields
-                },
-                dbRefsInData
-            );
-            this.attachDbRefs(dbRefsInData, options.dbRefs);
-        }
-
-
-        // const cursor = this._collection.find(options.filters as object, {
-        //     sort: options.sort,
-        //     limit: options.limit,
-        //     skip: options.skip,
-        //     projection: options.fields
-        // });
-
-        if (options.cursor) {
-            cursor.map(
-                (row) => options.dbRefs ? this.attachDbRefs([row], options.dbRefs).then(
-                    (data) => data[0]
-                ) : Promise.resolve(row)
-            );
-            return cursor;
-        }
-
-        return this.query('find', options.filters || {}).then((cursor) => {
-            let result = {
-                count: undefined,
-                data: []
-            };
-
-            return (options.count ? cursor.count() : Promise.resolve()).then((count) => {
-                result.count = count;
-                options.sort && cursor.sort(options.sort);
-                options.fields && cursor.project(options.fields);
-                options.skip && cursor.skip(+options.skip);
-                options.limit && cursor.limit(+options.limit);
-            }).then(() => {
-                if (options.cursor) {
-                    cursor.map(
-                        (row) => options.dbRefs ? this.attachDbRefs([row], options.dbRefs).then(
-                            (data) => data[0]
-                        ) : Promise.resolve(row)
-                    );
-                    return cursor;
-                }
-                return cursor.toArray().then(
-                    (data) => options.dbRefs ? this.attachDbRefs(data, options.dbRefs) : data
-                );
-            }).then((data) => {
-                result.data = data;
-                return result;
-            });
-        });
+    public find (...params: any[]) {
+        this._collection.find(...params);
     }
 
     /**
-     * attach dbRefs data to the original query result
+     * attach dbRefs to query result
+     * @param {(Cursor | object[])} data - query result from find() either array or Cursor
+     * @param {object} dbRefs - dbRefs definition. format: { collectionName: { fields: { fieldName: 1 or 0 } } }
+     * @returns {Promise<Cursor | object[]>}
+     * @memberof Mongo
+     */
+    public async attachDbRefs (data: Cursor | IResult[], dbRefs: IDbRefs): Promise<Cursor | IResult[]> {
+        const fieldConfig: IField = {
+            type: DataType.OBJECT,
+            array: true,
+            object: this._fields
+        };
+
+        if (data.constructor.name === 'Cursor') {
+            return (data as Cursor).map(
+                (row: IResult) => {
+                    const dbRefsInRow: IDbRefsInData = {};
+                    this._findDbRefs(row, dbRefs as IDbRefs, fieldConfig, dbRefsInRow);
+                    return this._attachDataToReferencePointer(dbRefsInRow, dbRefs as IDbRefs);
+                }
+            );
+        } else {
+            const dbRefsInData: IDbRefsInData = {};
+            this._findDbRefs(data, dbRefs, fieldConfig, dbRefsInData);
+            this._attachDataToReferencePointer(dbRefsInData, dbRefs);
+        }
+
+        return data;
+    }
+
+    /**
+     * attach dbRefs data to reference pointers found in _findDbRefs()
+     * @ignore
      * @param {object} dbRefsInData - all dbRef fields from mongo query result
      * @param {object} queryDbRefs - dbRefs defined in query
      * @memberof Mongo
      */
-    public async attachDbRefs (dbRefsInData: IDbRefsInData, queryDbRefs: IDbRefs) {
+    private async _attachDataToReferencePointer (dbRefsInData: IDbRefsInData, queryDbRefs: IDbRefs) {
         if (Object.keys(dbRefsInData).length === 0) {
             return;
         }
@@ -228,7 +196,7 @@ export class Mongo {
                     },
                     () => {
                         // attach dbRefs found in referenced collections
-                        resolve(this.attachDbRefs(collectionDbRefsInData, queryDbRefs));
+                        resolve(this._attachDataToReferencePointer(collectionDbRefsInData, queryDbRefs));
                     }
                 );
             });
