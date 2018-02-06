@@ -47,10 +47,10 @@ export interface IDbRefs {
 }
 
 // query definition
-export interface IFindConfig extends FindOneOptions {
-    dbRefs?: IDbRefs;
-    cursor?: boolean;
-}
+// export interface IFindConfig extends FindOneOptions {
+//     dbRefs?: IDbRefs;
+//     cursor?: boolean;
+// }
 
 export interface IDataByReference {
     parent: IResult | IResult[];
@@ -128,21 +128,44 @@ export class Mongo {
      * @memberof Mongo
      */
     public async attachDbRefs (data: Cursor | IResult[], dbRefs: IDbRefs): Promise<Cursor | IResult[]> {
+
+        for (const collection in dbRefs) {
+            if (dbRefs[collection].filters) {
+                if (dbRefs[collection].fields._id === 0) {
+                    dbRefs[collection].fields._id = 1;
+                }
+                dbRefs[collection].dbRefsById = {};
+                await new Promise((resolve) => {
+                    this._db.collection(collection).find(
+                        dbRefs[collection].filters,
+                        {
+                            projection: dbRefs[collection].fields
+                        }
+                    ).forEach(
+                        (row) => {
+                            dbRefs[collection].dbRefsById[row._id] = row;
+                        },
+                        () => resolve()
+                    );
+                });
+            }
+        }
+
         if (data.constructor.name === 'Cursor') {
             return (data as Cursor).map(
-                (row: IResult) => {
+                async (row: IResult) => {
                     const dbRefsInRow: IDbRefsInData = {};
                     this._findDbRefs(
                         row,
                         dbRefs as IDbRefs,
                         {
                             type: DataType.OBJECT,
-                            array: true,
                             object: this._fields
                         },
                         dbRefsInRow
                     );
-                    return this._attachDataToReferencePointer(dbRefsInRow, dbRefs as IDbRefs);
+                    await this._attachDataToReferencePointer(dbRefsInRow, dbRefs as IDbRefs);
+                    return row;
                 }
             );
         } else {
@@ -175,6 +198,9 @@ export class Mongo {
         }
 
         for (const collection in dbRefsInData) {
+            if (queryDbRefs[collection].fields._id === 0) {
+                queryDbRefs[collection].fields._id = 1;
+            }
             const cursor = this._db.collection(collection).find(
                 {
                     _id: {

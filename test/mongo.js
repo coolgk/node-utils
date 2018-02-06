@@ -366,29 +366,6 @@ describe.only('Mongo Module', function () {
             expect(result.count()).to.equal(model1Documents.length);
         });
 
-        it('should return data as cursor and show total count', async () => {
-            const result = await model.find({
-                limit: 2,
-                cursor: true,
-                count: true
-            });
-
-            expect(result).is.a(Cursor);
-            expect(result.count()).to.equal(model1Documents.length);
-
-            return new Promise((resolve) => {
-                result.forEach(
-                    async (row) => {
-                        const item = await row;
-                        for (const property in model1Documents[0]) {
-                            expect(item).to.have.property(property);
-                        }
-                    },
-                    () => resolve()
-                );
-            });
-        });
-
         it('should filter ObjectIds by string', async () => {
             const result = await model.find({
                 filters: {
@@ -470,6 +447,37 @@ describe.only('Mongo Module', function () {
             expect(result).to.deep.equal(documents);
         });
 
+        it('should be able to query other collection', async () => {
+            const result = await model.getDb().collection(model2Name).find().toArray();
+            expect(result).to.deep.equal(model2Documents);
+        });
+
+        it('should attach dbRefs to cursor', async () => {
+            const result = await model.find();
+            await model.attachDbRefs(result, {
+                model2: {
+                    fields: {
+                        string: 1,
+                        ref: 1
+                    }
+                }
+            });
+
+            return new Promise((resolve) => {
+                result.forEach(
+                    async (row) => {
+                        const item = await row;
+                        expect(item.dbRef).to.deep.equal(
+                            model2Documents.filter((model2Row) => {
+                                return model2Row._id.toHexString() === item.dbRef._id.toHexString();
+                            }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop()
+                        );
+                    },
+                    () => resolve()
+                );
+            });
+        });
+
         it('should filter dbref fields', async () => {
             const result = await model.find({
                 dbRefs: {
@@ -497,11 +505,6 @@ describe.only('Mongo Module', function () {
                     return row;
                 })
             );
-        });
-
-        it('should be able to query other collection', async () => {
-            const result = await model.getConnection().collection(model2Name).find();
-            expect(result).to.deep.equal(model2Documents);
         });
 
         it('should not cause dbRef infinite loops');
