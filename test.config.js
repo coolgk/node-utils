@@ -7,6 +7,7 @@
 // REDIS_PASSWORD=
 // REDIS_PORT=
 // MONGO_URL=
+// MONGO_DB_NAME=
 
 module.exports = {
     sourceFolder: 'dist',

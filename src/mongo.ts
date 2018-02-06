@@ -67,7 +67,7 @@ export interface IDbRefsInData {
 }
 
 export interface IConfig {
-    connection: Db;
+    db: Db;
 }
 
 export class Mongo {
@@ -84,7 +84,7 @@ export class Mongo {
 
     private _fields: IFields = {};
     private _collection: Collection;
-    private _connection: Db;
+    private _db: Db;
 
     constructor (options: IConfig) {
         if (!this.constructor.getCollectionName) {
@@ -95,9 +95,9 @@ export class Mongo {
             throw new Error('undefined static method "getFields" in child class');
         }
 
-        this._connection = options.connection;
+        this._db = options.db;
         this._fields = this.constructor.getFields();
-        this._collection = this._connection.collection(this.constructor.getCollectionName());
+        this._collection = this._db.collection(this.constructor.getCollectionName());
     }
 
     public getObjectID (id: ObjectID | string): ObjectID | undefined {
@@ -108,8 +108,8 @@ export class Mongo {
         return this.getObjectID(id);
     }
 
-    public getConnection (): Db {
-        return this._connection;
+    public getDb (): Db {
+        return this._db;
     }
 
     public getCollection (): Collection {
@@ -117,7 +117,7 @@ export class Mongo {
     }
 
     public find (...params: any[]) {
-        this._collection.find(...params);
+        return this._collection.find(...params);
     }
 
     /**
@@ -128,26 +128,37 @@ export class Mongo {
      * @memberof Mongo
      */
     public async attachDbRefs (data: Cursor | IResult[], dbRefs: IDbRefs): Promise<Cursor | IResult[]> {
-        const fieldConfig: IField = {
-            type: DataType.OBJECT,
-            array: true,
-            object: this._fields
-        };
-
         if (data.constructor.name === 'Cursor') {
             return (data as Cursor).map(
                 (row: IResult) => {
                     const dbRefsInRow: IDbRefsInData = {};
-                    this._findDbRefs(row, dbRefs as IDbRefs, fieldConfig, dbRefsInRow);
+                    this._findDbRefs(
+                        row,
+                        dbRefs as IDbRefs,
+                        {
+                            type: DataType.OBJECT,
+                            array: true,
+                            object: this._fields
+                        },
+                        dbRefsInRow
+                    );
                     return this._attachDataToReferencePointer(dbRefsInRow, dbRefs as IDbRefs);
                 }
             );
         } else {
             const dbRefsInData: IDbRefsInData = {};
-            this._findDbRefs(data, dbRefs, fieldConfig, dbRefsInData);
-            this._attachDataToReferencePointer(dbRefsInData, dbRefs);
+            this._findDbRefs(
+                data,
+                dbRefs,
+                {
+                    type: DataType.OBJECT,
+                    array: data.constructor.name === 'Array',
+                    object: this._fields
+                },
+                dbRefsInData
+            );
+            await this._attachDataToReferencePointer(dbRefsInData, dbRefs);
         }
-
         return data;
     }
 
@@ -164,10 +175,10 @@ export class Mongo {
         }
 
         for (const collection in dbRefsInData) {
-            const cursor = this._connection.collection(collection).find(
+            const cursor = this._db.collection(collection).find(
                 {
                     _id: {
-                        $in: Object.keys(dbRefsInData[collection])
+                        $in: Object.keys(dbRefsInData[collection].dbRefsById).map((stringId) => new ObjectID(stringId))
                     }
                 },
                 {

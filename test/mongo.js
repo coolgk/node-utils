@@ -11,7 +11,7 @@ describe.only('Mongo Module', function () {
     // this.timeout(4000);
 
     const { Mongo } = require(`../${config.sourceFolder}/mongo`);
-    const { MongoClient, ObjectID, Cursor } = require('mongodb');
+    const { MongoClient, ObjectID } = require('mongodb');
 
     let model;
     let db;
@@ -19,13 +19,16 @@ describe.only('Mongo Module', function () {
     let model1Documents;
     let model2Documents;
     let model3Documents;
+    let Model1;
+    let Model2;
+    let Model3;
     const model1Name = 'model1';
     const model2Name = 'model2';
     const model3Name = 'model3';
 
     before((done) => {
 
-        class Model1 extends Mongo {
+        class M1 extends Mongo {
             static getFields () {
                 return {
                     string: {
@@ -86,8 +89,9 @@ describe.only('Mongo Module', function () {
                 return model1Name;
             }
         }
+        Model1 = M1;
 
-        class Model2 extends Mongo {
+        class M2 extends Mongo {
             static getFields () {
                 return {
                     ref: {
@@ -106,8 +110,9 @@ describe.only('Mongo Module', function () {
                 return model2Name;
             }
         }
+        Model2 = M2;
 
-        class Model3 extends Mongo {
+        class M3 extends Mongo {
             static getFields () {
                 return {
                     enum: {
@@ -124,10 +129,7 @@ describe.only('Mongo Module', function () {
                 return model3Name;
             }
         }
-
-        model = new Model1({
-            url: ''
-        });
+        Model3 = M3;
 
         MongoClient.connect(config.mongo.url, async (error, client) => {
             if (error) {
@@ -135,6 +137,7 @@ describe.only('Mongo Module', function () {
             }
 
             db = client.db(config.mongo.dbName);
+
             const collection1 = db.collection(
                 Model1.getCollectionName()
             );
@@ -285,8 +288,12 @@ describe.only('Mongo Module', function () {
 
     });
 
+    beforeEach(() => {
+        model = new Model1({ db });
+    });
+
     after(async () => {
-        // await db.dropDatabase();
+        await db.dropDatabase();
         await mongoClient.close();
         // await model.disconnect();
     });
@@ -398,17 +405,16 @@ describe.only('Mongo Module', function () {
     describe('find', () => {
         it('should find all', async () => {
             const result = await model.find();
-            expect(result).to.deep.equal(model1Documents);
+            expect(await result.toArray()).to.deep.equal(model1Documents);
         });
 
         it('should select dbref fields', async () => {
-            const result = await model.find({
-                dbRefs: {
-                    model2: {
-                        fields: {
-                            string: 1,
-                            ref: 1
-                        }
+            const result = await model.find().toArray();
+            await model.attachDbRefs(result,  {
+                model2: {
+                    fields: {
+                        string: 1,
+                        ref: 1
                     }
                 }
             });
@@ -416,27 +422,26 @@ describe.only('Mongo Module', function () {
             const documents = model1Documents.slice();
 
             for (const row of documents) {
-                row.dbRef = model2Documents.filter((row) => {
-                    return row._id.toHexString() === row.dbRef.toHexString();
-                }).pop();
+                row.dbRef = model2Documents.filter((model2Row) => {
+                    return model2Row._id.toHexString() === row.dbRef.toHexString();
+                }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop();
             }
 
             expect(result).to.deep.equal(documents);
         });
 
         it('should recursively select dbref fields', async () => {
-            const result = await model.find({
-                dbRefs: {
-                    model2: {
-                        fields: {
-                            string: 1,
-                            ref: 1
-                        }
-                    },
-                    model3: {
-                        fields: {
-                            enum: 1
-                        }
+            const result = await model.find().toArray();
+            await model.attachDbRefs(result,  {
+                model2: {
+                    fields: {
+                        string: 1,
+                        ref: 1
+                    }
+                },
+                model3: {
+                    fields: {
+                        enum: 1
                     }
                 }
             });
@@ -444,13 +449,13 @@ describe.only('Mongo Module', function () {
             const documents = model1Documents.slice();
 
             for (const row of documents) {
-                row.dbRef = model2Documents.filter((row) => {
-                    return row._id.toHexString() === row.dbRef.toHexString();
-                }).pop();
+                row.dbRef = model2Documents.filter((model2Row) => {
+                    return model2Row._id.toHexString() === row.dbRef.toHexString();
+                }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop();
                 for (const item of row.objectArray) {
-                    item.dbRef = model3Documents.filter((row) => {
-                        return row._id.toHexString() === item.dbRef.toHexString();
-                    }).pop();
+                    item.dbRef = model3Documents.filter((model3Row) => {
+                        return model3Row._id.toHexString() === item.dbRef.toHexString();
+                    }).map((row) => ({ _id: row._id, enum: row.enum })).pop();
                 }
             }
 
