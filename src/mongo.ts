@@ -42,6 +42,9 @@ export interface IDbRefs {
         },
         filters: {
             [index: string]: any
+        },
+        dataById?: {
+            [index: string]: any
         }
     };
 }
@@ -134,7 +137,7 @@ export class Mongo {
                 if (dbRefs[collection].fields._id === 0) {
                     dbRefs[collection].fields._id = 1;
                 }
-                dbRefs[collection].dbRefsById = {};
+                dbRefs[collection].dataById = {};
                 await new Promise((resolve) => {
                     this._db.collection(collection).find(
                         dbRefs[collection].filters,
@@ -143,7 +146,7 @@ export class Mongo {
                         }
                     ).forEach(
                         (row) => {
-                            dbRefs[collection].dbRefsById[row._id] = row;
+                            (dbRefs[collection] as any).dataById[row._id] = row;
                         },
                         () => resolve()
                     );
