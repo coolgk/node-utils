@@ -11,11 +11,7 @@ describe.only('Mongo Module', function () {
     // this.timeout(4000);
 
     const { Mongo, DataType } = require(`../${config.sourceFolder}/mongo`);
-    const { MongoClient, ObjectID, DBRef } = require('mongodb');
-
-    const a = {};
-    a[new DBRef('namespace', new ObjectID(), 'model1')] = 1;
-    console.log(a);
+    const { MongoClient, ObjectID } = require('mongodb');
 
     let model;
     let db;
@@ -52,7 +48,7 @@ describe.only('Mongo Module', function () {
                         type: 'date'
                     },
                     dbRef: {
-                        type: DataType.DBREF,
+                        type: DataType.OBJECTID,
                         model: Model2
                     },
                     enum: {
@@ -82,7 +78,7 @@ describe.only('Mongo Module', function () {
                                 type: 'date'
                             },
                             dbRef: {
-                                type: DataType.DBREF,
+                                type: DataType.OBJECTID,
                                 model: Model3
                             }
                         }
@@ -99,7 +95,7 @@ describe.only('Mongo Module', function () {
             static getFields () {
                 return {
                     ref: {
-                        type: DataType.DBREF,
+                        type: DataType.OBJECTID,
                         model: Model3
                     },
                     string: {
@@ -135,6 +131,131 @@ describe.only('Mongo Module', function () {
         }
         Model3 = M3;
 
+        model3Documents = [
+            {
+                _id: new ObjectID(),
+                enum: ['aaa'],
+                boolean: true
+            },
+            {
+                _id: new ObjectID(),
+                enum: [false, 222],
+                boolean: true
+            },
+            {
+                _id: new ObjectID(),
+                enum: [false],
+                boolean: false
+            }
+        ];
+
+        model2Documents = [
+            {
+                _id: new ObjectID(),
+                string: 'm2111111',
+                number: 1234,
+                ref: model3Documents[1]._id
+            },
+            {
+                _id: new ObjectID(),
+                string: 'm2222222',
+                number: 2345,
+                ref: model3Documents[2]._id
+            },
+            {
+                _id: new ObjectID(),
+                string: 'm2333333',
+                number: 3456,
+                ref: model3Documents[0]._id
+            }
+        ];
+
+        model1Documents = [
+            {
+                _id: new ObjectID(),
+                string: 'string value',
+                number: 11,
+                boolean: true,
+                date: new Date('2018-02-03'),
+                dbRef: model2Documents[1]._id,
+                enum: 'abc',
+                object: {
+                    string: 'abc',
+                    number: 1111
+                },
+                stringArray: ['aaa', 'bbb', 'ccc'],
+                objectArray: [
+                    {
+                        date: new Date('2018-02-02'),
+                        dbRef: model3Documents[2]._id
+                    },
+                    {
+                        date: new Date('2018-02-01'),
+                        dbRef: model3Documents[1]._id
+                    }
+                ]
+            },
+            {
+                _id: new ObjectID(),
+                string: 'string1111',
+                number: 12,
+                boolean: false,
+                date: new Date('2018-02-01'),
+                dbRef: model2Documents[0]._id,
+                enum: 'd22222',
+                object: {
+                    string: 't2222',
+                    number: 2222
+                },
+                stringArray: ['eee', 'ddd'],
+                objectArray: [
+                    {
+                        date: new Date('2018-01-02'),
+                        dbRef: model3Documents[0]._id
+                    },
+                    {
+                        date: new Date('2018-01-31'),
+                        dbRef: model3Documents[2]._id
+                    }
+                ]
+            },
+            {
+                _id: new ObjectID(),
+                string: 'string3333',
+                number: 13,
+                boolean: false,
+                date: new Date('2018-01-21'),
+                dbRef: model2Documents[2]._id,
+                enum: 'd333',
+                object: {
+                    string: 't333',
+                    number: 333
+                },
+                stringArray: ['ddd'],
+                objectArray: []
+            },
+            {
+                _id: new ObjectID(),
+                string: 'string444',
+                number: 14,
+                boolean: true,
+                date: new Date('2018-01-08'),
+                dbRef: model2Documents[1]._id,
+                enum: 'd443',
+                object: {
+                    string: 't444',
+                    number: 4444
+                },
+                stringArray: [],
+                objectArray: [
+                    {
+                        date: new Date('2018-01-19'),
+                        dbRef: model3Documents[0]._id
+                    }
+                ]
+            }
+        ];
+
         MongoClient.connect(config.mongo.url, async (error, client) => {
             if (error) {
                 throw error;
@@ -152,136 +273,14 @@ describe.only('Mongo Module', function () {
                 Model3.getCollectionName()
             );
 
-            model3Documents = [
-                {
-                    _id: new ObjectID(),
-                    enum: ['aaa'],
-                    boolean: true
-                },
-                {
-                    _id: new ObjectID(),
-                    enum: [false, 222],
-                    boolean: true
-                },
-                {
-                    _id: new ObjectID(),
-                    enum: [false],
-                    boolean: false
-                }
-            ];
             await new Promise((resolve) => {
                 collection3.insertMany(model3Documents, (error, result) => resolve(result));
             });
 
-            model2Documents = [
-                {
-                    _id: new ObjectID(),
-                    string: 'm2111111',
-                    number: 1234,
-                    ref: model3Documents[1]._id
-                },
-                {
-                    _id: new ObjectID(),
-                    string: 'm2222222',
-                    number: 2345,
-                    ref: model3Documents[2]._id
-                },
-                {
-                    _id: new ObjectID(),
-                    string: 'm2333333',
-                    number: 3456,
-                    ref: model3Documents[0]._id
-                }
-            ];
             await new Promise((resolve) => {
                 collection2.insertMany(model2Documents, (error, result) => resolve(result));
             });
 
-            model1Documents = [
-                {
-                    _id: new ObjectID(),
-                    string: 'string value',
-                    number: 11,
-                    boolean: true,
-                    date: new Date('2018-02-03'),
-                    dbRef: model2Documents[1]._id,
-                    enum: 'abc',
-                    object: {
-                        string: 'abc',
-                        number: 1111
-                    },
-                    stringArray: ['aaa', 'bbb', 'ccc'],
-                    objectArray: [
-                        {
-                            date: new Date('2018-02-02'),
-                            dbRef: model3Documents[2]._id
-                        },
-                        {
-                            date: new Date('2018-02-01'),
-                            dbRef: model3Documents[1]._id
-                        }
-                    ]
-                },
-                {
-                    _id: new ObjectID(),
-                    string: 'string1111',
-                    number: 12,
-                    boolean: false,
-                    date: new Date('2018-02-01'),
-                    dbRef: model2Documents[0]._id,
-                    enum: 'd22222',
-                    object: {
-                        string: 't2222',
-                        number: 2222
-                    },
-                    stringArray: ['eee', 'ddd'],
-                    objectArray: [
-                        {
-                            date: new Date('2018-01-02'),
-                            dbRef: model3Documents[0]._id
-                        },
-                        {
-                            date: new Date('2018-01-31'),
-                            dbRef: model3Documents[2]._id
-                        }
-                    ]
-                },
-                {
-                    _id: new ObjectID(),
-                    string: 'string3333',
-                    number: 13,
-                    boolean: false,
-                    date: new Date('2018-01-21'),
-                    dbRef: model2Documents[2]._id,
-                    enum: 'd333',
-                    object: {
-                        string: 't333',
-                        number: 333
-                    },
-                    stringArray: ['ddd'],
-                    objectArray: []
-                },
-                {
-                    _id: new ObjectID(),
-                    string: 'string444',
-                    number: 14,
-                    boolean: true,
-                    date: new Date('2018-01-08'),
-                    dbRef: model2Documents[1]._id,
-                    enum: 'd443',
-                    object: {
-                        string: 't444',
-                        number: 4444
-                    },
-                    stringArray: [],
-                    objectArray: [
-                        {
-                            date: new Date('2018-01-19'),
-                            dbRef: model3Documents[0]._id
-                        }
-                    ]
-                }
-            ];
             await new Promise((resolve) => {
                 collection1.insertMany(model1Documents, (error, result) => resolve(result));
             });
@@ -484,19 +483,29 @@ describe.only('Mongo Module', function () {
 
         it.only('should filter dbref fields', async () => {
 
-            const result = await model.find({
-                dbRefs: {
-                    model2: {
-                        fields: {
-                            string: 1,
-                            ref: 1
-                        },
-                        filters: {
-                            string: 'm2222222'
-                        }
+            const result = await model.find({}, {}, {
+                model2: {
+                    fields: {
+                        string: 1,
+                        ref: 1
+                    },
+                    filters: {
+                        number: 2345
                     }
                 }
             });
+console.log(await result.toArray())
+            // await model.attachDbRefs(result, {
+            //     model2: {
+            //         fields: {
+            //             string: 1,
+            //             ref: 1
+            //         },
+            //         filters: {
+            //             number: 2345
+            //         }
+            //     }
+            // });
 
             return new Error();
 
