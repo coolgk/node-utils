@@ -8,7 +8,7 @@ export enum DataType {
     ENUM = 'enum',
     BOOLEAN = 'boolean',
     DATE = 'date',
-    DBREF = 'dbref'
+    OBJECTID = 'objectid'
 }
 
 // model field definition
@@ -306,7 +306,7 @@ export class Mongo {
                         }
                     }
                     break;
-                case DataType.DBREF:
+                case DataType.OBJECTID:
                     if (data) {
                         if (!fieldConfig.model) {
                             throw new Error(`undefined "model" property for "${fieldConfig.type}" type: ${JSON.stringify(fieldConfig)}`);
@@ -327,11 +327,11 @@ export class Mongo {
                                 // clear db ref data, if refereced data is not found, the result will be {} instead of the origin ObjectID or DBRef
                                 (dataByReference.parent as any)[dataByReference.field] = {};
                                 // data.oid = DbRef() type in mongo
-                                const id = data.constructor.name === 'ObjectID' ? data : data.oid;
-                                if (!dbRefsInData[collection].dbRefsById[id]) {
-                                    dbRefsInData[collection].dbRefsById[id] = [];
+                                // const id = data.constructor.name === 'ObjectID' ? data : data.oid;
+                                if (!dbRefsInData[collection].dbRefsById[data]) {
+                                    dbRefsInData[collection].dbRefsById[data] = [];
                                 }
-                                dbRefsInData[collection].dbRefsById[id].push(dataByReference);
+                                dbRefsInData[collection].dbRefsById[data].push(dataByReference);
                             }
                         }
                     }
@@ -344,7 +344,7 @@ export class Mongo {
         const dbRefFields: IDbRefFields = {};
         for (const field in fieldConfig) {
             switch (fieldConfig[field].type) {
-                case DataType.DBREF:
+                case DataType.OBJECTID:
                     dbRefFields[field] = (fieldConfig[field].model as typeof Mongo).getCollectionName();
                     break;
                 case DataType.OBJECT:

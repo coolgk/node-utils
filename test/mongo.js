@@ -11,7 +11,11 @@ describe.only('Mongo Module', function () {
     // this.timeout(4000);
 
     const { Mongo, DataType } = require(`../${config.sourceFolder}/mongo`);
-    const { MongoClient, ObjectID } = require('mongodb');
+    const { MongoClient, ObjectID, DBRef } = require('mongodb');
+
+    const a = {};
+    a[new DBRef('namespace', new ObjectID(), 'model1')] = 1;
+    console.log(a);
 
     let model;
     let db;
