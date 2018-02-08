@@ -18,9 +18,7 @@ export interface IField {
     enum?: (string | number | boolean)[];
     default?: any;
     model?: typeof Mongo;
-    object?: {
-        [index: string]: IField
-    };
+    object?: IFields;
     array?: boolean;
 }
 
@@ -67,6 +65,11 @@ export interface IDbRefsInData {
             [index: string]: IDataByReference[]
         }
     };
+}
+
+// all dbRefs fields found in field config
+export interface IDbRefFields {
+    [index: string]: any;
 }
 
 export interface IConfig {
@@ -120,7 +123,8 @@ export class Mongo {
     }
 
     public find (...params: any[]) {
-        return this._collection.find(...params);
+        // return this._collection.find(...params);
+        console.log(this._getDbRefsFields());
     }
 
     /**
@@ -158,7 +162,7 @@ export class Mongo {
             return (data as Cursor).map(
                 async (row: IResult) => {
                     const dbRefsInRow: IDbRefsInData = {};
-                    this._findDbRefs(
+                    this._findDbRefsInData(
                         row,
                         dbRefs as IDbRefs,
                         {
@@ -173,7 +177,7 @@ export class Mongo {
             );
         } else {
             const dbRefsInData: IDbRefsInData = {};
-            this._findDbRefs(
+            this._findDbRefsInData(
                 data,
                 dbRefs,
                 {
@@ -223,7 +227,7 @@ export class Mongo {
                         dbRefsInData[collection].dbRefsById[row._id].forEach((referencePointer) => {
                             (referencePointer.parent as any)[referencePointer.field] = row;
                         });
-                        this._findDbRefs(
+                        this._findDbRefsInData(
                             [row],
                             queryDbRefs,
                             {
@@ -244,7 +248,7 @@ export class Mongo {
     }
 
     /**
-     * find all dbRef fields from mongo query result
+     * find all dbRef data from mongo query result
      * @ignore
      * @private
      * @param {*} data - query result or a row/value of query result
@@ -254,7 +258,7 @@ export class Mongo {
      * @param {object} [dataByReference] - internal param, a reference pointer to the data param
      * @memberof Mongo
      */
-    private _findDbRefs (
+    private _findDbRefsInData (
         data: any,
         queryDbRefs: IDbRefs,
         fieldConfig: IField | undefined,
@@ -267,7 +271,7 @@ export class Mongo {
 
         if (fieldConfig.array) {
             for (let index = (data as IResult[]).length - 1; index >= 0; index--) {
-                this._findDbRefs(
+                this._findDbRefsInData(
                     (data as IResult[])[index],
                     queryDbRefs,
                     {
@@ -282,14 +286,14 @@ export class Mongo {
                 );
             }
         } else {
-            switch (fieldConfig.type.toLowerCase()) {
+            switch (fieldConfig.type) {
                 case DataType.OBJECT:
                     if (!fieldConfig.object) {
                         throw new Error(`undefined "object" property for "${fieldConfig.type}" type: ${JSON.stringify(fieldConfig)}`);
                     }
                     for (const field in data) {
                         if (field !== '_id') {
-                            this._findDbRefs(
+                            this._findDbRefsInData(
                                 data[field],
                                 queryDbRefs,
                                 fieldConfig.object[field],
@@ -336,6 +340,23 @@ export class Mongo {
         }
     }
 
+    private _getDbRefsFields (fieldConfig: IFields = this._fields): IDbRefFields {
+        const dbRefFields: IDbRefFields = {};
+        for (const field in fieldConfig) {
+            switch (fieldConfig[field].type) {
+                case DataType.DBREF:
+                    dbRefFields[field] = (fieldConfig[field].model as typeof Mongo).getCollectionName();
+                    break;
+                case DataType.OBJECT:
+                    const subFields = this._getDbRefsFields(fieldConfig[field].object as IFields);
+                    for (const subField in subFields) {
+                        dbRefFields[`${field}.${subField}`] = subFields[subField];
+                    }
+                    break;
+            }
+        }
+        return dbRefFields;
+    }
 }
 
 export default Mongo;

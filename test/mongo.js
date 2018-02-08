@@ -10,7 +10,7 @@ const config = require('../test.config.js');
 describe.only('Mongo Module', function () {
     // this.timeout(4000);
 
-    const { Mongo } = require(`../${config.sourceFolder}/mongo`);
+    const { Mongo, DataType } = require(`../${config.sourceFolder}/mongo`);
     const { MongoClient, ObjectID } = require('mongodb');
 
     let model;
@@ -48,7 +48,7 @@ describe.only('Mongo Module', function () {
                         type: 'date'
                     },
                     dbRef: {
-                        type: 'dbRef',
+                        type: DataType.DBREF,
                         model: Model2
                     },
                     enum: {
@@ -78,7 +78,7 @@ describe.only('Mongo Module', function () {
                                 type: 'date'
                             },
                             dbRef: {
-                                type: 'dbRef',
+                                type: DataType.DBREF,
                                 model: Model3
                             }
                         }
@@ -95,7 +95,7 @@ describe.only('Mongo Module', function () {
             static getFields () {
                 return {
                     ref: {
-                        type: 'dbRef',
+                        type: DataType.DBREF,
                         model: Model3
                     },
                     string: {
@@ -478,7 +478,8 @@ describe.only('Mongo Module', function () {
             });
         });
 
-        it('should filter dbref fields', async () => {
+        it.only('should filter dbref fields', async () => {
+
             const result = await model.find({
                 dbRefs: {
                     model2: {
@@ -492,6 +493,8 @@ describe.only('Mongo Module', function () {
                     }
                 }
             });
+
+            return new Error();
 
             const model2Row = model2Documents.filter((row) => {
                 return row.string === 'm2222222';
