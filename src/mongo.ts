@@ -35,10 +35,10 @@ export interface IResult {
 // query dbRef definition
 export interface IDbRefs {
     [index: string]: {
-        fields: {
+        fields?: {
             [index: string]: 1 | 0
         },
-        filters: {
+        filters?: {
             [index: string]: any
         }
     };
@@ -51,7 +51,7 @@ export interface IDataByReference {
 }
 
 // object id fields in search result
-export interface IDbRefsInData {
+export interface IObjectIdInData {
     [index: string]: {
         model: typeof Mongo;
         dbRefsById: {
@@ -61,15 +61,18 @@ export interface IDbRefsInData {
 }
 
 // all object id fields found in field config
-export interface IDbRefFields {
+export interface IObjectIdFields {
+    [index: string]: any;
+}
+
+// mongo query object
+export interface IQuery {
     [index: string]: any;
 }
 
 // data found in referenced collections
-export interface IDbRefData {
-    [index: string]: {
-        [index: string]: any;
-    };
+export interface IFilteredObjectIdData {
+    [index: string]: any[];
 }
 
 export interface IConfig {
@@ -122,48 +125,13 @@ export class Mongo {
         return this._collection;
     }
 
-    public async find (query, options = {}, dbRefs) {
-        const dbRefData: IDbRefData = {};
-        for (const collection in dbRefs) {
-            if (dbRefs[collection].filters) {
-                if (dbRefs[collection].fields._id === 0) {
-                    dbRefs[collection].fields._id = 1;
-                }
-                dbRefData[collection] = {};
-                await new Promise((resolve) => {
-                    this._db.collection(collection).find(
-                        dbRefs[collection].filters,
-                        {
-                            projection: dbRefs[collection].fields
-                        }
-                    ).forEach(
-                        (row) => {
-                            dbRefData[collection][row._id] = row;
-                        },
-                        () => resolve()
-                    );
-                });
-            }
-        }
-
-        if (Object.keys(dbRefData).length) {
-            query = {
-                $and: [ query ]
-            };
-            const dbRefFields = this._getDbRefFields();
-
-            for (const field in dbRefFields) {
-                if (dbRefData[dbRefFields[field]]) {
-                    query.$and.push({
-                        [field]: {
-                            $in: Object.keys(dbRefData[dbRefFields[field]]).map((stringId) => new ObjectID(stringId))
-                        }
-                    });
-                }
-            }
-        }
-console.log(query)
-        return this._collection.find(query, options);
+    public async find (query: IQuery, options = {}, dbRefs: IDbRefs) {
+        const filteredObjectIdData = await this._getFilteredObjectIdData(dbRefs);
+        const cursor = this._collection.find(
+            this._getQuery(query, filteredObjectIdData),
+            options
+        );
+        await this.attachDbRefs(cursor, dbRefs, filteredObjectIdData);
     }
 
     /**
@@ -173,44 +141,91 @@ console.log(query)
      * @returns {Promise<Cursor | object[]>}
      * @memberof Mongo
      */
-    public async attachDbRefs (data: Cursor | IResult[], dbRefs: IDbRefs): Promise<Cursor | IResult[]> {
-
-
-        return;
-
-
+    public async attachDbRefs (
+        data: Cursor | IResult[], dbRefs: IDbRefs, filteredObjectIdData: IFilteredObjectIdData
+    ): Promise<Cursor | IResult[]> {
         if (data.constructor.name === 'Cursor') {
             return (data as Cursor).map(
                 async (row: IResult) => {
-                    const dbRefsInRow: IDbRefsInData = {};
-                    this._findDbRefsInData(
-                        row,
-                        dbRefs as IDbRefs,
-                        {
-                            type: DataType.OBJECT,
-                            object: this._fields
-                        },
-                        dbRefsInRow
-                    );
-                    await this._attachDataToReferencePointer(dbRefsInRow, dbRefs as IDbRefs);
+                    await this._findAndAttachObjectIdData(row, dbRefs, false, filteredObjectIdData);
                     return row;
                 }
             );
         } else {
-            const dbRefsInData: IDbRefsInData = {};
-            this._findDbRefsInData(
-                data,
-                dbRefs,
-                {
-                    type: DataType.OBJECT,
-                    array: data.constructor.name === 'Array',
-                    object: this._fields
-                },
-                dbRefsInData
-            );
-            await this._attachDataToReferencePointer(dbRefsInData, dbRefs);
+            await this._findAndAttachObjectIdData(data, dbRefs, data.constructor.name === 'Array', filteredObjectIdData);
         }
         return data;
+    }
+
+    private _getQuery (query: IQuery, filteredObjectIdData: IFilteredObjectIdData): IQuery {
+        let newQUery = query;
+        if (Object.keys(filteredObjectIdData).length) {
+            newQUery = {
+                $and: [ query ]
+            };
+            const objectIdFields = this._getObjectIdFields();
+
+            for (const field in objectIdFields) {
+                const collection = objectIdFields[field];
+                const data = filteredObjectIdData[collection];
+                if (data) {
+                    newQUery.$and.push({
+                        [field]: {
+                            $in: data.map((row) => row._id)
+                        }
+                    });
+                }
+            }
+        }
+        return newQUery;
+    }
+
+    private async _getFilteredObjectIdData (dbRefs: IDbRefs): Promise<IFilteredObjectIdData> {
+        const filteredObjectIdData: IFilteredObjectIdData = {};
+        for (const collection in dbRefs) {
+            const filters = dbRefs[collection].filters;
+            if (filters) {
+                const fields = dbRefs[collection].fields;
+                if (fields && fields._id === 0) {
+                    fields._id = 1;
+                }
+                filteredObjectIdData[collection] = [];
+                await new Promise((resolve) => {
+                    this._db.collection(collection).find(
+                        filters,
+                        {
+                            projection: dbRefs[collection].fields
+                        }
+                    ).forEach(
+                        (row) => {
+                            filteredObjectIdData[collection].push(row);
+                        },
+                        () => resolve()
+                    );
+                });
+            }
+        }
+        return filteredObjectIdData;
+    }
+
+    private async _findAndAttachObjectIdData (
+        data: IResult[] | IResult,
+        dbRefs: IDbRefs,
+        isArray: boolean,
+        filteredObjectIdData: IFilteredObjectIdData
+    ): Promise<void> {
+        const dbRefsInData: IObjectIdInData = {};
+        this._findObjectIdInData(
+            data,
+            dbRefs,
+            {
+                type: DataType.OBJECT,
+                object: this._fields,
+                array: isArray
+            },
+            dbRefsInData
+        );
+        await this._attachDataToReferencePointer(dbRefsInData, dbRefs, filteredObjectIdData);
     }
 
     /**
@@ -220,14 +235,27 @@ console.log(query)
      * @param {object} queryDbRefs - dbRefs defined in query
      * @memberof Mongo
      */
-    private async _attachDataToReferencePointer (dbRefsInData: IDbRefsInData, queryDbRefs: IDbRefs) {
+    private async _attachDataToReferencePointer (
+        dbRefsInData: IObjectIdInData, queryDbRefs: IDbRefs, filteredObjectIdData: IFilteredObjectIdData
+    ) {
         if (Object.keys(dbRefsInData).length === 0) {
             return;
         }
 
         for (const collection in dbRefsInData) {
-            if (queryDbRefs[collection].fields._id === 0) {
-                queryDbRefs[collection].fields._id = 1;
+            if (filteredObjectIdData[collection]) {
+                filteredObjectIdData[collection].forEach((row) => {
+                    dbRefsInData[collection].dbRefsById[row._id].forEach((referencePointer) => {
+                        (referencePointer.parent as any)[referencePointer.field] = row;
+                    });
+                });
+            } else {
+
+            }
+
+            const fields = queryDbRefs[collection].fields;
+            if (fields && fields._id === 0) {
+                fields._id = 1;
             }
             const cursor = this._db.collection(collection).find(
                 {
@@ -241,14 +269,14 @@ console.log(query)
             );
 
             await new Promise((resolve) => {
-                const collectionDbRefsInData: IDbRefsInData = {};
+                const collectionDbRefsInData: IObjectIdInData = {};
                 const collectionFieldConfig = dbRefsInData[collection].model.getFields();
                 cursor.forEach(
                     (row) => {
                         dbRefsInData[collection].dbRefsById[row._id].forEach((referencePointer) => {
                             (referencePointer.parent as any)[referencePointer.field] = row;
                         });
-                        this._findDbRefsInData(
+                        this._findObjectIdInData(
                             [row],
                             queryDbRefs,
                             {
@@ -260,8 +288,8 @@ console.log(query)
                         );
                     },
                     () => {
-                        // attach dbRefs found in referenced collections
-                        resolve(this._attachDataToReferencePointer(collectionDbRefsInData, queryDbRefs));
+                        // attach object ids found in referenced collections
+                        resolve(this._attachDataToReferencePointer(collectionDbRefsInData, queryDbRefs, filteredObjectIdData));
                     }
                 );
             });
@@ -269,7 +297,7 @@ console.log(query)
     }
 
     /**
-     * find all dbRef data from mongo query result
+     * find all object id data from mongo query result
      * @ignore
      * @private
      * @param {*} data - query result or a row/value of query result
@@ -279,11 +307,11 @@ console.log(query)
      * @param {object} [dataByReference] - internal param, a reference pointer to the data param
      * @memberof Mongo
      */
-    private _findDbRefsInData (
+    private _findObjectIdInData (
         data: any,
         queryDbRefs: IDbRefs,
         fieldConfig: IField | undefined,
-        dbRefsInData: IDbRefsInData = {},
+        dbRefsInData: IObjectIdInData = {},
         dataByReference?: IDataByReference
     ) {
         if (!fieldConfig) {
@@ -292,7 +320,7 @@ console.log(query)
 
         if (fieldConfig.array) {
             for (let index = (data as IResult[]).length - 1; index >= 0; index--) {
-                this._findDbRefsInData(
+                this._findObjectIdInData(
                     (data as IResult[])[index],
                     queryDbRefs,
                     {
@@ -314,7 +342,7 @@ console.log(query)
                     }
                     for (const field in data) {
                         if (field !== '_id') {
-                            this._findDbRefsInData(
+                            this._findObjectIdInData(
                                 data[field],
                                 queryDbRefs,
                                 fieldConfig.object[field],
@@ -361,22 +389,29 @@ console.log(query)
         }
     }
 
-    private _getDbRefFields (fieldConfig: IFields = this._fields): IDbRefFields {
-        const dbRefFields: IDbRefFields = {};
+    /**
+     * find object id fields from field config
+     * @private
+     * @param {IFields} [fieldConfig=this._fields]
+     * @returns {IObjectIdFields}
+     * @memberof Mongo
+     */
+    private _getObjectIdFields (fieldConfig: IFields = this._fields): IObjectIdFields {
+        const objectIdFields: IObjectIdFields = {};
         for (const field in fieldConfig) {
             switch (fieldConfig[field].type) {
                 case DataType.OBJECTID:
-                    dbRefFields[field] = (fieldConfig[field].model as typeof Mongo).getCollectionName();
+                    objectIdFields[field] = (fieldConfig[field].model as typeof Mongo).getCollectionName();
                     break;
                 case DataType.OBJECT:
-                    const subFields = this._getDbRefFields(fieldConfig[field].object as IFields);
+                    const subFields = this._getObjectIdFields(fieldConfig[field].object as IFields);
                     for (const subField in subFields) {
-                        dbRefFields[`${field}.${subField}`] = subFields[subField];
+                        objectIdFields[`${field}.${subField}`] = subFields[subField];
                     }
                     break;
             }
         }
-        return dbRefFields;
+        return objectIdFields;
     }
 }
 
