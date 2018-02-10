@@ -230,6 +230,8 @@ function generateRootReadme (folder) {
                 readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/node-utils/status.svg)](https://david-dm.org/coolgk/node-utils) ');
                 // coverage
                 readmeWriteStream.write('[![Coverage Status](https://coveralls.io/repos/github/coolgk/node-utils/badge.svg)](https://coveralls.io/github/coolgk/node-utils)');
+                // security
+                readmeWriteStream.write('[![Known Vulnerabilities](https://snyk.io/test/github/coolgk/node-utils/badge.svg)](https://snyk.io/test/github/coolgk/node-utils)');
 
                 readmeWriteStream.write("\n\n");
                 readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
