@@ -1,6 +1,6 @@
 /***
 description: unit conversion
-version: 2.0.3
+version: 2.0.4
 keywords:
     - unit
     - conversion
@@ -55,7 +55,7 @@ export function bytesToString (value: number): string {
  * @return {string} value in second, minute, hour, day, month or year
  */
 export function millisecondsToString (value: number): string {
-    const units: [[string, number]] = [
+    const units: [string, number][] = [
         ['second', 60],
         ['minute', 60],
         ['hour', 24],
