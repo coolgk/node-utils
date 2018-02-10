@@ -19,12 +19,15 @@ describe.only('Mongo Module', function () {
     let model1Documents;
     let model2Documents;
     let model3Documents;
+    let model4Documents;
     let Model1;
     let Model2;
     let Model3;
+    let Model4;
     const model1Name = 'model1';
     const model2Name = 'model2';
     const model3Name = 'model3';
+    const model4Name = 'model4';
 
     before((done) => {
 
@@ -47,7 +50,7 @@ describe.only('Mongo Module', function () {
                     date: {
                         type: 'date'
                     },
-                    dbRef: {
+                    model2DbRef: {
                         type: DataType.OBJECTID,
                         model: Model2
                     },
@@ -77,7 +80,7 @@ describe.only('Mongo Module', function () {
                             date: {
                                 type: 'date'
                             },
-                            dbRef: {
+                            model3DbRef: {
                                 type: DataType.OBJECTID,
                                 model: Model3
                             }
@@ -94,7 +97,7 @@ describe.only('Mongo Module', function () {
         class M2 extends Mongo {
             static getFields () {
                 return {
-                    ref: {
+                    model3Ref: {
                         type: DataType.OBJECTID,
                         model: Model3
                     },
@@ -103,6 +106,10 @@ describe.only('Mongo Module', function () {
                     },
                     number: {
                         type: 'number'
+                    },
+                    model4Ref: {
+                        type: DataType.OBJECTID,
+                        model: Model4
                     }
                 };
             }
@@ -131,6 +138,33 @@ describe.only('Mongo Module', function () {
         }
         Model3 = M3;
 
+        class M4 extends Mongo {
+            static getFields () {
+                return {
+                    m4str: DataType.STRING
+                };
+            }
+            static getCollectionName () {
+                return model4Name;
+            }
+        }
+        Model4 = M4;
+
+        model4Documents = [
+            {
+                _id: new ObjectID(),
+                m4str: 's1'
+            },
+            {
+                _id: new ObjectID(),
+                m4str: 's1'
+            },
+            {
+                _id: new ObjectID(),
+                m4str: 's2'
+            }
+        ];
+
         model3Documents = [
             {
                 _id: new ObjectID(),
@@ -154,19 +188,22 @@ describe.only('Mongo Module', function () {
                 _id: new ObjectID(),
                 string: 'm2111111',
                 number: 1234,
-                ref: model3Documents[1]._id
+                model3Ref: model3Documents[1]._id,
+                model4Ref: model4Documents[1]._id
             },
             {
                 _id: new ObjectID(),
                 string: 'm2222222',
                 number: 2345,
-                ref: model3Documents[2]._id
+                model3Ref: model3Documents[2]._id,
+                model4Ref: model4Documents[2]._id
             },
             {
                 _id: new ObjectID(),
                 string: 'm2333333',
                 number: 3456,
-                ref: model3Documents[0]._id
+                model3Ref: model3Documents[0]._id,
+                model4Ref: model4Documents[0]._id
             }
         ];
 
@@ -177,7 +214,7 @@ describe.only('Mongo Module', function () {
                 number: 11,
                 boolean: true,
                 date: new Date('2018-02-03'),
-                dbRef: model2Documents[1]._id,
+                model2DbRef: model2Documents[1]._id,
                 enum: 'abc',
                 object: {
                     string: 'abc',
@@ -187,11 +224,11 @@ describe.only('Mongo Module', function () {
                 objectArray: [
                     {
                         date: new Date('2018-02-02'),
-                        dbRef: model3Documents[2]._id
+                        model3DbRef: model3Documents[2]._id
                     },
                     {
                         date: new Date('2018-02-01'),
-                        dbRef: model3Documents[1]._id
+                        model3DbRef: model3Documents[1]._id
                     }
                 ]
             },
@@ -201,7 +238,7 @@ describe.only('Mongo Module', function () {
                 number: 12,
                 boolean: false,
                 date: new Date('2018-02-01'),
-                dbRef: model2Documents[0]._id,
+                model2DbRef: model2Documents[0]._id,
                 enum: 'd22222',
                 object: {
                     string: 't2222',
@@ -211,11 +248,11 @@ describe.only('Mongo Module', function () {
                 objectArray: [
                     {
                         date: new Date('2018-01-02'),
-                        dbRef: model3Documents[0]._id
+                        model3DbRef: model3Documents[0]._id
                     },
                     {
                         date: new Date('2018-01-31'),
-                        dbRef: model3Documents[2]._id
+                        model3DbRef: model3Documents[2]._id
                     }
                 ]
             },
@@ -225,7 +262,7 @@ describe.only('Mongo Module', function () {
                 number: 13,
                 boolean: false,
                 date: new Date('2018-01-21'),
-                dbRef: model2Documents[2]._id,
+                model2DbRef: model2Documents[2]._id,
                 enum: 'd333',
                 object: {
                     string: 't333',
@@ -240,7 +277,7 @@ describe.only('Mongo Module', function () {
                 number: 14,
                 boolean: true,
                 date: new Date('2018-01-08'),
-                dbRef: model2Documents[1]._id,
+                model2DbRef: model2Documents[1]._id,
                 enum: 'd443',
                 object: {
                     string: 't444',
@@ -250,7 +287,7 @@ describe.only('Mongo Module', function () {
                 objectArray: [
                     {
                         date: new Date('2018-01-19'),
-                        dbRef: model3Documents[0]._id
+                        model3DbRef: model3Documents[0]._id
                     }
                 ]
             }
@@ -373,7 +410,7 @@ describe.only('Mongo Module', function () {
             const result = await model.find({
                 filters: {
                     _id: model1Documents[0]._id.toHexString(),
-                    dbref: model1Documents[0].dbRef.toHexString()
+                    // model2Dbref: model1Documents[0].model2DbRef.toHexString()
                 }
             });
             expect(result).to.deep.equal([model1Documents[0]]);
@@ -388,35 +425,35 @@ describe.only('Mongo Module', function () {
             expect(await result.toArray()).to.deep.equal(model1Documents);
         });
 
-        it('should select dbref fields', async () => {
+        it('should select object id fields', async () => {
             const result = await model.find().toArray();
             await model.attachDbRefs(result,  {
                 model2: {
                     fields: {
                         string: 1,
-                        ref: 1
+                        model3Ref: 1
                     }
                 }
             });
 
             const documents = model1Documents.map((row) => {
                 return Object.assign({}, row, {
-                    dbRef: model2Documents.filter((model2Row) => {
-                        return model2Row._id.toHexString() === row.dbRef.toHexString();
-                    }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop()
+                    model2DbRef: model2Documents.filter((model2Row) => {
+                        return model2Row._id.toHexString() === row.model2DbRef.toHexString();
+                    }).map((row) => ({ _id: row._id, string: row.string, model3Ref: row.model3Ref })).pop()
                 });
             });
 
             expect(result).to.deep.equal(documents);
         });
 
-        it('should recursively select dbref fields', async () => {
+        it('should recursively select object id fields', async () => {
             const result = await model.find().toArray();
             await model.attachDbRefs(result,  {
                 model2: {
                     fields: {
                         string: 1,
-                        ref: 1
+                        model3Ref: 1
                     }
                 },
                 model3: {
@@ -428,19 +465,19 @@ describe.only('Mongo Module', function () {
 
             const documents = model1Documents.map((row) => {
                 return Object.assign({}, row, {
-                    dbRef: model2Documents.filter((model2Row) => {
-                        return model2Row._id.toHexString() === row.dbRef.toHexString();
+                    model2DbRef: model2Documents.filter((model2Row) => {
+                        return model2Row._id.toHexString() === row.model2DbRef.toHexString();
                     }).map((row) => ({
                         _id: row._id,
                         string: row.string,
-                        ref: model3Documents.filter((model3Row) => {
-                            return model3Row._id.toHexString() === row.ref.toHexString();
+                        model3Ref: model3Documents.filter((model3Row) => {
+                            return model3Row._id.toHexString() === row.model3Ref.toHexString();
                         }).map((row) => ({ _id: row._id, enum: row.enum })).pop()
                     })).pop(),
                     objectArray: row.objectArray.map((item) => {
                         return Object.assign(item, {
-                            dbRef: model3Documents.filter((model3Row) => {
-                                return model3Row._id.toHexString() === item.dbRef.toHexString();
+                            model3DbRef: model3Documents.filter((model3Row) => {
+                                return model3Row._id.toHexString() === item.model3DbRef.toHexString();
                             }).map((row) => ({ _id: row._id, enum: row.enum })).pop()
                         });
                     })
@@ -461,7 +498,7 @@ describe.only('Mongo Module', function () {
                 model2: {
                     fields: {
                         string: 1,
-                        ref: 1
+                        model3Ref: 1
                     }
                 }
             });
@@ -470,10 +507,10 @@ describe.only('Mongo Module', function () {
                 result.forEach(
                     async (row) => {
                         const item = await row;
-                        expect(item.dbRef).to.deep.equal(
+                        expect(item.model2DbRef).to.deep.equal(
                             model2Documents.filter((model2Row) => {
-                                return model2Row._id.toHexString() === item.dbRef._id.toHexString();
-                            }).map((row) => ({ _id: row._id, string: row.string, ref: row.ref })).pop()
+                                return model2Row._id.toHexString() === item.model2DbRef._id.toHexString();
+                            }).map((row) => ({ _id: row._id, string: row.string, model3Ref: row.model3Ref })).pop()
                         );
                     },
                     () => resolve()
@@ -481,49 +518,79 @@ describe.only('Mongo Module', function () {
             });
         });
 
-        it.only('should filter dbref fields', async () => {
-
-            const result = await model.find({}, {}, {
-                model2: {
-                    fields: {
-                        string: 1,
-                        ref: 1
-                    },
-                    filters: {
-                        number: 2345
+        it('should filter object id referenced fields', async () => {
+            const result = await model.find({}, {
+                join: {
+                    model2: {
+                        fields: {
+                            string: 1,
+                            model3Ref: 1
+                        },
+                        filters: {
+                            number: 2345
+                        }
                     }
                 }
             });
-console.log(await result.toArray())
-            // await model.attachDbRefs(result, {
-            //     model2: {
-            //         fields: {
-            //             string: 1,
-            //             ref: 1
-            //         },
-            //         filters: {
-            //             number: 2345
-            //         }
-            //     }
-            // });
 
-            return new Error();
+            const model2Data = model2Documents.filter((m2row) => {
+                return m2row.number === 2345;
+            });
 
-            const model2Row = model2Documents.filter((row) => {
-                return row.string === 'm2222222';
-            }).pop();
+            const docs = model1Documents.filter((row) => {
+                const m2row = model2Data.find((m2row) => {
+                    return m2row._id.toHexString() === row.model2DbRef.toHexString();
+                });
+                if (m2row) {
+                    row.model2DbRef = { _id: m2row._id, string: m2row.string, model3Ref: m2row.model3Ref };
+                    return true;
+                }
+                return false;
+            });
 
-            expect(result).to.deep.equal(
-                model1Documents.filter((row) => {
-                    return row.dbRef.toHexString() === model2Row._id.toHexString();
-                }).map((row) => {
-                    row.dbRef = model2Row;
-                    return row;
-                })
-            );
+            expect(result).to.deep.equal(docs);
         });
 
-        it('should not cause dbRef infinite loops');
+        it.only('should filter resursive object id referenced fields when there are multiple matches', async () => {
+            const result = await model.find({}, {
+                join: {
+                    model2: {
+                        fields: {
+                            model3Ref: 1
+                        }
+                    },
+                    model3: {},
+                    model4: {
+                        filters: {
+                            m4str: 's1'
+                        }
+                    }
+                }
+            });
+console.log(11111, result);
+            const model2Data = model2Documents.filter((m2row) => {
+                return m2row.number === 2345;
+            });
+
+            const docs = model1Documents.filter((row) => {
+                const m2row = model2Data.find((m2row) => {
+                    return m2row._id.toHexString() === row.model2DbRef.toHexString();
+                });
+                if (m2row) {
+                    row.model2DbRef = { _id: m2row._id, string: m2row.string, model3Ref: m2row.model3Ref };
+                    return true;
+                }
+                return false;
+            });
+
+            // expect(result).to.deep.equal(docs);
+        });
+
+        it('should filter object id references in array');
+
+        it('should attach object id data when foreign collections fields are not defined');
+
+        it('should not cause object id infinite loops');
         // it('should call getter functions?');
     });
 

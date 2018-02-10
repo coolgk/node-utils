@@ -40,7 +40,7 @@
   "scripts": {
     "pretest": "tsc --project tsconfig.dev.json",
     "test": "export $(cat .env | xargs) && nyc mocha test",
-    "test:quick": "export $(cat .env | xargs) && mocha test",
+    "test:quick": "export $(cat .env | xargs) && mocha --require source-map-support/register test",
     "test:precommit": "export $(cat .env | xargs) && tsc --project tsconfig.json && nyc --reporter text-summary mocha test --reporter min",
     "scan:local": "nsp check",
     "scan": "ls -d packages/* | xargs -n1 nsp check --reporter summary",
