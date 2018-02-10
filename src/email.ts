@@ -1,12 +1,12 @@
 /***
 description: a email sender wrapper class
-version: 2.0.4
+version: 2.0.5
 keywords:
     - email
     - smtp sender
 dependencies:
     "mime-types": "^2.1.17"
-    "emailjs": "^1.0.12"
+    "emailjs": "^2.0.0"
     "@coolgk/string": "^2"
     "@types/mime-types": "^2.1.0"
 example: |
@@ -29,8 +29,7 @@ example: |
             },
             'gong@example.com'
         ],
-        message: '<html><body><h1>test</h1>some message here
-            <img src="cid:my-image" width="500" height="250"></body></html>',
+        message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
         attachments: [
             {
                 path: '/tmp/test.png',

@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-version: 2.0.3
+version: 2.0.4
 keywords:
     - ampq
     - rabbitmq
@@ -99,7 +99,7 @@ export class Amqp {
     private _uuid: typeof v1;
     private _connect: typeof connect;
     private _channel: any;
-    private _connection: Connection;
+    private _connection: Connection | undefined;
 
     /**
      * @param {object} options
