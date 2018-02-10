@@ -1,6 +1,6 @@
 /***
 description: an expirable, revocable, renewable token with data storage
-version: 2.0.3
+version: 2.0.4
 keywords:
     - token
     - session token
@@ -126,10 +126,10 @@ export enum TokenError {
 
 export class Token {
 
-    private _token: string;
+    private _token!: string;
     private _cache: Cache;
     private _expiry: number;
-    private _name: string;
+    private _name!: string;
     private _prefix: string;
 
     /**
