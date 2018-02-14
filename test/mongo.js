@@ -552,6 +552,22 @@ describe.only('Mongo Module', function () {
         });
 
         it.only('should filter resursive object id referenced fields when there are multiple matches', async () => {
+
+            const cursor = model.getCollection.find();
+            cursor.forEach(
+                (row) => {
+                    row.aaa = 1;
+                },
+                () => {
+                    cursor.rewind();
+                    cursor.forEach((row) => {
+                        console.log(row);
+                    });
+                }
+            );
+
+            return;
+
             const result = await model.find({}, {
                 join: {
                     model2: {
