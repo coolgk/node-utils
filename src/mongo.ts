@@ -118,11 +118,11 @@ export interface IConfig {
 export class Mongo {
 
     public static getCollectionName (): string {
-        throw Error('undefined static method "getCollectionName" in child class');
+        throw Error('Undefined static method "getCollectionName"');
     }
 
     public static getSchema (): ISchema {
-        throw new Error('undefined static method "getSchema" in child class');
+        throw new Error('Undefined static method "getSchema"');
     }
 
     private _schema: ISchema = {};
@@ -130,13 +130,13 @@ export class Mongo {
     private _db: Db;
 
     constructor (options: IConfig) {
-        if (!(this.constructor as typeof Mongo).getCollectionName) {
-            throw new Error('undefined static method "getCollectionName" in child class');
-        }
+        // if (!(this.constructor as typeof Mongo).getCollectionName) {
+        //     throw new Error('undefined static method "getCollectionName" in child class');
+        // }
 
-        if (!(this.constructor as typeof Mongo).getSchema) {
-            throw new Error('undefined static method "getSchema" in child class');
-        }
+        // if (!(this.constructor as typeof Mongo).getSchema) {
+        //     throw new Error('undefined static method "getSchema" in child class');
+        // }
 
         this._db = options.db;
         this._schema = (this.constructor as typeof Mongo).getSchema();
@@ -172,7 +172,7 @@ export class Mongo {
         // return await this.attachObjectIdData(options.cursor ? cursor : await cursor.toArray(), join, filteredObjectIdData);
 
         const cursor = this._collection.find(
-            this._getJoinQuery(this.constructor as typeof Mongo, query, options.join),
+            await this._getJoinQuery(this.constructor as typeof Mongo, query, options.join),
             options
         );
         const data = options.cursor ? cursor : await cursor.toArray();
@@ -243,13 +243,14 @@ export class Mongo {
                 });
             });
 
-            if (!join.data) {
+            let joinData = join.data;
+            if (!joinData) {
                 const projection = join.projection;
                 if (projection && projection._id === 0) {
                     projection._id = 1;
                 }
 
-                join.data = this._db.collection(joinModel.getCollectionName()).find(
+                joinData = this._db.collection(joinModel.getCollectionName()).find(
                     {
                         _id: {
                             $in: ids
@@ -262,7 +263,7 @@ export class Mongo {
             // if else here is for looping cursor only once to attach data
             if (join.join) {
                 await this._attachDataToReferencePointer(
-                    await (join.data as Cursor).map((row: IResult) => {
+                    await joinData.map((row: IResult) => {
                         referencePointers[row._id].forEach((referencePointer) => {
                             (referencePointer.parent as any)[referencePointer.field] = row;
                         });
@@ -278,7 +279,7 @@ export class Mongo {
                 );
             } else {
                 await new Promise((resolve) => {
-                    (join.data as Cursor).forEach(
+                    (joinData as Cursor).forEach(
                         (row) => {
                             referencePointers[row._id].forEach((referencePointer) => {
                                 (referencePointer.parent as any)[referencePointer.field] = row;
@@ -497,18 +498,22 @@ const j = [
     }
 ];
  */
-    private async _getJoinQuery (model: typeof Mongo, query?: IQuery, joins?: IJoin[]): Promise<IQuery | undefined> {
+    private async _getJoinQuery (model: typeof Mongo, query: IQuery = {}, joins?: IJoin[]): Promise<IQuery> {
         if (query && typeof(query._id) === 'string') {
             query._id = this.getObjectID(query._id);
         }
 
         if (joins) {
+            const joinQuery: IQuery = {
+                $and: []
+            };
+
             for (const join of joins) {
                 const fields = toArray(join.on);
                 join.model = this._findObjectIdFieldModel(fields[0], model);
                 const filters = await this._getJoinQuery(join.model, join.filters, join.join);
 
-                if (filters) {
+                if (Object.keys(filters).length) {
                     const projection = join.projection || {};
                     if (projection._id === 0) {
                         projection._id = 1;
@@ -521,26 +526,25 @@ const j = [
                         }
                     );
 
-                    const joinQuery: IQuery = {
-                        $and: fields.map(async (field) => {
-                            return {
-                                [field]: {
-                                    $in: await cursor.map((row: IResult) => row._id).toArray()
-                                }
-                            };
-                        })
-                    };
+                    const ids = (await cursor.toArray()).map((row) => row._id);
+                    fields.forEach((field) => {
+                        joinQuery.$and.push({
+                            [field]: {
+                                $in: ids
+                            }
+                        });
+                    });
 
                     cursor.rewind();
                     join.data = cursor;
-
-                    if (joinQuery.$and.length) {
-                        if (query && Object.keys(query).length) {
-                            joinQuery.$and.push(query);
-                        }
-                        return joinQuery;
-                    }
                 }
+            }
+
+            if (joinQuery.$and.length) {
+                if (query && Object.keys(query).length) {
+                    joinQuery.$and.push(query);
+                }
+                return joinQuery;
             }
         }
 
@@ -551,21 +555,30 @@ const j = [
         const fields = fieldPath.split('.');
         let schema: ISchema = model.getSchema();
         while (fields.length > 1) {
-            if (schema[fields.unshift()].object) {
-                schema = schema[fields.unshift()].object as ISchema;
+            const field = fields.shift() as string;
+            if (schema[field].object) {
+                schema = schema[field].object as ISchema;
             } else {
-                throw new Error(`Undefined "object" property in ${JSON.stringify(model.getSchema())}
-                    or Invalid Object ID field in join: "${fieldPath}".
-                    Collection: ${model.getCollectionName()}`);
+                throw new Error(
+                    'Undefined "model" property or Invalid Object ID field in join statement.\n'
+                    + `On: "${fieldPath}"\n`
+                    + `Collection: ${model.getCollectionName()}\n`
+                    + `Schema: ${JSON.stringify(model.getSchema())}\n`
+                );
             }
         }
-        const fieldModel = schema && schema[fields.unshift()].model;
+
+        const objectIdField = fields.shift();
+        const fieldModel = objectIdField && schema && schema[objectIdField] && schema[objectIdField].model;
         if (fieldModel) {
             return fieldModel;
         }
-        throw new Error(`Undefined "model" property in ${JSON.stringify(model.getSchema())}
-            or Invalid Object ID field in join: "${fieldPath}".
-            Collection: ${model.getCollectionName()}`);
+        throw new Error(
+            '\nUndefined "model" property or Invalid Object ID field in join statement.\n'
+            + `On: "${fieldPath}"\n`
+            + `Collection: ${model.getCollectionName()}\n`
+            + `Schema: ${JSON.stringify(model.getSchema())}\n`
+        );
     }
 
     /**

@@ -32,7 +32,7 @@ describe.only('Mongo Module', function () {
     before((done) => {
 
         class M1 extends Mongo {
-            static getFields () {
+            static getSchema () {
                 return {
                     string: {
                         type: 'string',
@@ -95,7 +95,7 @@ describe.only('Mongo Module', function () {
         Model1 = M1;
 
         class M2 extends Mongo {
-            static getFields () {
+            static getSchema () {
                 return {
                     model3Ref: {
                         type: DataType.OBJECTID,
@@ -120,7 +120,7 @@ describe.only('Mongo Module', function () {
         Model2 = M2;
 
         class M3 extends Mongo {
-            static getFields () {
+            static getSchema () {
                 return {
                     enum: {
                         type: 'enum',
@@ -139,7 +139,7 @@ describe.only('Mongo Module', function () {
         Model3 = M3;
 
         class M4 extends Mongo {
-            static getFields () {
+            static getSchema () {
                 return {
                     m4str: DataType.STRING
                 };
@@ -309,6 +309,13 @@ describe.only('Mongo Module', function () {
             const collection3 = db.collection(
                 Model3.getCollectionName()
             );
+            const collection4 = db.collection(
+                Model4.getCollectionName()
+            );
+
+            await new Promise((resolve) => {
+                collection4.insertMany(model4Documents, (error, result) => resolve(result));
+            });
 
             await new Promise((resolve) => {
                 collection3.insertMany(model3Documents, (error, result) => resolve(result));
@@ -422,20 +429,19 @@ describe.only('Mongo Module', function () {
     describe('find', () => {
         it('should find all', async () => {
             const result = await model.find();
-            expect(await result.toArray()).to.deep.equal(model1Documents);
+            expect(await result).to.deep.equal(model1Documents);
         });
 
         it('should select object id fields', async () => {
-            const result = await model.find().toArray();
-            await model.attachDbRefs(result,  {
-                model2: {
-                    fields: {
+            const result = await model.find({}, {
+                join: [{
+                    on: 'model2DbRef',
+                    projection: {
                         string: 1,
                         model3Ref: 1
                     }
-                }
+                }]
             });
-
             const documents = model1Documents.map((row) => {
                 return Object.assign({}, row, {
                     model2DbRef: model2Documents.filter((model2Row) => {
@@ -448,22 +454,65 @@ describe.only('Mongo Module', function () {
         });
 
         it('should recursively select object id fields', async () => {
-            const result = await model.find().toArray();
-            await model.attachDbRefs(result,  {
-                model2: {
-                    fields: {
-                        string: 1,
-                        model3Ref: 1
+            const result = await model.find({}, {
+                join: [
+                    {
+                        on: ['model2DbRef'],
+                        projection: {
+                            string: 1,
+                            model3Ref: 1
+                        },
+                        join: [{
+                            on: 'model3Ref',
+                            projection: {
+                                enum: 1
+                            }
+                        }]
                     }
-                },
-                model3: {
-                    fields: {
-                        enum: 1
-                    }
-                }
+                ]
             });
 
             const documents = model1Documents.map((row) => {
+                return Object.assign({}, row, {
+                    model2DbRef: model2Documents.filter((model2Row) => {
+                        return model2Row._id.toHexString() === row.model2DbRef.toHexString();
+                    }).map((row) => ({
+                        _id: row._id,
+                        string: row.string,
+                        model3Ref: model3Documents.filter((model3Row) => {
+                            return model3Row._id.toHexString() === row.model3Ref.toHexString();
+                        }).map((row) => ({ _id: row._id, enum: row.enum })).pop()
+                    })).pop()
+                });
+            });
+
+            expect(result).to.deep.equal(documents);
+
+            const result2 = await model.find({}, {
+                join: [
+                    {
+                        on: ['model2DbRef'],
+                        projection: {
+                            string: 1,
+                            model3Ref: 1
+                        },
+                        join: [{
+                            on: 'model3Ref',
+                            projection: {
+                                enum: 1
+                            }
+                        }]
+                    },
+                    {
+                        on: 'objectArray.model3DbRef',
+                        projection: {
+                            enum: 1
+                        }
+                    }
+                ]
+            });
+
+            const documents2 = model1Documents.map((row) => {
                 return Object.assign({}, row, {
                     model2DbRef: model2Documents.filter((model2Row) => {
                         return model2Row._id.toHexString() === row.model2DbRef.toHexString();
@@ -484,7 +533,7 @@ describe.only('Mongo Module', function () {
                 });
             });
 
-            expect(result).to.deep.equal(documents);
+            expect(result2).to.deep.equal(documents2);
         });
 
         it('should be able to query other collection', async () => {
@@ -493,44 +542,50 @@ describe.only('Mongo Module', function () {
         });
 
         it('should attach dbRefs to cursor', async () => {
-            const result = await model.find();
-            await model.attachDbRefs(result, {
-                model2: {
-                    fields: {
-                        string: 1,
-                        model3Ref: 1
+            const result = await model.find({}, {
+                join: [
+                    {
+                        on: 'model2DbRef',
+                        projection: {
+                            string: 1,
+                            model3Ref: 1
+                        }
                     }
-                }
+                ],
+                cursor: 1
             });
 
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                const promises = [];
                 result.forEach(
-                    async (row) => {
-                        const item = await row;
-                        expect(item.model2DbRef).to.deep.equal(
-                            model2Documents.filter((model2Row) => {
-                                return model2Row._id.toHexString() === item.model2DbRef._id.toHexString();
-                            }).map((row) => ({ _id: row._id, string: row.string, model3Ref: row.model3Ref })).pop()
+                    (row) => {
+                        promises.push(
+                            row.then((item) => {
+                                expect(item.model2DbRef).to.deep.equal(
+                                    model2Documents.filter((model2Row) => {
+                                        return model2Row._id.toHexString() === item.model2DbRef._id.toHexString();
+                                    }).map((row) => ({ _id: row._id, string: row.string, model3Ref: row.model3Ref })).pop()
+                                );
+                            })
                         );
                     },
-                    () => resolve()
+                    () => resolve(Promise.all(promises))
                 );
             });
         });
 
         it('should filter object id referenced fields', async () => {
             const result = await model.find({}, {
-                join: {
-                    model2: {
-                        fields: {
-                            string: 1,
-                            model3Ref: 1
-                        },
-                        filters: {
-                            number: 2345
-                        }
+                join: [{
+                    on: ['model2DbRef'],
+                    projection: {
+                        string: 1,
+                        model3Ref: 1
+                    },
+                    filters: {
+                        number: 2345
                     }
-                }
+                }]
             });
 
             const model2Data = model2Documents.filter((m2row) => {
@@ -553,37 +608,28 @@ describe.only('Mongo Module', function () {
 
         it.only('should filter resursive object id referenced fields when there are multiple matches', async () => {
 
-            const cursor = model.getCollection.find();
-            cursor.forEach(
-                (row) => {
-                    row.aaa = 1;
-                },
-                () => {
-                    cursor.rewind();
-                    cursor.forEach((row) => {
-                        console.log(row);
-                    });
-                }
-            );
-
-            return;
-
             const result = await model.find({}, {
-                join: {
-                    model2: {
+                join: [
+                    {
+                        on: 'model2DbRef',
                         fields: {
                             model3Ref: 1
-                        }
-                    },
-                    model3: {},
-                    model4: {
-                        filters: {
-                            m4str: 's1'
-                        }
+                        },
+                        join: [
+                            {
+                                on: 'model3Ref'
+                            },
+                            {
+                                on: 'model4Ref',
+                                filters: {
+                                    m4str: 's1'
+                                }
+                            }
+                        ]
                     }
-                }
+                ]
             });
-console.log(11111, result);
+console.log( require('util').inspect(result, false, null, true) );
             const model2Data = model2Documents.filter((m2row) => {
                 return m2row.number === 2345;
             });
