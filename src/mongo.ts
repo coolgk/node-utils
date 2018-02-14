@@ -1,4 +1,5 @@
 import { Db, ObjectID, Cursor, Collection, FindOneOptions } from 'mongodb';
+import { toArray } from '@coolgk/array';
 
 // model field data types
 export enum DataType {
@@ -12,58 +13,83 @@ export enum DataType {
 }
 
 // model field definition
-export interface IField {
+export interface IFieldSchema {
     type: DataType;
     setter?: (value: any) => any;
     enum?: (string | number | boolean)[];
     default?: any;
     model?: typeof Mongo;
-    object?: IFields;
+    object?: ISchema;
     array?: boolean;
 }
 
 // model fields
-export interface IFields {
-    [index: string]: IField;
+export interface ISchema {
+    [field: string]: IFieldSchema;
 }
 
 // query result
 export interface IResult {
-    [index: string]: any;
+    [field: string]: any;
 }
 
 // query join definition
 export interface IJoin {
-    [index: string]: {
-        fields?: {
-            [index: string]: 1 | 0
-        },
-        filters?: {
-            [index: string]: any
-        }
+    // [index: string]: {
+    //     fields?: {
+    //         [index: string]: 1 | 0
+    //     },
+    //     filters?: {
+    //         [index: string]: any
+    //     },
+    //     join?: IJoin,
+    //     data?: IResult[]
+    // };
+    on: string | string[];
+    projection?: {
+        [field: string]: 1 | 0
     };
+    filters?: IQuery;
+    join?: IJoin[];
+    data?: Cursor;
+    model?: typeof Mongo;
 }
 
 // reference pointer type for find ref in data
-export interface IDataByReference {
+export interface IReferencePointer {
     parent: IResult | IResult[];
     field: string | number;
+    path: string[];
+    // id?: ObjectID;
 }
 
 // object id fields in search result
 export interface IObjectIdInData {
-    [index: string]: {
-        model: typeof Mongo;
-        dbRefsById: {
-            [index: string]: IDataByReference[]
-        }
-    };
+    // [collection: string]: {
+    //     model: typeof Mongo;
+    //     dbRefsById: {
+    //         [id: string]: IReferencePointer[]
+    //     }
+    // };
+    [field: string]: IReferencePointer[];
+    // {
+    //     [id: string]: IReferencePointer[]
+    // };
 }
 
+// join.data indexed by collection and field
+// export interface IJoinCollectionData {
+//     [collection: string]: {
+//         [field: string]: {
+//             [id: string]: IResult
+//         }
+//     };
+// }
+
 // all object id fields found in field config
-export interface IObjectIdFields {
-    [index: string]: any;
-}
+// export interface IObjectIdFields {
+//     [index: string]: any;
+// }
 
 // mongo query object
 export interface IQuery {
@@ -71,12 +97,17 @@ export interface IQuery {
 }
 
 // data found in referenced collections
-export interface IFilteredObjectIdData {
-    [index: string]: any[];
-}
+// export interface IFilteredObjectIdData {
+//     [index: string]: any[];
+// }
+
+// model mapping for collections in join
+// export interface ICollectionModel {
+//     [index: string]: typeof Mongo;
+// }
 
 export interface IFindOptions extends FindOneOptions {
-    join?: IJoin;
+    join?: IJoin[];
     cursor?: boolean;
 }
 
@@ -90,28 +121,26 @@ export class Mongo {
         throw Error('undefined static method "getCollectionName" in child class');
     }
 
-    public static getFields (): IFields {
-        throw new Error('undefined static method "getFields" in child class');
+    public static getSchema (): ISchema {
+        throw new Error('undefined static method "getSchema" in child class');
     }
 
-    public ['constructor']: typeof Mongo;
-
-    private _fields: IFields = {};
+    private _schema: ISchema = {};
     private _collection: Collection;
     private _db: Db;
 
     constructor (options: IConfig) {
-        if (!this.constructor.getCollectionName) {
+        if (!(this.constructor as typeof Mongo).getCollectionName) {
             throw new Error('undefined static method "getCollectionName" in child class');
         }
 
-        if (!this.constructor.getFields) {
-            throw new Error('undefined static method "getFields" in child class');
+        if (!(this.constructor as typeof Mongo).getSchema) {
+            throw new Error('undefined static method "getSchema" in child class');
         }
 
         this._db = options.db;
-        this._fields = this.constructor.getFields();
-        this._collection = this._db.collection(this.constructor.getCollectionName());
+        this._schema = (this.constructor as typeof Mongo).getSchema();
+        this._collection = this._db.collection((this.constructor as typeof Mongo).getCollectionName());
     }
 
     public getObjectID (id: ObjectID | string): ObjectID | undefined {
@@ -131,16 +160,412 @@ export class Mongo {
     }
 
     public async find (query: IQuery, options: IFindOptions = {}): Promise<Cursor | IResult[]> {
-        if (typeof(query._id) === 'string') {
-            query._id = this.getObjectID(query._id);
-        }
-        const join = options.join || {};
-        const filteredObjectIdData = await this._getFilteredObjectIdData(join);
+        // if (typeof(query._id) === 'string') {
+        //     query._id = this.getObjectID(query._id);
+        // }
+        // const join = options.join || {};
+        // const filteredObjectIdData = await this._getFilteredObjectIdData(join);
+        // const cursor = this._collection.find(
+        //     this._getQuery(query, this._fields, filteredObjectIdData),
+        //     options
+        // );
+        // return await this.attachObjectIdData(options.cursor ? cursor : await cursor.toArray(), join, filteredObjectIdData);
+
         const cursor = this._collection.find(
-            this._getQuery(query, filteredObjectIdData),
+            this._getJoinQuery(this.constructor as typeof Mongo, query, options.join),
             options
         );
-        return await this.attachObjectIdData(options.cursor ? cursor : await cursor.toArray(), join, filteredObjectIdData);
+        const data = options.cursor ? cursor : await cursor.toArray();
+        return options.join ? await this.attachObjectIdData(data, options.join) : data;
+    }
+
+    public async attachObjectIdData (data: Cursor | IResult[], joins: IJoin[]): Promise<Cursor | IResult[]> {
+        if (data.constructor.name === 'Cursor') {
+            return (data as Cursor).map(
+                async (row: IResult) => {
+                    await this._attachDataToReferencePointer(
+                        row,
+                        joins,
+                        {
+                            type: DataType.OBJECT,
+                            object: this._schema
+                        }
+                    );
+                    return row;
+                }
+            );
+        } else {
+            await this._attachDataToReferencePointer(
+                data,
+                joins,
+                {
+                    type: DataType.OBJECT,
+                    object: this._schema,
+                    array: data.constructor.name === 'Array'
+                }
+            );
+        }
+        return data;
+    }
+
+    private async _attachDataToReferencePointer (
+        data: IResult[] | IResult,
+        joins: IJoin[],
+        fieldSchema: IFieldSchema,
+        model: typeof Mongo = this.constructor as typeof Mongo
+    ): Promise<void> {
+        const fieldPathsInJoin = joins.reduce((fieldPaths, join) => {
+            return fieldPaths.concat(toArray(join.on));
+        }, [] as string[]);
+
+        const objectIdInData: IObjectIdInData = {};
+        this._findObjectIdInData(data, fieldSchema, fieldPathsInJoin, objectIdInData);
+
+        if (Object.keys(objectIdInData).length === 0) {
+            return;
+        }
+
+        for (const join of joins) {
+            const fields = toArray(join.on);
+            const joinModel = join.model || this._findObjectIdFieldModel(fields[0], model);
+
+            const referencePointers: IObjectIdInData = {};
+            const ids: ObjectID[] = [];
+            // find all ids and create an object of reference pointers indexed by id
+            fields.forEach((field) => {
+                objectIdInData[field].forEach((referencePointer) => {
+                    const id = (referencePointer.parent as any)[referencePointer.field]._id;
+                    if (!referencePointers[id]) {
+                        referencePointers[id] = [];
+                    }
+                    referencePointers[id].push(referencePointer);
+                    ids.push(id);
+                });
+            });
+
+            if (!join.data) {
+                const projection = join.projection;
+                if (projection && projection._id === 0) {
+                    projection._id = 1;
+                }
+
+                join.data = this._db.collection(joinModel.getCollectionName()).find(
+                    {
+                        _id: {
+                            $in: ids
+                        }
+                    },
+                    { projection }
+                );
+            }
+
+            // if else here is for looping cursor only once to attach data
+            if (join.join) {
+                await this._attachDataToReferencePointer(
+                    await (join.data as Cursor).map((row: IResult) => {
+                        referencePointers[row._id].forEach((referencePointer) => {
+                            (referencePointer.parent as any)[referencePointer.field] = row;
+                        });
+                        return row;
+                    }).toArray(),
+                    join.join,
+                    {
+                        type: DataType.OBJECT,
+                        object: joinModel.getSchema(),
+                        array: true
+                    },
+                    joinModel
+                );
+            } else {
+                await new Promise((resolve) => {
+                    (join.data as Cursor).forEach(
+                        (row) => {
+                            referencePointers[row._id].forEach((referencePointer) => {
+                                (referencePointer.parent as any)[referencePointer.field] = row;
+                            });
+                        },
+                        () => resolve()
+                    );
+                });
+            }
+        }
+    }
+
+    private _findObjectIdInData (
+        data: any,
+        fieldConfig: IFieldSchema,
+        fieldPathsInJoin: string[],
+        objectIdInData: IObjectIdInData,
+        referencePointer?: IReferencePointer
+    ): void {
+        if (fieldConfig) { // _id field and auto generated fields (e.g.dateCreated etc) do not have fieldConfig values.
+            if (fieldConfig.array) {
+                toArray(data).forEach((row, index) => {
+                    this._findObjectIdInData(
+                        row,
+                        {
+                            ...fieldConfig,
+                            array: false
+                        },
+                        fieldPathsInJoin,
+                        objectIdInData,
+                        {
+                            parent: data,
+                            field: index,
+                            path: referencePointer && referencePointer.path || []
+                        }
+                    );
+                });
+            } else {
+                switch (fieldConfig.type) {
+                    case DataType.OBJECT:
+                        if (!fieldConfig.object) {
+                            throw new Error(
+                                `Undefined "object" property on "${fieldConfig.type}" type in ${JSON.stringify(fieldConfig)}`
+                            );
+                        }
+                        for (const field in data) {
+                            this._findObjectIdInData(
+                                data[field],
+                                fieldConfig.object[field],
+                                fieldPathsInJoin,
+                                objectIdInData,
+                                {
+                                    parent: data,
+                                    field,
+                                    path: toArray(referencePointer && referencePointer.path).concat(field)
+                                }
+                            );
+                        }
+                        break;
+                    case DataType.OBJECTID:
+                        if (data && referencePointer) {
+                            if (!fieldConfig.model) {
+                                throw new Error(
+                                    `Undefined "model" property on "${fieldConfig.type}" type in ${JSON.stringify(fieldConfig)}`
+                                );
+                            }
+
+                            const fieldPath = referencePointer.path.join('.');
+                            if (fieldPathsInJoin.includes(fieldPath)) {
+                                const collection = fieldConfig.model.getCollectionName();
+
+                                if (!objectIdInData[fieldPath]) {
+                                    objectIdInData[fieldPath] = [];
+                                }
+                                // data.oid = DbRef type in mongo
+                                // const id = data.constructor.name === 'ObjectID' ? data : data.oid;
+                                // if (!objectIdInData[fieldPath][id]) {
+                                //     objectIdInData[fieldPath][id] = [];
+                                // }
+
+                                // clear object id data, if refereced data is not found,
+                                // the result will be { _id: ObjectId(...) } instead of the origin ObjectID or DBRef
+                                (referencePointer.parent as any)[referencePointer.field] = {
+                                    _id: data.constructor.name === 'ObjectID' ? data : data.oid
+                                };
+                                objectIdInData[fieldPath].push(referencePointer);
+
+                                // if (!objectIdInData[collection]) {
+                                //     objectIdInData[collection] = {
+                                //         model: fieldConfig.model,
+                                //         dbRefsById: {}
+                                //     };
+                                // }
+
+                                // // data.oid = DbRef type in mongo
+                                // const id = data.constructor.name === 'ObjectID' ? data : data.oid;
+                                // if (!objectIdInData[collection].dbRefsById[id]) {
+                                //     objectIdInData[collection].dbRefsById[id] = [];
+                                // }
+                                // objectIdInData[collection].dbRefsById[id].push(referencePointer);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    /* private _findObjectIdInData (
+        data: any,
+        fieldConfig: IField | undefined,
+        objectIdInData: IObjectIdInData = {},
+        referencePointer?: IReferencePointer
+    ): void {
+        if (!fieldConfig) {
+            return;
+        }
+
+        if (fieldConfig.array) {
+            for (let index = (data as IResult[]).length - 1; index >= 0; index--) {
+                this._findObjectIdInData(
+                    (data as IResult[])[index],
+                    {
+                        ...fieldConfig,
+                        array: false
+                    },
+                    objectIdInData,
+                    {
+                        parent: data,
+                        field: index
+                    }
+                );
+            }
+        } else {
+            switch (fieldConfig.type) {
+                case DataType.OBJECT:
+                    if (!fieldConfig.object) {
+                        throw new Error(`Undefined "object" property for "${fieldConfig.type}" type in ${JSON.stringify(fieldConfig)}`);
+                    }
+                    for (const field in data) {
+                        if (field !== '_id') {
+                            this._findObjectIdInData(
+                                data[field],
+                                fieldConfig.object[field],
+                                objectIdInData,
+                                {
+                                    parent: data,
+                                    field
+                                }
+                            );
+                        }
+                    }
+                    break;
+                case DataType.OBJECTID:
+                    if (data && referencePointer) {
+                        if (!fieldConfig.model) {
+                            throw new Error(`undefined "model" property for "${fieldConfig.type}" type in ${JSON.stringify(fieldConfig)}`);
+                        }
+
+                        const collection = fieldConfig.model.getCollectionName();
+
+                        if (!objectIdInData[collection]) {
+                            objectIdInData[collection] = {
+                                model: fieldConfig.model,
+                                dbRefsById: {}
+                            };
+                        }
+
+                        // data.oid = DbRef type in mongo
+                        const id = data.constructor.name === 'ObjectID' ? data : data.oid;
+                        if (!objectIdInData[collection].dbRefsById[id]) {
+                            objectIdInData[collection].dbRefsById[id] = [];
+                        }
+                        objectIdInData[collection].dbRefsById[id].push(referencePointer);
+                    }
+                    break;
+            }
+        }
+    } */
+/*
+const j = [
+    {
+        on: ['model2Ref'],
+        projection: {
+            model3Ref: 1
+        },
+        join: [
+            {
+                on: 'xy.z',
+                filters: {
+                    boolean: true
+                }
+            }
+        ]
+    },
+    {
+        on: 'model4Ref',
+        filters: {
+            m4str: 's1'
+        },
+        join: {
+            model6: {}
+        }
+    },
+    {
+        on: 'model5Ref',
+        join: {
+            model6: {}
+        }
+    },
+    {
+        on: 'model3Ref',
+        filters: {
+            m4str: 's1'
+        }
+    }
+];
+ */
+    private async _getJoinQuery (model: typeof Mongo, query?: IQuery, joins?: IJoin[]): Promise<IQuery | undefined> {
+        if (query && typeof(query._id) === 'string') {
+            query._id = this.getObjectID(query._id);
+        }
+
+        if (joins) {
+            for (const join of joins) {
+                const fields = toArray(join.on);
+                join.model = this._findObjectIdFieldModel(fields[0], model);
+                const filters = await this._getJoinQuery(join.model, join.filters, join.join);
+
+                if (filters) {
+                    const projection = join.projection || {};
+                    if (projection._id === 0) {
+                        projection._id = 1;
+                    }
+
+                    const cursor = this._db.collection((join.model as typeof Mongo).getCollectionName() as string).find(
+                        filters,
+                        {
+                            projection
+                        }
+                    );
+
+                    const joinQuery: IQuery = {
+                        $and: fields.map(async (field) => {
+                            return {
+                                [field]: {
+                                    $in: await cursor.map((row: IResult) => row._id).toArray()
+                                }
+                            };
+                        })
+                    };
+
+                    cursor.rewind();
+                    join.data = cursor;
+
+                    if (joinQuery.$and.length) {
+                        if (query && Object.keys(query).length) {
+                            joinQuery.$and.push(query);
+                        }
+                        return joinQuery;
+                    }
+                }
+            }
+        }
+
+        return query;
+    }
+
+    private _findObjectIdFieldModel (fieldPath: string, model: typeof Mongo): typeof Mongo {
+        const fields = fieldPath.split('.');
+        let schema: ISchema = model.getSchema();
+        while (fields.length > 1) {
+            if (schema[fields.unshift()].object) {
+                schema = schema[fields.unshift()].object as ISchema;
+            } else {
+                throw new Error(`Undefined "object" property in ${JSON.stringify(model.getSchema())}
+                    or Invalid Object ID field in join: "${fieldPath}".
+                    Collection: ${model.getCollectionName()}`);
+            }
+        }
+        const fieldModel = schema && schema[fields.unshift()].model;
+        if (fieldModel) {
+            return fieldModel;
+        }
+        throw new Error(`Undefined "model" property in ${JSON.stringify(model.getSchema())}
+            or Invalid Object ID field in join: "${fieldPath}".
+            Collection: ${model.getCollectionName()}`);
     }
 
     /**
@@ -150,7 +575,7 @@ export class Mongo {
      * @returns {Promise<Cursor | object[]>}
      * @memberof Mongo
      */
-    public async attachObjectIdData (
+    /* public async attachObjectIdData (
         data: Cursor | IResult[], join: IJoin, filteredObjectIdData: IFilteredObjectIdData = {}
     ): Promise<Cursor | IResult[]> {
         if (data.constructor.name === 'Cursor') {
@@ -183,7 +608,7 @@ export class Mongo {
             );
         }
         return data;
-    }
+    } */
 
     /**
      * attach object id data to reference pointers found in _findDbRefs()
@@ -192,7 +617,7 @@ export class Mongo {
      * @param {object} join - joins defined in query
      * @memberof Mongo
      */
-    private async _attachDataToReferencePointer (
+   /*  private async _attachDataToReferencePointer (
         data: IResult[] | IResult,
         join: IJoin,
         fieldConfig: IField,
@@ -243,13 +668,13 @@ export class Mongo {
                 {
                     type: DataType.OBJECT,
                     array: true,
-                    object: dbRefsInData[collection].model.getFields()
+                    object: dbRefsInData[collection].model.getSchema()
                 },
                 filteredObjectIdData
             );
             // await new Promise((resolve) => {
             //     const collectionDbRefsInData: IObjectIdInData = {};
-            //     const collectionFieldConfig = dbRefsInData[collection].model.getFields();
+            //     const collectionFieldConfig = dbRefsInData[collection].model.getSchema();
             //     cursor.forEach(
             //         (row) => {
             //             dbRefsInData[collection].dbRefsById[row._id].forEach((referencePointer) => {
@@ -273,7 +698,7 @@ export class Mongo {
             //     );
             // });
         }
-    }
+    } */
 
     /**
      * find all object id data from mongo query result
@@ -281,12 +706,12 @@ export class Mongo {
      * @private
      * @param {*} data - query result or a row/value of query result
      * @param {object} join - dbRefs defined in query
-     * @param {(object | undefined)} fieldConfig - field config of the model, defined in getFields()
+     * @param {(object | undefined)} fieldConfig - field config of the model, defined in getSchema()
      * @param {object} [dbRefsInData={}] - dbRefs data found in data param in format { collectionName: { objectID: [referecePointers] } }
      * @param {object} [dataByReference] - internal param, a reference pointer to the data param
      * @memberof Mongo
      */
-    private _findObjectIdInData (
+    /* private _findObjectIdInData (
         data: any,
         join: IJoin,
         fieldConfig: IField | undefined,
@@ -366,15 +791,110 @@ export class Mongo {
                     break;
             }
         }
+    } */
+
+// const j = {
+//     model2: {
+//         fields: {
+//             model3Ref: 1
+//         },
+//         join: {
+//             model3: {
+//                 filters: {
+//                     boolean: true
+//                 }
+//             },
+//         },
+//         on: ['field.ab.a']
+//     },
+//     model4: {
+//         filters: {
+//             m4str: 's1'
+//         },
+//         join: {
+//             model6: {}
+//         }
+//     },
+//     model5: {
+//         join: {
+//             model6: {}
+//         }
+//     }
+// };
+
+/*
+    private async _getJoinQuery (fieldConfig: IFields, query?: IQuery, join?: IJoin): Promise<IQuery | undefined> {
+        if (join) {
+            const joinQuery: IQuery = {
+                $and: []
+            };
+
+            if (query) {
+                if (Object.keys(query).length) {
+                    joinQuery.$and.push(query);
+                }
+                if (typeof(query._id) === 'string') {
+                    query._id = this.getObjectID(query._id);
+                }
+            }
+
+            const collectionModel = this._getCollectionModel(Object.keys(join), fieldConfig);
+            // find filters in join
+            for (const collection in join) {
+                const filters = await this._getJoinQuery(
+                    collectionModel[collection].getSchema(),
+                    join[collection].filters,
+                    join[collection].join
+                );
+
+                if (filters) {
+                    const fields = join[collection].fields;
+                    if (fields && fields._id === 0) {
+                        fields._id = 1;
+                    }
+
+                    join[collection].data = await this._db.collection(collection).find(
+                        filters,
+                        {
+                            projection: join[collection].fields
+                        }
+                    ).toArray();
+
+                    // joinQuery.$and.push(query)
+                }
+            }
+        }
+
+        return query;
     }
 
-    private _getQuery (query: IQuery, filteredObjectIdData: IFilteredObjectIdData): IQuery {
-        let newQUery = query;
+    private _getCollectionModel (collections: string[], fieldConfig: IFields): ICollectionModel {
+        const collectionModel: ICollectionModel = {};
+        for (const field in fieldConfig) {
+            switch (fieldConfig[field].type) {
+                case DataType.OBJECTID:
+                    const collectionName = (fieldConfig[field].model as typeof Mongo).getCollectionName();
+                    if (collections.includes(collectionName)) {
+                        collectionModel[collectionName] = fieldConfig[field].model as typeof Mongo;
+                    }
+                    break;
+                case DataType.OBJECT:
+                    Object.assign(
+                        collectionModel,
+                        this._getCollectionModel(collections, fieldConfig[field].object as IFields)
+                    );
+                    break;
+            }
+        }
+        return collectionModel;
+    }
+
+    private _getQuery (query: IQuery, fieldConfig: IFields, filteredObjectIdData: IFilteredObjectIdData): IQuery {
         if (Object.keys(filteredObjectIdData).length) {
-            newQUery = {
-                $and: [ query ]
+            const newQUery = {
+                $and: Object.keys(query).length ? [ query ] : []
             };
-            const objectIdFields = this._getObjectIdFields();
+            const objectIdFields = this._getObjectIdFieldsInConfig(fieldConfig);
 
             for (const field in objectIdFields) {
                 const collection = objectIdFields[field];
@@ -387,14 +907,24 @@ export class Mongo {
                     });
                 }
             }
+            return newQUery;
         }
         console.log(newQUery)
-        return newQUery;
+        return query;
     }
 
     private async _getFilteredObjectIdData (join: IJoin): Promise<IFilteredObjectIdData> {
         const filteredObjectIdData: IFilteredObjectIdData = {};
         for (const collection in join) {
+            const collectionJoin = join[collection].join;
+            if (collectionJoin) {
+                this._getQuery(
+                    {},
+                    collectionJoin.,
+                    this._getFilteredObjectIdData(collectionJoin)
+                );
+            }
+
             const filters = join[collection].filters;
             if (filters) {
                 const fields = join[collection].fields;
@@ -421,7 +951,7 @@ export class Mongo {
             }
         }
         return filteredObjectIdData;
-    }
+    } */
 
 /*
     private async _findAndAttachObjectIdData (
@@ -449,10 +979,10 @@ export class Mongo {
      * find object id fields from field config
      * @private
      * @param {IFields} [fieldConfig=this._fields]
-     * @returns {IObjectIdFields}
+     * @returns {object} - { [field]: [collection], ... }
      * @memberof Mongo
      */
-    private _getObjectIdFields (fieldConfig: IFields = this._fields): IObjectIdFields {
+/*     private _getObjectIdFieldsInConfig (fieldConfig: IFields): IObjectIdFields {
         const objectIdFields: IObjectIdFields = {};
         for (const field in fieldConfig) {
             switch (fieldConfig[field].type) {
@@ -460,7 +990,7 @@ export class Mongo {
                     objectIdFields[field] = (fieldConfig[field].model as typeof Mongo).getCollectionName();
                     break;
                 case DataType.OBJECT:
-                    const subFields = this._getObjectIdFields(fieldConfig[field].object as IFields);
+                    const subFields = this._getObjectIdFieldsInConfig(fieldConfig[field].object as IFields);
                     for (const subField in subFields) {
                         objectIdFields[`${field}.${subField}`] = subFields[subField];
                     }
@@ -468,7 +998,7 @@ export class Mongo {
             }
         }
         return objectIdFields;
-    }
+    } */
 }
 
 export default Mongo;
