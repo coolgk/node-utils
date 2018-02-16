@@ -1,10 +1,10 @@
-'use strcit';
+'use strict';
 
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 const fs = require('fs');
-const path = require('path');
+// const path = require('path');
 const yaml = require('js-yaml');
 const jsdoc2md = require('jsdoc-to-markdown');
 const chalk = require('chalk');
@@ -36,10 +36,11 @@ const codeHeader = `/*!
 
 gulp.task('index.ts', generateIndexFile);
 
+/*
 gulp.task('ts', ['index.ts'], () => {
     const tsResult = gulp.src('src/*.ts')
         // .pipe(
-            // changed(distFolder, {extension: '.js'})
+        // changed(distFolder, {extension: '.js'})
         // )
         // .pipe(sourcemaps.init()) // This means sourcemaps will be generated
         .pipe(tsProject());
@@ -54,7 +55,7 @@ gulp.task('ts', ['index.ts'], () => {
             .pipe(gulp.dest(`${distFolder}`))
     ]);
 });
-
+ */
 gulp.task('ts-dev', compileTsDev);
 
 // gulp.task('prepublish', ['ts'], addDistCodeToPackage);
@@ -80,7 +81,7 @@ gulp.task('postpublish', () => {
     });
 });
 */
-
+/*
 gulp.task('pre-test', () => { // https://github.com/SBoudrias/gulp-istanbul
     return gulp.src([`${distFolder}/*.js`])
         .pipe(istanbul({
@@ -116,18 +117,18 @@ gulp.task('test', ['pre-test'], () => {
             process.exit(1);
         });
 });
-
+ */
 gulp.task('publish', ['generate-all-packages'], () => {
     return execCommand(`cd ${packageFolder}/utils && npm publish --access=public`);
-    // return new Promise((resolve) => {
-        // fs.readdir(packageFolder, (error, folders) => {
-            // const promises = [];
-            // folders.forEach((folder) => {
-                // promises.push(execCommand(`cd ${packageFolder}/${folder} && npm publish --access=public`));
-            // });
-            // resolve(Promise.all(promises));
-        // });
-    // });
+    /* return new Promise((resolve) => {
+        fs.readdir(packageFolder, (error, folders) => {
+            const promises = [];
+            folders.forEach((folder) => {
+                promises.push(execCommand(`cd ${packageFolder}/${folder} && npm publish --access=public`));
+            });
+            resolve(Promise.all(promises));
+        });
+    }); */
 });
 
 gulp.task('dependencyCheck', ['package'], dependencyCheck);
@@ -138,18 +139,18 @@ gulp.task('generate-sub-packages', generateSubPackages);
 
 function generateSubPackages () {
     return del([`${distFolder}/**`, `${packageFolder}/**`])
-    .then(() => createFolder(packageFolder))
-    .then(() => generateSubPackageMetaData())
-    .then(() => generateIndexFile())
-    .then(() => compileTs())
-    .then(() => addDistCodeToSubPackages());
+        .then(() => createFolder(packageFolder))
+        .then(() => generateSubPackageMetaData())
+        .then(() => generateIndexFile())
+        .then(() => compileTs())
+        .then(() => addDistCodeToSubPackages());
 }
 
 function compileTs () {
     const tsResult = gulp.src('src/*.ts')
-        // .pipe(
+        /* // .pipe(
             // changed(distFolder, {extension: '.js'})
-        // )
+        // ) */
         .pipe(tsProject());
 
     return Promise.all([
@@ -172,17 +173,17 @@ function compileTsDev () {
     return new Promise((resolve, reject) => {
         const devTsProject = ts.createProject('./tsconfig.json', { removeComments: false });
         const tsResult = gulp.src('src/*.ts')
-            // .pipe(
+            /* // .pipe(
                 // changed(distFolder, {extension: '.js'})
-            // )
+            // ) */
             .pipe(sourcemaps.init()) // This means sourcemaps will be generated
             .pipe(devTsProject());
 
         return tsResult.js
-                .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-                .pipe(header('require("source-map-support").install();' + "\n"))
-                .pipe(gulp.dest(distFolder))
-                .on('finish', () => resolve());
+            .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+            .pipe(header('require("source-map-support").install();' + `\n`))
+            .pipe(gulp.dest(distFolder))
+            .on('finish', () => resolve());
     });
 }
 
@@ -220,53 +221,54 @@ function generateRootReadme (folder) {
     return new Promise((resolve, reject) => {
         const rootReadmeFile = `${folder}/README.md`;
         // fs.writeFile(file, '', (error) => {
-            // if (error) return reject(error);
-            fs.readdir('src', (error, files) => {
-                const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
+        // if (error) return reject(error);
+        fs.readdir('src', (error, files) => {
+            const readmeWriteStream = fs.createWriteStream(rootReadmeFile);
 
-                // travis
-                readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/node-utils.svg?branch=master)](https://travis-ci.org/coolgk/node-utils) ');
-                // dependencies
-                readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/node-utils/status.svg)](https://david-dm.org/coolgk/node-utils) ');
-                // coverage
-                readmeWriteStream.write('[![Coverage Status](https://coveralls.io/repos/github/coolgk/node-utils/badge.svg)](https://coveralls.io/github/coolgk/node-utils)');
-                // security
-                readmeWriteStream.write('[![Known Vulnerabilities](https://snyk.io/test/github/coolgk/node-utils/badge.svg)](https://snyk.io/test/github/coolgk/node-utils)');
+            // travis
+            readmeWriteStream.write('[![Build Status](https://travis-ci.org/coolgk/node-utils.svg?branch=master)](https://travis-ci.org/coolgk/node-utils) ');
+            // dependencies
+            readmeWriteStream.write('[![dependencies Status](https://david-dm.org/coolgk/node-utils/status.svg)](https://david-dm.org/coolgk/node-utils) ');
+            // coverage
+            readmeWriteStream.write('[![Coverage Status](https://coveralls.io/repos/github/coolgk/node-utils/badge.svg)](https://coveralls.io/github/coolgk/node-utils) ');
+            // security
+            readmeWriteStream.write('[![Known Vulnerabilities](https://snyk.io/test/github/coolgk/node-utils/badge.svg)](https://snyk.io/test/github/coolgk/node-utils)');
 
-                readmeWriteStream.write("\n\n");
-                readmeWriteStream.write('`npm install @coolgk/utils`' + "\n\n");
-                readmeWriteStream.write('you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + "\n\n");
+            readmeWriteStream.write(`\n\n`);
+            readmeWriteStream.write('`npm install @coolgk/utils`' + `\n\n`);
+            readmeWriteStream.write('you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + `\n\n`);
+            readmeWriteStream.write(`Report bugs here: [${packageJson.bugs.url}](${packageJson.bugs.url})` + `\n\n`);
 
-                const promises = [];
-                files.forEach((file) => {
-                    const name = file.replace('.ts', '');
+            const promises = [];
+            files.forEach((file) => {
+                const name = file.replace('.ts', '');
 
-                    promises.push(
-                        new Promise((resolve) => {
-                            fs.access(`${packageFolder}/${name}/README.md`, fs.constants.R_OK, (error) => {
-                                if (error) return resolve();
-                                readmeWriteStream.write(`- [${name}](#coolgk${name})\n`);
+                promises.push(
+                    new Promise((resolve) => {
+                        fs.access(`${packageFolder}/${name}/README.md`, fs.constants.R_OK, (error) => {
+                            if (error) return resolve();
+                            readmeWriteStream.write(`- [${name}](#coolgk${name})\n`);
 
-                                const rs = fs.createReadStream(`${packageFolder}/${name}/README.md`);
-                                rs.on('data', (chunk) => {
-                                    readmeWriteStream.write(chunk);
-                                });
-                                rs.on('end', () => {
-                                    resolve();
-                                });
+                            const rs = fs.createReadStream(`${packageFolder}/${name}/README.md`);
+                            rs.on('data', (chunk) => {
+                                readmeWriteStream.write(chunk);
                             });
-                        })
-                    )
-                });
-                Promise.all(promises).then(() => {
-                    readmeWriteStream.end();
-                    fs.createReadStream(rootReadmeFile).pipe(
-                        fs.createWriteStream('./README.md')
-                    ).on('finish', () => {
-                        resolve();
-                    });
+                            rs.on('end', () => {
+                                resolve();
+                            });
+                        });
+                    })
+                );
+            });
+            Promise.all(promises).then(() => {
+                readmeWriteStream.end();
+                fs.createReadStream(rootReadmeFile).pipe(
+                    fs.createWriteStream('./README.md')
+                ).on('finish', () => {
+                    resolve();
                 });
             });
+        });
         // });
     });
 }
@@ -286,7 +288,7 @@ function generateIndexFile () {
             writeStream.end();
             resolve();
         });
-    })
+    });
 }
 
 function addDistCodeToSubPackages () {
@@ -298,18 +300,18 @@ function addDistCodeToSubPackages () {
                 promises.push(new Promise((resolve) => {
                     fs.access(`${packageFolder}/${name}`, fs.constants.W_OK, (error) => {
                         if (error) {
-                            console.warn(chalk.red.bold(`${name} has no package folder`));
+                            console.warn(chalk.red.bold(`${name} has no package folder`)); // eslint-disable-line
                             return resolve();
                         }
                         fs.createReadStream(`${distFolder}/${file}`).pipe(
                             fs.createWriteStream(`${packageFolder}/${name}/${file}`)
                         ).on('finish', () => {
-                            // if (file.includes('.js')) {
+                            /* // if (file.includes('.js')) {
                                 // execCommand(
                                     // `cd ${packageFolder}/${name} && sudo npm link && cd - && npm link @coolgk/${name}`,
                                     // { mute: true }
                                 // );
-                            // }
+                            // } */
                             resolve();
                         });
                     });
@@ -331,7 +333,7 @@ function generateSubPackageMetaData () {
                     // if (['array'].includes(name)) {
                         promises.push(
                             parseFileMetaDoc(file, name)
-                        )
+                        );
                     }
                 });
                 resolve(Promise.all(promises));
@@ -345,7 +347,7 @@ function parseFileMetaDoc (file, name) {
         fs.readFile(`src/${file}`, 'utf8', (error, data) => {
             if (error) return reject(error);
 
-            const [ , metaComments ] = /^\/\*\*\*\n([^]+)\n\*\//m.exec(data) || [];
+            const [, metaComments] = /^\/\*\*\*\n([^]+)\n\*\//m.exec(data) || [];
 
             if (metaComments) {
                 try {
@@ -357,10 +359,11 @@ function parseFileMetaDoc (file, name) {
                             // create README.md
                             jsdoc2md.render({ files: `${distFolder}/${name}.js` }).then((jsDoc) => {
 
-                                let markdown = "\n" + `## @coolgk/${name}` + "\n" +
-                                'a javascript / typescript module' + "\n\n" +
-                                `\`npm install @coolgk/${name}\`` + "\n\n" +
-                                `${metaDoc.description}` + "\n";
+                                let markdown = `\n` + `## @coolgk/${name}` + `\n` +
+                                'a javascript / typescript module' + `\n\n` +
+                                `\`npm install @coolgk/${name}\`` + `\n\n` +
+                                `${metaDoc.description}` + `\n\n` +
+                                `Report bugs here: [${packageJson.bugs.url}](${packageJson.bugs.url})` + `\n`;
 
                                 if (metaDoc.documentation) {
                                     markdown += metaDoc.documentation;
@@ -390,15 +393,15 @@ function parseFileMetaDoc (file, name) {
                                     `${folder}/package.json`,
                                     JSON.stringify(
                                         Object.assign(
-                                            packageJson,{
-                                                name: `@coolgk/${name}`,
-                                                main: `./${name}.js`,
-                                                types: `./${name}.d.ts`,
-                                                description: metaDoc.description.replace(/\n/, ' '),
-                                                keywords: (metaDoc.keywords || []).concat('typescript'),
-                                                dependencies: metaDoc.dependencies,
-                                                devDependencies: undefined,
-                                                scripts: undefined,
+                                            packageJson, {
+                                                'name': `@coolgk/${name}`,
+                                                'main': `./${name}.js`,
+                                                'types': `./${name}.d.ts`,
+                                                'description': metaDoc.description.replace(/\n/, ' '),
+                                                'keywords': (metaDoc.keywords || []).concat('typescript'),
+                                                'dependencies': metaDoc.dependencies,
+                                                'devDependencies': undefined,
+                                                'scripts': undefined,
                                                 'pre-commit': undefined,
                                                 version
                                             }
@@ -413,7 +416,6 @@ function parseFileMetaDoc (file, name) {
                             })
                         ])
                     ));
-
                 } catch (error) {
                     return reject(error);
                 }
@@ -436,7 +438,7 @@ function createFolder (path) {
 }
 
 function getMdCode (code) {
-    return "\n```javascript\n" + code + "\n```\n";
+    return "\n```javascript\n" + code + "\n```\n"; // eslint-disable-line
 }
 
 function dependencyCheck () {
@@ -451,26 +453,26 @@ function dependencyCheck () {
     return Promise.all(promises);
 }
 
-function execCommand (command, options = {mute: false}) {
+function execCommand (command, options = { mute: false }) {
     return new Promise((resolve, reject) => {
-        if (!options.mute) console.log('exec command: ' + command);
-        childProcess.exec(command, {maxBuffer: Infinity}, (error, stdout, stderr) => {
-            if (!options.mute) console.log(stdout);
+        if (!options.mute) console.log('exec command: ' + command); // eslint-disable-line
+        childProcess.exec(command, { maxBuffer: Infinity }, (error, stdout, stderr) => {
+            if (!options.mute) console.log(stdout); // eslint-disable-line
             consoleLogError(stderr);
             if (error) {
                 reject(error);
             } else {
-                if (!options.mute) console.log('done');
+                if (!options.mute) console.log('done'); // eslint-disable-line
                 resolve();
             }
         });
     });
 }
 
-function consoleLogError(message) {
+function consoleLogError (message) {
     console.error(chalk.white.bgRed.bold(message));
 }
-
+/*
 function unitTest (reporter = 'spec') {
     return gulp.src('./test')
         .pipe(
@@ -498,7 +500,7 @@ function unitTest (reporter = 'spec') {
             process.exit(1);
         });
 }
-
+ */
 process.on('unhandledRejection', consoleLogError);
 
 gulp.task('watch', ['ts-dev'], () => {
