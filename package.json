@@ -44,6 +44,7 @@
     "test:precommit": "export $(cat .env | xargs) && tsc --project tsconfig.json && nyc --reporter text-summary mocha test --reporter min",
     "scan:local": "nsp check",
     "scan": "ls -d packages/* | xargs -n1 nsp check --reporter summary",
+    "updatecheck": "find $PWD/packages/* -type d -print0 | xargs -0 -n1 -t -I {} sh -c 'cd {} && npm outdated'",
     "tslint": "tslint --exclude src/test.ts src/**/*",
     "tsc": "tsc --project tsconfig.json",
     "tsc:watch": "tsc --project tsconfig.debug.json -w --pretty",
