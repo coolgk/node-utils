@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-version: 2.0.4
+version: 2.0.5
 keywords:
     - ampq
     - rabbitmq
@@ -53,6 +53,11 @@ example: |
     // direct route + a catch all consumer
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // npm install -S @types/amqplib amqplib @types/uuid uuid
 

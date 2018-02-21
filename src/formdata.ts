@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parses form data when you ask for it.
-version: 2.0.3
+version: 2.0.4
 documentation: |
     #### Example Form
     ```html
@@ -158,6 +158,11 @@ dependencies:
     "@types/node": "^9"
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // multer does not seems to be very memory efficient for larger files
 // other parsers have strange api

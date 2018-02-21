@@ -1,6 +1,6 @@
 /***
 description: array utilities
-version: 2.0.3
+version: 2.0.4
 keywords:
     - toArray
 example: |
@@ -20,6 +20,11 @@ example: |
     console.log(toArray(d)); // [ 1, 2, 3 ]
     console.log(toArray(e)); // [ { a: 1 } ]
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 /**
  * @param {*} data - any data to be type cast to array

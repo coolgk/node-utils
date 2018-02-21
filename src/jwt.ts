@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple jwt token class
-version: 2.0.5
+version: 2.0.6
 keywords:
     - jwt
 dependencies:
@@ -34,6 +34,11 @@ example: |
     }, 250);
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // https://en.wikipedia.org/wiki/JSON_Web_Token
 // https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/

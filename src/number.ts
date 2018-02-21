@@ -1,6 +1,6 @@
 /***
 description: number utitlies
-version: 2.0.3
+version: 2.0.4
 keywords:
     - number utitlies
     - round
@@ -14,6 +14,11 @@ example: |
     console.log(round(100.1264, 2)); // 100.13
     console.log(round(100.958747, 4)); // 100.9587
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 /**
  * @param {number} value - number to round

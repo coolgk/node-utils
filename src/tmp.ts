@@ -1,6 +1,6 @@
 /***
 description: wrapper functions, generate tmp file or folders
-version: 2.0.4
+version: 2.0.5
 keywords:
     - temp
     - tmp
@@ -21,6 +21,11 @@ example: |
     generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
         // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // https://github.com/raszi/node-tmp
 // npm i -S tmp

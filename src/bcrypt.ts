@@ -1,6 +1,6 @@
 /***
 description: just a promise wrapper
-version: 2.0.3
+version: 2.0.4
 keywords:
     - bcrypt
 dependencies:
@@ -19,6 +19,11 @@ example: |
         verify('invalidpass', hash).then(console.log); // false
     });
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // just a wrapper for compatibility in case bcrypt-nodejs needs to be replaced
 

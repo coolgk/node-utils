@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 2.0.5
+version: 2.0.6
 keywords:
     - email
     - smtp sender
@@ -46,6 +46,11 @@ example: |
         console.log(error);
     });
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // mime package (https://www.npmjs.com/package/mime) does not work in node 8 using mime-types instead
 // npm i -S emailjs mime-types

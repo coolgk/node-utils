@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: An session handler that works without cookie (and with cookie too).
-version: 1.0.3
+version: 1.0.4
 keywords:
     - session
     - session handler
@@ -138,6 +138,11 @@ documentation: |
     ```
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 import { Token, IRedisClient } from '@coolgk/token';
 import { Jwt, IPayload } from '@coolgk/jwt';

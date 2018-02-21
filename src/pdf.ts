@@ -1,6 +1,6 @@
 /***
 description: html to PDF module. create PDF files from html string or file.
-version: 2.0.3
+version: 2.0.4
 keywords:
     - pdf
     - html to pdf
@@ -65,6 +65,11 @@ example: |
         console.log(pdfFile);
     });
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // npm i -S phantom @types/phantom
 
