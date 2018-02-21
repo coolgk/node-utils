@@ -2,7 +2,7 @@
   "name": "@coolgk/utils",
   "version": "2.1.4",
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
-  "homepage": "https://www.npmjs.com/package/@coolgk/utils",
+  "homepage": "https://github.com/coolgk/node-utils",
   "bugs": {
     "url": "https://github.com/coolgk/node-utils/issues"
   },

@@ -1,6 +1,6 @@
 /***
 description: a redis wrapper
-version: 2.0.3
+version: 2.0.4
 keywords:
     - redis
     - cache
@@ -64,6 +64,11 @@ example: |
         ])
     );
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 import { RedisClient } from 'redis';
 

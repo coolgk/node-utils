@@ -1,6 +1,6 @@
 /***
 description: recapcha wrapper
-version: 2.0.3
+version: 2.0.4
 keywords:
     - recapcha
 dependencies:
@@ -22,6 +22,11 @@ example: |
                                // { success: false, 'error-codes': [ 'invalid-input-response' ] }
     });
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 import * as request from 'request';
 

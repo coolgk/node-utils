@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: read and write csv files
-version: 2.0.4
+version: 2.0.5
 keywords:
     - csv
     - csv parser
@@ -95,6 +95,11 @@ example: |
     }
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // npm i -S csv-stringify @types/csv-stringify csv-parse @types/csv-parse @types/mongodb
 

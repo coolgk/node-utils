@@ -1,6 +1,6 @@
 /***
 description: an expirable, revocable, renewable token with data storage
-version: 2.0.4
+version: 2.0.5
 keywords:
     - token
     - session token
@@ -86,6 +86,11 @@ example: |
         redisClient.quit();
     })()
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 // allow a token string (e.g. jwt, uuid) to be manually revoked or renewed
 // (./jwt cannot be renewed or revoked until expired)

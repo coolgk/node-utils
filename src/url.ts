@@ -1,6 +1,6 @@
 /***
 description: a simple function for parsing parameters in a url
-version: 2.0.5
+version: 2.0.6
 keywords:
     - url
     - parser
@@ -25,6 +25,11 @@ example: |
     console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 export interface IParams {
     [index: string]: any;

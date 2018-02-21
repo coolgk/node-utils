@@ -1,6 +1,6 @@
 /***
 description: base64 encoded decode functions
-version: 2.0.3
+version: 2.0.4
 keywords:
     - base64
     - encode
@@ -23,6 +23,11 @@ example: |
     console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
     console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 /**
  * @param {string} data - string to encode

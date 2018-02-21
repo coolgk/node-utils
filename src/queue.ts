@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-version: 2.0.3
+version: 2.0.4
 documentation: |
     1. Put async functions in a queue and limit the number of async functions that run concurrently.
     2. Run async functions in order
@@ -49,6 +49,11 @@ example: |
     });
 */
 /* tslint:enable */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 let promise: Promise<any> = Promise.resolve(undefined);
 const backlogs: Promise<any>[] = [];

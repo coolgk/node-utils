@@ -1,6 +1,6 @@
 /***
 description: unit conversion
-version: 2.0.4
+version: 2.0.5
 keywords:
     - unit
     - conversion
@@ -31,6 +31,11 @@ example: |
     console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
     console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 import { round } from './number';
 

@@ -1,6 +1,6 @@
 /***
 description: string utility functions
-version: 2.0.3
+version: 2.0.4
 keywords:
     - stripTags
     - escapeHtml
@@ -23,6 +23,11 @@ example: |
     console.log(prepad0(1, 4)); // 0001
     console.log(prepad0(1000, 2)); // 1000
 */
+
+/*!
+ *  Copyright (c) 2017 Daniel Gong <daniel.k.gong@gmail.com>. All rights reserved.
+ *  Licensed under the MIT License.
+ */
 
 /**
  * strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"

@@ -148,7 +148,7 @@ function generateSubPackages () {
         .then(() => generateIndexFile())
         .then(() => compileTs())
         .then(() => addDistCodeToSubPackages())
-        .then(() => createLicence());
+        .then(() => createLicence(packageFolder));
 }
 
 function compileTs () {
@@ -307,6 +307,9 @@ function addDistCodeToSubPackages () {
         fs.readdir(distFolder, (error, files) => {
             files.forEach((file) => {
                 const name = file.substr(0, file.indexOf('.'));
+                if (['index', 'test'].includes(name)) {
+                    return;
+                }
                 promises.push(new Promise((resolve) => {
                     fs.access(`${packageFolder}/${name}`, fs.constants.W_OK, (error) => {
                         if (error) {
@@ -457,14 +460,17 @@ function createLicence (packageFolder) {
         fs.readdir(distFolder, (error, files) => {
             files.forEach((file) => {
                 const name = file.substr(0, file.indexOf('.'));
+                if (['index', 'test'].includes(name)) {
+                    return;
+                }
                 promises.push(new Promise((resolve) => {
                     fs.access(`${packageFolder}/${name}`, fs.constants.W_OK, (error) => {
                         if (error) {
-                            console.warn(chalk.red.bold(`${name} has no package folder`)); // eslint-disable-line
+                            console.warn(chalk.red.bold(`${name} has no package folder: ${packageFolder}/${name}`)); // eslint-disable-line
                             return resolve();
                         }
                         fs.createReadStream('./LICENSE').pipe(
-                            fs.createWriteStream(`${packageFolder}/LICENSE`)
+                            fs.createWriteStream(`${packageFolder}/${name}/LICENSE`)
                         ).on('finish', resolve).on('error', reject);
                     });
                 }));
