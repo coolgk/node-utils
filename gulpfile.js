@@ -30,6 +30,10 @@ const codeHeader = `/*!
  * @version ${packageJson.version}
  * @link ${packageJson.homepage}
  * @license ${packageJson.license}
+ * @author ${packageJson.author}
+ *
+ * Copyright (c) 2017 ${packageJson.author}. All rights reserved.
+ * Licensed under the MIT License.
  */
 
 `;
@@ -143,7 +147,8 @@ function generateSubPackages () {
         .then(() => generateSubPackageMetaData())
         .then(() => generateIndexFile())
         .then(() => compileTs())
-        .then(() => addDistCodeToSubPackages());
+        .then(() => addDistCodeToSubPackages())
+        .then(() => createLicence());
 }
 
 function compileTs () {
@@ -209,6 +214,11 @@ function generateRootPackage () {
                             fs.createReadStream(`${distFolder}/${file}`).pipe(
                                 fs.createWriteStream(`${folder}/${file}`)
                             ).on('finish', () => resolve());
+                        }));
+                        promises.push(new Promise((resolve, reject) => {
+                            fs.createReadStream('./LICENSE').pipe(
+                                fs.createWriteStream(`${folder}/LICENSE`)
+                            ).on('finish', resolve).on('error', reject);
                         }));
                     });
                     resolve(Promise.all(promises));
@@ -441,6 +451,29 @@ function getMdCode (code) {
     return "\n```javascript\n" + code + "\n```\n"; // eslint-disable-line
 }
 
+function createLicence (packageFolder) {
+    return new Promise((resolve, reject) => {
+        const promises = [];
+        fs.readdir(distFolder, (error, files) => {
+            files.forEach((file) => {
+                const name = file.substr(0, file.indexOf('.'));
+                promises.push(new Promise((resolve) => {
+                    fs.access(`${packageFolder}/${name}`, fs.constants.W_OK, (error) => {
+                        if (error) {
+                            console.warn(chalk.red.bold(`${name} has no package folder`)); // eslint-disable-line
+                            return resolve();
+                        }
+                        fs.createReadStream('./LICENSE').pipe(
+                            fs.createWriteStream(`${packageFolder}/LICENSE`)
+                        ).on('finish', resolve).on('error', reject);
+                    });
+                }));
+            });
+            resolve(Promise.all(promises));
+        });
+    });
+}
+
 function dependencyCheck () {
     const promises = [];
     fs.readdir(packageFolder, (error, folders) => {
@@ -449,7 +482,7 @@ function dependencyCheck () {
                 execCommand(`nsp check ${packageFolder}/${folder}`)
             );
         }
-    })
+    });
     return Promise.all(promises);
 }
 
