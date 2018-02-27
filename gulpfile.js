@@ -249,6 +249,14 @@ function generateRootReadme (folder) {
             readmeWriteStream.write('you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + `\n\n`);
             readmeWriteStream.write(`Report bugs here: [${packageJson.bugs.url}](${packageJson.bugs.url})` + `\n\n`);
 
+            readmeWriteStream.write(`Also see:` + `\n\n`);
+
+            readmeWriteStream.write(`[@coolgk/mongo](https://www.npmjs.com/package/@coolgk/mongo)\n\n`
+            + `A javascript / typescript MongoDB modelling library which enables joins in collections, simplifies CRUD operations for sub / nested documents and implements schema based data validation.` + `\n\n`);
+
+            readmeWriteStream.write(`[@coolgk/mvc](https://www.npmjs.com/package/@coolgk/mvc)\n\n`
+            + `A simple, lightweight javascript / typescript MxC framework that helps you to create object oriented, modular and testable code.` + `\n\n`);
+
             const promises = [];
             files.forEach((file) => {
                 const name = file.replace('.ts', '');
