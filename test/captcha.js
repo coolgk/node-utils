@@ -2,14 +2,14 @@
 
 const sinon = require('sinon');
 const chai = require('chai');
-chai.use(require("chai-as-promised"));
+chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 
 const config = require('../test.config.js');
 
 describe('Captcha Module', function () {
 
-    const { Captcha } = require(`../${config.sourceFolder}/captcha`);
+    const { Captcha, verify } = require(`../${config.sourceFolder}/captcha`);
 
     // sandbox secret https://developers.google.com/recaptcha/docs/faq
     const secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
@@ -30,6 +30,10 @@ describe('Captcha Module', function () {
         request.post.callArgWith(1, error);
 
         return expect(promise).to.be.rejectedWith(error);
+    });
+
+    it('should verify as a function call', () => {
+        return expect(verify('6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 'dfasdfa')).to.eventually.have.property('success', true);
     });
 
 });

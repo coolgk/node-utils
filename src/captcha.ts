@@ -1,12 +1,20 @@
 /***
 description: recapcha wrapper
-version: 2.0.4
+version: 2.1.0
 keywords:
     - recapcha
 dependencies:
-    "@types/request": "^2.0.9"
     "request": "^2.83.0"
 example: |
+    const { verify } = require('@coolgk/captcha');
+
+    verify(captchaResponse).then((response) => {
+        console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                               // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+    });
+
+    // OR
+
     import { Captcha } from '@coolgk/captcha';
     // OR
     // const { Captcha } = require('@coolgk/captcha');
@@ -35,9 +43,14 @@ export interface ICaptchaConfig {
     readonly secret: string;
 }
 
+export interface IResult {
+    success: boolean;
+    [index: string]: any;
+}
+
 export class Captcha {
 
-    private static readonly _RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
+    public static readonly _RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     protected _secret: string;
     protected _request: typeof request;
@@ -56,7 +69,7 @@ export class Captcha {
      * @param {string} [remoteip] - ip address
      * @param {promise}
      */
-    public verify (response: string, remoteip?: string): Promise<{}> {
+    public verify (response: string, remoteip?: string): Promise<IResult> {
         return new Promise((resolve, reject) => {
             this._request.post(
                 {
@@ -77,6 +90,28 @@ export class Captcha {
             );
         });
     }
+}
+
+export function verify (secret: string, response: string, remoteip?: string): Promise<IResult> {
+    return new Promise((resolve, reject) => {
+        request.post(
+            {
+                url: Captcha._RECAPTCHA_URL,
+                form: {
+                    secret,
+                    response,
+                    remoteip
+                }
+            },
+            (error, httpResponse, data) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(JSON.parse(data));
+                }
+            }
+        );
+    });
 }
 
 export default Captcha;
