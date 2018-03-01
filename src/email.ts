@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 2.0.7
+version: 3.0.0
 keywords:
     - email
     - smtp sender
@@ -60,7 +60,7 @@ import { lookup } from 'mime-types';
 import { basename } from 'path';
 import { stripTags } from '@coolgk/string';
 
-export interface IEmailConfig {
+export interface IEmailOptions {
     readonly host: string;
     readonly stripTags?: typeof stripTags;
     readonly getMimeType?: typeof lookup;
@@ -96,7 +96,7 @@ export interface IEmailAttachment {
     readonly headers?: {[propName: string]: string};
 }
 
-export interface ISendConfig {
+export interface ISendOptions {
     readonly subject: string;
     readonly message?: string;
     readonly from: string | IEmailAddress;
@@ -124,9 +124,9 @@ export class Email {
      * @param {string[]} [options.authentication] - authentication methods
      * @see https://www.npmjs.com/package/emailjs#emailserverconnectoptions
      */
-    public constructor (options: (IEmailConfig | IEmailConfigWithClient) = {host: 'localhost'}) {
+    public constructor (options: (IEmailOptions | IEmailConfigWithClient) = {host: 'localhost'}) {
         this._emailClient = (options as IEmailConfigWithClient).emailClient ?
-            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailConfig);
+            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailOptions);
         this._stripTags = options.stripTags || stripTags;
         this._getMimeType = options.getMimeType || lookup;
     }
@@ -149,7 +149,7 @@ export class Email {
      * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
      * @return {promise} - message sent
      */
-    public send (options: ISendConfig): Promise<any> {
+    public send (options: ISendOptions): Promise<any> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
             if (options[field]) {
                 options[field] = this._formatEmailAddress(field === 'from' ? [options[field]] : options[field]);
