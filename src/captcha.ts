@@ -1,6 +1,6 @@
 /***
 description: recapcha wrapper
-version: 2.0.5
+version: 2.1.0
 keywords:
     - recapcha
 dependencies:
@@ -43,6 +43,11 @@ export interface ICaptchaConfig {
     readonly secret: string;
 }
 
+export interface IResult {
+    success: boolean;
+    [index: string]: any;
+}
+
 export class Captcha {
 
     public static readonly _RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
@@ -64,7 +69,7 @@ export class Captcha {
      * @param {string} [remoteip] - ip address
      * @param {promise}
      */
-    public verify (response: string, remoteip?: string): Promise<{}> {
+    public verify (response: string, remoteip?: string): Promise<IResult> {
         return new Promise((resolve, reject) => {
             this._request.post(
                 {
@@ -87,7 +92,7 @@ export class Captcha {
     }
 }
 
-export function verify (secret: string, response: string, remoteip?: string) {
+export function verify (secret: string, response: string, remoteip?: string): Promise<IResult> {
     return new Promise((resolve, reject) => {
         request.post(
             {
