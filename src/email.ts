@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 3.0.0
+version: 3.0.1
 keywords:
     - email
     - smtp sender
@@ -61,16 +61,16 @@ import { basename } from 'path';
 import { stripTags } from '@coolgk/string';
 
 export interface IEmailOptions {
-    readonly host: string;
-    readonly stripTags?: typeof stripTags;
-    readonly getMimeType?: typeof lookup;
-    readonly user?: string;
-    readonly password?: string;
-    readonly port?: number;
-    readonly ssl?: boolean;
-    readonly tls?: boolean;
-    readonly domain?: string;
-    readonly authentication?: string[];
+    host: string;
+    stripTags?: typeof stripTags;
+    getMimeType?: typeof lookup;
+    user?: string;
+    password?: string;
+    port?: number;
+    ssl?: boolean;
+    tls?: boolean;
+    domain?: string;
+    authentication?: string[];
 }
 
 export interface IEmailClient {
@@ -78,32 +78,32 @@ export interface IEmailClient {
 }
 
 export interface IEmailConfigWithClient {
-    readonly emailClient: IEmailClient; // DI for test
-    readonly stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
-    readonly getMimeType?: typeof lookup; // DI for test
+    emailClient: IEmailClient; // DI for test
+    stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
+    getMimeType?: typeof lookup; // DI for test
 }
 
 export interface IEmailAddress {
     name?: string;
-    readonly email: string;
+    email: string;
 }
 
 export interface IEmailAttachment {
-    readonly path: string;
+    path: string;
     name?: string;
     type?: string;
-    readonly method?: string;
-    readonly headers?: {[propName: string]: string};
+    method?: string;
+    headers?: {[propName: string]: string};
 }
 
 export interface ISendOptions {
-    readonly subject: string;
-    readonly message?: string;
-    readonly from: string | IEmailAddress;
-    readonly to: (string | IEmailAddress)[];
-    readonly cc?: (string | IEmailAddress)[];
-    readonly bcc?: (string | IEmailAddress)[];
-    readonly attachments?: IEmailAttachment[];
+    subject: string;
+    message?: string;
+    from: string | IEmailAddress;
+    to: (string | IEmailAddress)[];
+    cc?: (string | IEmailAddress)[];
+    bcc?: (string | IEmailAddress)[];
+    attachments?: IEmailAttachment[];
     [key: string]: any;
 }
 

@@ -21,12 +21,12 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
-- [csv](#coolgkcsv)
 - [captcha](#coolgkcaptcha)
+- [csv](#coolgkcsv)
 - [email](#coolgkemail)
 - [formdata](#coolgkformdata)
-- [number](#coolgknumber)
 - [jwt](#coolgkjwt)
+- [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
@@ -461,6 +461,70 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 | ...params | <code>array</code> | params for the command |
 
 
+## @coolgk/captcha
+a javascript / typescript module
+
+`npm install @coolgk/captcha`
+
+recapcha wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { verify } = require('@coolgk/captcha');
+const secret = '-------';
+
+verify(secret, captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+});
+
+// OR
+
+import { Captcha } from '@coolgk/captcha';
+// OR
+// const { Captcha } = require('@coolgk/captcha');
+
+const captcha = new Captcha({ secret });
+
+const captchaResponse = '---------';
+
+captcha.verify(captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+});
+
+```
+<a name="Captcha"></a>
+
+## Captcha
+**Kind**: global class  
+
+* [Captcha](#Captcha)
+    * [new Captcha(options)](#new_Captcha_new)
+    * [.verify(response, [remoteip])](#Captcha+verify)
+
+<a name="new_Captcha_new"></a>
+
+### new Captcha(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
+
+<a name="Captcha+verify"></a>
+
+### captcha.verify(response, [remoteip])
+**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| response | <code>string</code> | repsonse from recaptcha |
+| [remoteip] | <code>string</code> | ip address |
+|  | <code>promise</code> |  |
+
+
 ## @coolgk/csv
 a javascript / typescript module
 
@@ -620,70 +684,6 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
 | [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
-
-
-## @coolgk/captcha
-a javascript / typescript module
-
-`npm install @coolgk/captcha`
-
-recapcha wrapper
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-const { verify } = require('@coolgk/captcha');
-const secret = '-------';
-
-verify(secret, captchaResponse).then((response) => {
-    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
-                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
-});
-
-// OR
-
-import { Captcha } from '@coolgk/captcha';
-// OR
-// const { Captcha } = require('@coolgk/captcha');
-
-const captcha = new Captcha({ secret });
-
-const captchaResponse = '---------';
-
-captcha.verify(captchaResponse).then((response) => {
-    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
-                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
-});
-
-```
-<a name="Captcha"></a>
-
-## Captcha
-**Kind**: global class  
-
-* [Captcha](#Captcha)
-    * [new Captcha(options)](#new_Captcha_new)
-    * [.verify(response, [remoteip])](#Captcha+verify)
-
-<a name="new_Captcha_new"></a>
-
-### new Captcha(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
-
-<a name="Captcha+verify"></a>
-
-### captcha.verify(response, [remoteip])
-**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| response | <code>string</code> | repsonse from recaptcha |
-| [remoteip] | <code>string</code> | ip address |
-|  | <code>promise</code> |  |
 
 
 ## @coolgk/email
@@ -1016,37 +1016,6 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
-## @coolgk/number
-a javascript / typescript module
-
-`npm install @coolgk/number`
-
-number utitlies
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { round } from '@coolgk/number';
-// OR
-// const { round } = require('@coolgk/number');
-
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
-
-```
-<a name="round"></a>
-
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
 ## @coolgk/jwt
 a javascript / typescript module
 
@@ -1122,6 +1091,37 @@ setTimeout(() => {
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | token to verify |
+
+
+## @coolgk/number
+a javascript / typescript module
+
+`npm install @coolgk/number`
+
+number utitlies
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { round } from '@coolgk/number';
+// OR
+// const { round } = require('@coolgk/number');
+
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
+
+```
+<a name="round"></a>
+
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
 
 ## @coolgk/pdf
