@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 3.0.1
+version: 3.0.2
 keywords:
     - email
     - smtp sender
@@ -8,6 +8,7 @@ dependencies:
     "mime-types": "^2.1.17"
     "emailjs": "^2.0.0"
     "@coolgk/string": "^2"
+    "@coolgk/array": "^2"
     "@types/mime-types": "^2.1.0"
 example: |
     import { Email } from '@coolgk/email';
@@ -59,6 +60,7 @@ import emailjs = require('emailjs');
 import { lookup } from 'mime-types';
 import { basename } from 'path';
 import { stripTags } from '@coolgk/string';
+import { toArray } from '@coolgk/array';
 
 export interface IEmailOptions {
     host: string;
@@ -152,12 +154,12 @@ export class Email {
     public send (options: ISendOptions): Promise<any> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
             if (options[field]) {
-                options[field] = this._formatEmailAddress(field === 'from' ? [options[field]] : options[field]);
+                options[field] = this._formatEmailAddress(toArray(options[field]));
             }
         });
 
         if (options.attachments) {
-            options.attachments.forEach((attachment: IEmailAttachment) => {
+            toArray(options.attachments).forEach((attachment: IEmailAttachment) => {
                 if (!attachment.name) {
                     attachment.name = basename(attachment.path);
                 }
