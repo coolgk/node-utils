@@ -27,6 +27,7 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [formdata](#coolgkformdata)
 - [jwt](#coolgkjwt)
 - [number](#coolgknumber)
+- [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
 - [session](#coolgksession)
 - [string](#coolgkstring)
@@ -34,7 +35,6 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [token](#coolgktoken)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
-- [pdf](#coolgkpdf)
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -471,6 +471,15 @@ recapcha wrapper
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
+const { verify } = require('@coolgk/captcha');
+
+verify(captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+});
+
+// OR
+
 import { Captcha } from '@coolgk/captcha';
 // OR
 // const { Captcha } = require('@coolgk/captcha');
@@ -515,6 +524,167 @@ captcha.verify(captchaResponse).then((response) => {
 | response | <code>string</code> | repsonse from recaptcha |
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
+
+
+## @coolgk/csv
+a javascript / typescript module
+
+`npm install @coolgk/csv`
+
+read and write csv files
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Csv } from '@coolgk/csv';
+// OR
+// const { Csv } = require('@coolgk/csv');
+
+const csv = new Csv({
+    tmpConfig: { dir: '/tmp/csv' } // optional
+});
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row) => {
+            return row.map((value) => 'formatted-' + value);
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    // read lines as object
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+            // {
+                // 'column 1': 'formatted-1',
+                // 'column 2': 'formatted-2',
+                // 'column 3': 'formatted-3',
+                // h4: 'formatted-4',
+                // h5: 'formatted-5'
+            // } 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+
+    // without columns/headers
+    // read lines as array
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+}
+
+```
+<a name="Csv"></a>
+
+## Csv
+**Kind**: global class  
+
+* [Csv](#Csv)
+    * [new Csv([options])](#new_Csv_new)
+    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
+    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
+    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+
+<a name="new_Csv_new"></a>
+
+### new Csv([options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+<a name="Csv+parse"></a>
+
+### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
+parse a string as csv data and returns an array promise
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>string</code> |  | a csv string |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+readFile"></a>
+
+### csv.readFile(file, [options]) ⇒ <code>object</code>
+read a csv file. the return value can ONLY be used in a forEach() loop
+e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| file | <code>string</code> |  | file path |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+createFile"></a>
+
+### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
+| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
+| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
 ## @coolgk/email
@@ -955,420 +1125,6 @@ console.log(round(100.958747, 4)); // 100.9587
 | precision | <code>number</code> | <code>2</code> | precision |
 
 
-## @coolgk/queue
-a javascript / typescript module
-
-`npm install @coolgk/queue`
-
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-## Examples
-```javascript
-import { queue } from '@coolgk/queue';
-// OR
-// const { queue } = require('@coolgk/queue');
-
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
-
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
-
-```
-<a name="queue"></a>
-
-## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
-
-
-## @coolgk/csv
-a javascript / typescript module
-
-`npm install @coolgk/csv`
-
-read and write csv files
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Csv } from '@coolgk/csv';
-// OR
-// const { Csv } = require('@coolgk/csv');
-
-const csv = new Csv({
-    tmpConfig: { dir: '/tmp/csv' } // optional
-});
-
-const arrayData = [
-    [1,2,3,4,5],
-    [6,7,7,8,9],
-    [0,5,8,90,65]
-];
-
-const objectData = [
-    {col1: 'ab', col2: 'cd', col3: 'ef'},
-    {col1: '2ab', col2: '2cd', col3: '2ef'},
-    {col1: '3ab', col2: '3cd', col3: '3ef'}
-];
-
-csv.createFile(
-    arrayData,
-    {
-        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-        formatter: (row) => {
-            return row.map((value) => 'formatted-' + value);
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
-    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
-});
-
-csv.createFile(
-    objectData,
-    {
-        columns: ['col1', 'col2', 'col3'],
-        formatter: (row) => {
-            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
-    read(csvFilePath, ['col1', 'col2', 'col3']);
-});
-
-function read (file, columns) {
-    // with columns/headers
-    // read lines as object
-    const lines = csv.readFile(file, {columns: columns});
-    lines.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index);
-            // {
-                // 'column 1': 'formatted-1',
-                // 'column 2': 'formatted-2',
-                // 'column 3': 'formatted-3',
-                // h4: 'formatted-4',
-                // h5: 'formatted-5'
-            // } 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-
-    // without columns/headers
-    // read lines as array
-    const lines2 = csv.readFile(file);
-    lines2.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-}
-
-```
-<a name="Csv"></a>
-
-## Csv
-**Kind**: global class  
-
-* [Csv](#Csv)
-    * [new Csv([options])](#new_Csv_new)
-    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
-    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
-
-<a name="new_Csv_new"></a>
-
-### new Csv([options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Csv+parse"></a>
-
-### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
-parse a string as csv data and returns an array promise
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>string</code> |  | a csv string |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+readFile"></a>
-
-### csv.readFile(file, [options]) ⇒ <code>object</code>
-read a csv file. the return value can ONLY be used in a forEach() loop
-e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| file | <code>string</code> |  | file path |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
-
-<a name="Csv+createFile"></a>
-
-### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
-| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
-| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
-
-
-## @coolgk/tmp
-a javascript / typescript module
-
-`npm install @coolgk/tmp`
-
-wrapper functions, generate tmp file or folders
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
-// OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
-
-```
-## Functions
-
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
-
-<a name="generateFile"></a>
-
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateDir"></a>
-
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
-// OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
-
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
-
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
-
-```
-## Functions
-
-<dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
-</dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="bytesToString"></a>
-
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
-
-**Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
-
-<a name="millisecondsToString"></a>
-
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
-
-
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
-
-
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1496,222 +1252,63 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/token
+## @coolgk/queue
 a javascript / typescript module
 
-`npm install @coolgk/token`
+`npm install @coolgk/queue`
 
-an expirable, revocable, renewable token with data storage
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 ## Examples
 ```javascript
-import { Token } from '@coolgk/token';
-import { createClient } from 'redis';
+import { queue } from '@coolgk/queue';
 // OR
-// const { Token } = require('@coolgk/token');
-// const createClient = require('redis').createClient;
+// const { queue } = require('@coolgk/queue');
 
-(async () => {
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
 
-    const redisClient = createClient({
-        host: 'localhost',
-        port: 6379,
-        password: '----'
-    });
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
 
-    const token = new Token({
-        redisClient: redisClient,
-        expiry: 5,
-        token: 'abcde'
-    });
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
 
-    console.log(
-        await token.verify()
-    ) // false
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
 
-    await token.renew();
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
 
-    console.log(
-        await token.verify()
-    ) // true
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    await token.set('var1', {a: 'var1', b: false});
-
-    console.log(
-        await token.get('var1');
-    ); // {a: 'var1', b: false}
-
-    await token.set('var2', 'string var 2');
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
-
-    await token.delete('var2');
-
-    console.log(
-        await token.get('var2');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false } }
-
-    await token.destroy();
-
-    console.log(
-        await token.verify()
-    ) // false
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    redisClient.quit();
-})()
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
 
 ```
-## Classes
+<a name="queue"></a>
 
-<dl>
-<dt><a href="#Token">Token</a></dt>
-<dd></dd>
-</dl>
-
-## Constants
-
-<dl>
-<dt><a href="#TokenError">TokenError</a> : <code>object</code></dt>
-<dd><p>Error Codes</p>
-</dd>
-</dl>
-
-<a name="Token"></a>
-
-## Token
-**Kind**: global class  
-
-* [Token](#Token)
-    * [new Token(options)](#new_Token_new)
-    * [.renew([expiry])](#Token+renew) ⇒ <code>promise</code>
-    * [.set(name, value)](#Token+set) ⇒ <code>promise</code>
-    * [.verify()](#Token+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.get(name)](#Token+get) ⇒ <code>promise</code>
-    * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
-    * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
-    * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
-    * [.setToken(token)](#Token+setToken)
-
-<a name="new_Token_new"></a>
-
-### new Token(options)
+## queue(callback, [limit]) ⇒ <code>promise</code>
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| options.token | <code>string</code> |  | token string for creating a token object |
-| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
-| [options.prefix] | <code>string</code> | <code>&quot;&#x27;token&#x27;&quot;</code> | prefix used in redis e.g. token:[TOKEN_STRING...] |
-| [options.expiry] | <code>number</code> | <code>0</code> | in seconds. 0 = never expire |
-
-<a name="Token+renew"></a>
-
-### token.renew([expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [expiry] | <code>number</code> | in seconds |
-
-<a name="Token+set"></a>
-
-### token.set(name, value) ⇒ <code>promise</code>
-set a data field value
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | field name |
-| value | <code>\*</code> | anything can be JSON.stringify'ed |
-
-<a name="Token+verify"></a>
-
-### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
-verify if token has expired
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+get"></a>
-
-### token.get(name) ⇒ <code>promise</code>
-get the value of a data field
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | data field name |
-
-<a name="Token+destroy"></a>
-
-### token.destroy() ⇒ <code>promise</code>
-delete the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+delete"></a>
-
-### token.delete(name) ⇒ <code>promise</code>
-delete a data field in the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | data field name |
-
-<a name="Token+getAll"></a>
-
-### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
-get the values of all data fields in the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+setToken"></a>
-
-### token.setToken(token)
-set a new token string
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | new token string |
-
-<a name="TokenError"></a>
-
-## TokenError : <code>object</code>
-Error Codes
-
-**Kind**: global constant  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| INVALID_TOKEN | <code>string</code> | invalid token string |
-| RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
-| EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/session
@@ -2053,4 +1650,416 @@ use padStart instead
 | --- | --- | --- | --- |
 | value | <code>number</code> |  | an integer in string or number format |
 | length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
+
+
+## @coolgk/tmp
+a javascript / typescript module
+
+`npm install @coolgk/tmp`
+
+wrapper functions, generate tmp file or folders
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
+// OR
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
+
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+
+```
+## Functions
+
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+</dl>
+
+<a name="generateFile"></a>
+
+## generateFile([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateDir"></a>
+
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateTmpName"></a>
+
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+
+## @coolgk/token
+a javascript / typescript module
+
+`npm install @coolgk/token`
+
+an expirable, revocable, renewable token with data storage
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Token } from '@coolgk/token';
+import { createClient } from 'redis';
+// OR
+// const { Token } = require('@coolgk/token');
+// const createClient = require('redis').createClient;
+
+(async () => {
+
+    const redisClient = createClient({
+        host: 'localhost',
+        port: 6379,
+        password: '----'
+    });
+
+    const token = new Token({
+        redisClient: redisClient,
+        expiry: 5,
+        token: 'abcde'
+    });
+
+    console.log(
+        await token.verify()
+    ) // false
+
+    await token.renew();
+
+    console.log(
+        await token.verify()
+    ) // true
+
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    await token.set('var1', {a: 'var1', b: false});
+
+    console.log(
+        await token.get('var1');
+    ); // {a: 'var1', b: false}
+
+    await token.set('var2', 'string var 2');
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
+
+    await token.delete('var2');
+
+    console.log(
+        await token.get('var2');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false } }
+
+    await token.destroy();
+
+    console.log(
+        await token.verify()
+    ) // false
+
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    redisClient.quit();
+})()
+
+```
+## Classes
+
+<dl>
+<dt><a href="#Token">Token</a></dt>
+<dd></dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#TokenError">TokenError</a> : <code>object</code></dt>
+<dd><p>Error Codes</p>
+</dd>
+</dl>
+
+<a name="Token"></a>
+
+## Token
+**Kind**: global class  
+
+* [Token](#Token)
+    * [new Token(options)](#new_Token_new)
+    * [.renew([expiry])](#Token+renew) ⇒ <code>promise</code>
+    * [.set(name, value)](#Token+set) ⇒ <code>promise</code>
+    * [.verify()](#Token+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.get(name)](#Token+get) ⇒ <code>promise</code>
+    * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
+    * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
+    * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
+    * [.setToken(token)](#Token+setToken)
+
+<a name="new_Token_new"></a>
+
+### new Token(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| options.token | <code>string</code> |  | token string for creating a token object |
+| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
+| [options.prefix] | <code>string</code> | <code>&quot;&#x27;token&#x27;&quot;</code> | prefix used in redis e.g. token:[TOKEN_STRING...] |
+| [options.expiry] | <code>number</code> | <code>0</code> | in seconds. 0 = never expire |
+
+<a name="Token+renew"></a>
+
+### token.renew([expiry]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [expiry] | <code>number</code> | in seconds |
+
+<a name="Token+set"></a>
+
+### token.set(name, value) ⇒ <code>promise</code>
+set a data field value
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | field name |
+| value | <code>\*</code> | anything can be JSON.stringify'ed |
+
+<a name="Token+verify"></a>
+
+### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
+verify if token has expired
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+get"></a>
+
+### token.get(name) ⇒ <code>promise</code>
+get the value of a data field
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | data field name |
+
+<a name="Token+destroy"></a>
+
+### token.destroy() ⇒ <code>promise</code>
+delete the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+delete"></a>
+
+### token.delete(name) ⇒ <code>promise</code>
+delete a data field in the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | data field name |
+
+<a name="Token+getAll"></a>
+
+### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
+get the values of all data fields in the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+setToken"></a>
+
+### token.setToken(token)
+set a new token string
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | new token string |
+
+<a name="TokenError"></a>
+
+## TokenError : <code>object</code>
+Error Codes
+
+**Kind**: global constant  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| INVALID_TOKEN | <code>string</code> | invalid token string |
+| RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
+| EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
+
+
+## @coolgk/unit
+a javascript / typescript module
+
+`npm install @coolgk/unit`
+
+unit conversion
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+
+```
+## Functions
+
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | value in byte |
+
+<a name="millisecondsToString"></a>
+
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | number of milliseconds |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
