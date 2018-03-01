@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple jwt token class
-version: 2.0.6
+version: 3.0.0
 keywords:
     - jwt
 dependencies:
