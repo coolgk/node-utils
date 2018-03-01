@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 2.0.6
+version: 2.0.7
 keywords:
     - email
     - smtp sender
@@ -149,7 +149,7 @@ export class Email {
      * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
      * @return {promise} - message sent
      */
-    public send (options: ISendConfig): Promise<{}> {
+    public send (options: ISendConfig): Promise<any> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
             if (options[field]) {
                 options[field] = this._formatEmailAddress(field === 'from' ? [options[field]] : options[field]);

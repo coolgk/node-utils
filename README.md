@@ -1310,98 +1310,6 @@ queue(c);
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
 ## @coolgk/session
 a javascript / typescript module
 
@@ -1649,6 +1557,98 @@ renew session optionally with a different expiry time
 | Param | Type | Description |
 | --- | --- | --- |
 | [expiry] | <code>number</code> | in seconds |
+
+
+## @coolgk/string
+a javascript / typescript module
+
+`npm install @coolgk/string`
+
+string utility functions
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
+// OR
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
+
+```
+## Functions
+
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
 ## @coolgk/tmp
