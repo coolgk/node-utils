@@ -33,7 +33,7 @@ describe('Captcha Module', function () {
     });
 
     it('should verify as a function call', () => {
-        return expect(verify('dfasdfa')).to.eventually.have.property('success', true);
+        return expect(verify('6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 'dfasdfa')).to.eventually.have.property('success', true);
     });
 
 });

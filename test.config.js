@@ -18,9 +18,10 @@ module.exports = {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: process.env.REDIS_PORT
-    },
-    mongo: {
-        url: process.env.MONGO_URL,
-        dbName: process.env.MONGO_DB_NAME
     }
+    // ,
+    // mongo: {
+    //     url: process.env.MONGO_URL,
+    //     dbName: process.env.MONGO_DB_NAME
+    // }
 };
