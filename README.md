@@ -472,8 +472,9 @@ Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.c
 ## Examples
 ```javascript
 const { verify } = require('@coolgk/captcha');
+const secret = '-------';
 
-verify(captchaResponse).then((response) => {
+verify(secret, captchaResponse).then((response) => {
     console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
                            // { success: false, 'error-codes': [ 'invalid-input-response' ] }
 });
@@ -484,9 +485,7 @@ import { Captcha } from '@coolgk/captcha';
 // OR
 // const { Captcha } = require('@coolgk/captcha');
 
-const captcha = new Captcha({
-    secret: '-------'
-});
+const captcha = new Captcha({ secret });
 
 const captchaResponse = '---------';
 
