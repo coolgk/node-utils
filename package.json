@@ -57,7 +57,7 @@
     "@coolgk/array": "^2.0.4",
     "@coolgk/base64": "^2.0.4",
     "@coolgk/cache": "^2.0.4",
-    "@coolgk/jwt": "^2.0.6",
+    "@coolgk/jwt": "^3.0.0",
     "@coolgk/queue": "^2.0.4",
     "@coolgk/string": "^2.0.4",
     "@coolgk/tmp": "^2.0.5",
