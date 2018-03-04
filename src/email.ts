@@ -1,6 +1,6 @@
 /***
 description: a email sender wrapper class
-version: 2.0.6
+version: 3.0.2
 keywords:
     - email
     - smtp sender
@@ -8,6 +8,7 @@ dependencies:
     "mime-types": "^2.1.17"
     "emailjs": "^2.0.0"
     "@coolgk/string": "^2"
+    "@coolgk/array": "^2"
     "@types/mime-types": "^2.1.0"
 example: |
     import { Email } from '@coolgk/email';
@@ -59,18 +60,19 @@ import emailjs = require('emailjs');
 import { lookup } from 'mime-types';
 import { basename } from 'path';
 import { stripTags } from '@coolgk/string';
+import { toArray } from '@coolgk/array';
 
-export interface IEmailConfig {
-    readonly host: string;
-    readonly stripTags?: typeof stripTags;
-    readonly getMimeType?: typeof lookup;
-    readonly user?: string;
-    readonly password?: string;
-    readonly port?: number;
-    readonly ssl?: boolean;
-    readonly tls?: boolean;
-    readonly domain?: string;
-    readonly authentication?: string[];
+export interface IEmailOptions {
+    host: string;
+    stripTags?: typeof stripTags;
+    getMimeType?: typeof lookup;
+    user?: string;
+    password?: string;
+    port?: number;
+    ssl?: boolean;
+    tls?: boolean;
+    domain?: string;
+    authentication?: string[];
 }
 
 export interface IEmailClient {
@@ -78,32 +80,32 @@ export interface IEmailClient {
 }
 
 export interface IEmailConfigWithClient {
-    readonly emailClient: IEmailClient; // DI for test
-    readonly stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
-    readonly getMimeType?: typeof lookup; // DI for test
+    emailClient: IEmailClient; // DI for test
+    stripTags?: typeof stripTags; // DI for test, from @coolgk/stripTags.js
+    getMimeType?: typeof lookup; // DI for test
 }
 
 export interface IEmailAddress {
     name?: string;
-    readonly email: string;
+    email: string;
 }
 
 export interface IEmailAttachment {
-    readonly path: string;
+    path: string;
     name?: string;
     type?: string;
-    readonly method?: string;
-    readonly headers?: {[propName: string]: string};
+    method?: string;
+    headers?: {[propName: string]: string};
 }
 
-export interface ISendConfig {
-    readonly subject: string;
-    readonly message?: string;
-    readonly from: string | IEmailAddress;
-    readonly to: (string | IEmailAddress)[];
-    readonly cc?: (string | IEmailAddress)[];
-    readonly bcc?: (string | IEmailAddress)[];
-    readonly attachments?: IEmailAttachment[];
+export interface ISendOptions {
+    subject: string;
+    message?: string;
+    from: string | IEmailAddress;
+    to: (string | IEmailAddress)[];
+    cc?: (string | IEmailAddress)[];
+    bcc?: (string | IEmailAddress)[];
+    attachments?: IEmailAttachment[];
     [key: string]: any;
 }
 
@@ -124,9 +126,9 @@ export class Email {
      * @param {string[]} [options.authentication] - authentication methods
      * @see https://www.npmjs.com/package/emailjs#emailserverconnectoptions
      */
-    public constructor (options: (IEmailConfig | IEmailConfigWithClient) = {host: 'localhost'}) {
+    public constructor (options: (IEmailOptions | IEmailConfigWithClient) = {host: 'localhost'}) {
         this._emailClient = (options as IEmailConfigWithClient).emailClient ?
-            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailConfig);
+            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailOptions);
         this._stripTags = options.stripTags || stripTags;
         this._getMimeType = options.getMimeType || lookup;
     }
@@ -149,15 +151,15 @@ export class Email {
      * @param {object} [attachments.headers] - attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"}
      * @return {promise} - message sent
      */
-    public send (options: ISendConfig): Promise<{}> {
+    public send (options: ISendOptions): Promise<any> {
         ['cc', 'bcc', 'from', 'to'].forEach((field: string) => {
             if (options[field]) {
-                options[field] = this._formatEmailAddress(field === 'from' ? [options[field]] : options[field]);
+                options[field] = this._formatEmailAddress(toArray(options[field]));
             }
         });
 
         if (options.attachments) {
-            options.attachments.forEach((attachment: IEmailAttachment) => {
+            toArray(options.attachments).forEach((attachment: IEmailAttachment) => {
                 if (!attachment.name) {
                     attachment.name = basename(attachment.path);
                 }

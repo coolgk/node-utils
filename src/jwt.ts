@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple jwt token class
-version: 2.0.6
+version: 3.0.0
 keywords:
     - jwt
 dependencies:
@@ -46,7 +46,7 @@ example: |
 import { createHmac } from 'crypto';
 import { decodeUrl, encodeUrl } from '@coolgk/base64';
 
-export interface IJwtConfig {
+export interface IJwtOptions {
     secret: string;
 }
 
@@ -66,7 +66,7 @@ export class Jwt {
      * @param {object} options
      * @param {string} options.secret - for encryption
      */
-    public constructor (options: IJwtConfig) {
+    public constructor (options: IJwtOptions) {
         if (!options || !options.secret) {
             throw new Error(JwtError.SECRET_CANNOT_BE_EMPTY);
         }

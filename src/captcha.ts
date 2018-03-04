@@ -1,10 +1,11 @@
 /***
 description: recapcha wrapper
-version: 2.1.1
+version: 2.1.2
 keywords:
     - recapcha
 dependencies:
     "request": "^2.83.0"
+    "@types/request": "^2.47.0"
 example: |
     const { verify } = require('@coolgk/captcha');
     const secret = '-------';

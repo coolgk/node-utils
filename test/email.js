@@ -30,8 +30,8 @@ describe('Email Module', function () {
             subject,
             message,
             from: {
-                    name: 'Daniel Gong',
-                    email: 'daniel.k.gong@example.com'
+                name: 'Daniel Gong',
+                email: 'daniel.k.gong@example.com'
             },
             to: [
                 {
