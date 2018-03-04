@@ -17,24 +17,24 @@ A javascript / typescript MongoDB modelling library which enables joins in colle
 A simple, lightweight javascript / typescript MxC framework that helps you to create object oriented, modular and testable code.
 
 - [array](#coolgkarray)
+- [amqp](#coolgkamqp)
 - [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
 - [csv](#coolgkcsv)
-- [email](#coolgkemail)
 - [formdata](#coolgkformdata)
+- [email](#coolgkemail)
 - [jwt](#coolgkjwt)
-- [pdf](#coolgkpdf)
-- [number](#coolgknumber)
-- [amqp](#coolgkamqp)
 - [queue](#coolgkqueue)
+- [pdf](#coolgkpdf)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [token](#coolgktoken)
+- [tmp](#coolgktmp)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
-- [tmp](#coolgktmp)
+- [number](#coolgknumber)
 
 ## @coolgk/array
 a javascript / typescript module
@@ -73,80 +73,171 @@ console.log(toArray(e)); // [ { a: 1 } ]
 | data | <code>\*</code> | any data to be type cast to array |
 
 
-## @coolgk/base64
+## @coolgk/amqp
 a javascript / typescript module
 
-`npm install @coolgk/base64`
+`npm install @coolgk/amqp`
 
-base64 encoded decode functions
+a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+import { Amqp } from '@coolgk/amqp';
 // OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
+// const { Amqp } = require('@coolgk/amqp');
 
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
+});
 
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
+const message = {
+    a: 1,
+    b: 'b'
+};
 
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
+});
+
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
+
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+});
+
+
+// example to add:
+// consume from (multiple) routes
+// round robin consumers
+// direct route + a catch all consumer
+
+```
+<a name="Amqp"></a>
+
+## Amqp
+**Kind**: global class  
+
+* [Amqp](#Amqp)
+    * [new Amqp(options)](#new_Amqp_new)
+    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
+
+<a name="new_Amqp_new"></a>
+
+### new Amqp(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.url | <code>string</code> | connection string e.g. amqp://localhost |
+| [options.sslPem] | <code>string</code> | pem file path |
+| [options.sslCa] | <code>string</code> | sslCa file path |
+| [options.sslPass] | <code>string</code> | password |
+
+<a name="Amqp+closeConnection"></a>
+
+### amqp.closeConnection() ⇒ <code>void</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+<a name="Amqp+publish"></a>
+
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
+| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+
+<a name="Amqp+consume"></a>
+
+### amqp.consume(callback, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | consumer(message) function should returns a promise |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
+| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
+
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
+
+## @coolgk/bcrypt
+a javascript / typescript module
+
+`npm install @coolgk/bcrypt`
+
+just a promise wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
+
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
 
 ```
 ## Functions
 
 <dl>
-<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
 <dd></dd>
-<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
 <dd></dd>
 </dl>
 
-<a name="encode"></a>
+<a name="encrypt"></a>
 
-## encode(data) ⇒ <code>string</code>
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>string</code> | string to encode |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
 
-<a name="decode"></a>
+<a name="verify"></a>
 
-## decode(data) ⇒ <code>string</code>
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>string</code> | encoded hash |
-
-<a name="encodeUrl"></a>
-
-## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decodeUrl"></a>
-
-## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | base64 encoded url to decode |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/cache
@@ -519,157 +610,6 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
-## @coolgk/bcrypt
-a javascript / typescript module
-
-`npm install @coolgk/bcrypt`
-
-just a promise wrapper
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
-// OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
-<dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encrypt"></a>
-
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
-
-<a name="verify"></a>
-
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
-
-
-## @coolgk/email
-a javascript / typescript module
-
-`npm install @coolgk/email`
-
-a email sender wrapper class
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Email } from '@coolgk/email';
-// OR
-// const { Email } = require('@coolgk/email');
-
-const email = new Email({host: 'localhost'});
-
-email.send({
-    subject: 'hello this is email subject',
-    from: {
-            name: 'Daniel Gong',
-            email: 'daniel.k.gong@example.com'
-    },
-    to: [
-        {
-            name: 'Dan Go',
-            email: 'dan@example.com'
-        },
-        'gong@example.com'
-    ],
-    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
-    attachments: [
-        {
-            path: '/tmp/test.png',
-            name: 'screenshot.png'
-        },
-        {
-            path:"/tmp/test.png",
-            headers:{"Content-ID": "<my-image>"}
-        }
-    ]
-}).then((sentMessage) => {
-    console.log(sentMessage);
-}).catch((error) => {
-    console.log(error);
-});
-
-```
-<a name="Email"></a>
-
-## Email
-**Kind**: global class  
-**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
-
-* [Email](#Email)
-    * [new Email(options)](#new_Email_new)
-    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
-
-<a name="new_Email_new"></a>
-
-### new Email(options)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| [options.user] | <code>string</code> |  | username for logging into smtp |
-| [options.password] | <code>string</code> |  | password for logging into smtp |
-| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
-| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
-| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
-| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
-| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
-| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
-
-<a name="Email+send"></a>
-
-### email.send(options, [attachments]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Email</code>](#Email)  
-**Returns**: <code>promise</code> - - message sent  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.subject | <code>string</code> | email subject |
-| [options.message] | <code>string</code> | html email message |
-| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
-| options.to[].name | <code>string</code> | name of the recipient |
-| options.to[].email | <code>string</code> | email address of the recipient |
-| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
-| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
-| attachments.path | <code>string</code> | file path |
-| [attachments.name] | <code>string</code> | file name |
-| [attachments.type] | <code>string</code> | file mime type |
-| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
-| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
-
-
 ## @coolgk/formdata
 a javascript / typescript module
 
@@ -902,6 +842,104 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
+## @coolgk/email
+a javascript / typescript module
+
+`npm install @coolgk/email`
+
+a email sender wrapper class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Email } from '@coolgk/email';
+// OR
+// const { Email } = require('@coolgk/email');
+
+const email = new Email({host: 'localhost'});
+
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.k.gong@example.com'
+    },
+    to: [
+        {
+            name: 'Dan Go',
+            email: 'dan@example.com'
+        },
+        'gong@example.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/tmp/test.png',
+            name: 'screenshot.png'
+        },
+        {
+            path:"/tmp/test.png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
+});
+
+```
+<a name="Email"></a>
+
+## Email
+**Kind**: global class  
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
+
+* [Email](#Email)
+    * [new Email(options)](#new_Email_new)
+    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
+
+<a name="new_Email_new"></a>
+
+### new Email(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| [options.user] | <code>string</code> |  | username for logging into smtp |
+| [options.password] | <code>string</code> |  | password for logging into smtp |
+| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
+| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
+| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
+| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
+| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
+| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+
+<a name="Email+send"></a>
+
+### email.send(options, [attachments]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.subject | <code>string</code> | email subject |
+| [options.message] | <code>string</code> | html email message |
+| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
+| options.to[].name | <code>string</code> | name of the recipient |
+| options.to[].email | <code>string</code> | email address of the recipient |
+| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
+| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
+| attachments.path | <code>string</code> | file path |
+| [attachments.name] | <code>string</code> | file name |
+| [attachments.type] | <code>string</code> | file mime type |
+| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
+| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+
+
 ## @coolgk/jwt
 a javascript / typescript module
 
@@ -977,6 +1015,65 @@ setTimeout(() => {
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | token to verify |
+
+
+## @coolgk/queue
+a javascript / typescript module
+
+`npm install @coolgk/queue`
+
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+## Examples
+```javascript
+import { queue } from '@coolgk/queue';
+// OR
+// const { queue } = require('@coolgk/queue');
+
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
+
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
+
+```
+<a name="queue"></a>
+
+## queue(callback, [limit]) ⇒ <code>promise</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/pdf
@@ -1106,208 +1203,80 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/number
+## @coolgk/base64
 a javascript / typescript module
 
-`npm install @coolgk/number`
+`npm install @coolgk/base64`
 
-number utitlies
+base64 encoded decode functions
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { round } from '@coolgk/number';
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
 // OR
-// const { round } = require('@coolgk/number');
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
 
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
+const a = 'https://www.google.co.uk/?a=b'
+const hash = encode(a);
+const urlHash = encodeUrl(a);
+
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 
 ```
-<a name="round"></a>
+## Functions
 
-## round(value, precision) ⇒ <code>number</code>
+<dl>
+<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encode"></a>
+
+## encode(data) ⇒ <code>string</code>
 **Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
-## @coolgk/amqp
-a javascript / typescript module
-
-`npm install @coolgk/amqp`
-
-a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Amqp } from '@coolgk/amqp';
-// OR
-// const { Amqp } = require('@coolgk/amqp');
-
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
-
-// consumer.js
-// consume message and return (send) a response back to publisher
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message); // consumer received ignore response
-                                               // consumer received { a: 1, b: 'b' }
-    return {
-        response: 'response message'
-    }
-});
-
-// publisher.js
-// publish a message, no response from consumer
-amqp.publish('ignore response');
-
-// publish a message and handle response from consumer
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-});
-
-
-// example to add:
-// consume from (multiple) routes
-// round robin consumers
-// direct route + a catch all consumer
-
-```
-<a name="Amqp"></a>
-
-## Amqp
-**Kind**: global class  
-
-* [Amqp](#Amqp)
-    * [new Amqp(options)](#new_Amqp_new)
-    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
-    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
-
-<a name="new_Amqp_new"></a>
-
-### new Amqp(options)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| options | <code>object</code> |  |
-| options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.sslPem] | <code>string</code> | pem file path |
-| [options.sslCa] | <code>string</code> | sslCa file path |
-| [options.sslPass] | <code>string</code> | password |
+| data | <code>string</code> | string to encode |
 
-<a name="Amqp+closeConnection"></a>
+<a name="decode"></a>
 
-### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-<a name="Amqp+publish"></a>
-
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
-| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-
-<a name="Amqp+consume"></a>
-
-### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | consumer(message) function should returns a promise |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
-| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
-
-<a name="Amqp+getChannel"></a>
-
-### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  
-
-## @coolgk/queue
-a javascript / typescript module
-
-`npm install @coolgk/queue`
-
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-## Examples
-```javascript
-import { queue } from '@coolgk/queue';
-// OR
-// const { queue } = require('@coolgk/queue');
-
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
-
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
-
-```
-<a name="queue"></a>
-
-## queue(callback, [limit]) ⇒ <code>promise</code>
+## decode(data) ⇒ <code>string</code>
 **Kind**: global function  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | encoded hash |
+
+<a name="encodeUrl"></a>
+
+## encodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decodeUrl"></a>
+
+## decodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | base64 encoded url to decode |
 
 
 ## @coolgk/session
@@ -1482,7 +1451,6 @@ This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk
 <a name="Session+init"></a>
 
 ### session.init(signature) ⇒ <code>promise.&lt;string&gt;</code>
-an alias of the start() method.
 initialising a new session
 
 **Kind**: instance method of [<code>Session</code>](#Session)  
@@ -1495,8 +1463,7 @@ initialising a new session
 <a name="Session+rotate"></a>
 
 ### session.rotate(signature) ⇒ <code>promise.&lt;string&gt;</code>
-an alias of the start() method.
-initialising a new session
+rotate a session: start a new session and transfer old session values to the new session
 
 **Kind**: instance method of [<code>Session</code>](#Session)  
 **Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
@@ -1508,7 +1475,7 @@ initialising a new session
 <a name="Session+start"></a>
 
 ### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
-initialising a new session
+start session: renew the existing session or if not valid valid session, start a new one
 
 **Kind**: instance method of [<code>Session</code>](#Session)  
 **Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
@@ -1557,98 +1524,6 @@ renew session optionally with a different expiry time
 | Param | Type | Description |
 | --- | --- | --- |
 | [expiry] | <code>number</code> | in seconds |
-
-
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
 ## @coolgk/token
@@ -1869,6 +1744,98 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
+## @coolgk/string
+a javascript / typescript module
+
+`npm install @coolgk/string`
+
+string utility functions
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
+// OR
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
+
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
+
+```
+## Functions
+
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
+**Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
+
+
 ## @coolgk/unit
 a javascript / typescript module
 
@@ -1981,6 +1948,37 @@ a simple function to get params in a url e.g. with url: user/123, pattern: user/
 | --- | --- | --- |
 | url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
 | pattern | <code>string</code> | e.g. /:userid/:name |
+
+
+## @coolgk/number
+a javascript / typescript module
+
+`npm install @coolgk/number`
+
+number utitlies
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { round } from '@coolgk/number';
+// OR
+// const { round } = require('@coolgk/number');
+
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
+
+```
+<a name="round"></a>
+
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
 
 ## @coolgk/tmp
