@@ -1,6 +1,6 @@
 /***
 description: google sign in module which verifies id token and returns account data
-version: 1.0.1
+version: 1.0.2
 keywords:
     - google
     - login
@@ -14,7 +14,7 @@ example: |
     // import { GoogleSignIn } from '@coolgk/google-sign-in';
 
     const googleSignIn = new GoogleSignIn({
-        clientId: '936046478010-98hmjf60qmhdpfeok14l4f39ptka6t48.apps.googleusercontent.com'
+        clientId: '......'
     });
 
     const invalidToken = '...';
