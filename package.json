@@ -1,6 +1,6 @@
 {
   "name": "@coolgk/utils",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "author": "Daniel Gong <daniel.k.gong@gmail.com>",
   "homepage": "https://github.com/coolgk/node-utils",
   "bugs": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/coolgk/node-utils.git"
   },
-  "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params, session, form data",
+  "description": "javascript, typescript utility and wrapper functions and classes: array, string, base64, ampq, bcrypt, cache, captcha, csv, email, jwt, number, pdf, tmp, token, unit conversion, url params, session, form data, google sign in, facebook sign in",
   "keywords": [
     "array",
     "string",
@@ -35,7 +35,11 @@
     "middleware",
     "multipart",
     "x-www-form-urlencoded",
-    "form"
+    "form",
+    "google sign in",
+    "google login",
+    "facebook sign in",
+    "facebook log in"
   ],
   "scripts": {
     "pretest": "tsc --project tsconfig.dev.json",
@@ -63,6 +67,7 @@
     "@coolgk/tmp": "^2.0.5",
     "@coolgk/token": "^2.0.7",
     "@types/request": "^2.47.0",
+    "@types/request-promise-native": "^1.0.14",
     "amqplib": "^0.5.2",
     "bcrypt-nodejs": "0.0.3",
     "busboy": "^0.2.14",
@@ -70,10 +75,12 @@
     "csv-parse": "^2.0.4",
     "csv-stringify": "^2.0.4",
     "emailjs": "^2.0.0",
+    "google-auth-library": "^1.3.1",
     "mime-types": "^2.1.18",
     "phantom": "^4.0.12",
     "redis": "^2.8.0",
     "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
     "tmp": "0.0.33",
     "uuid": "^3.2.1"
   },
