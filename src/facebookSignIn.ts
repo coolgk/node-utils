@@ -25,11 +25,11 @@ documentation: |
     const validToken = '...';
 
     (async () => {
-        const account = await facebookSignIn.verify(invalidToken);
-        console.log(account); // false
+        const account1 = await facebookSignIn.verify(invalidToken);
+        console.log(account1); // false
 
-        const account = await facebookSignIn.verify(validToken);
-        console.log(account); // { email: '', id: '' }
+        const account2 = await facebookSignIn.verify(validToken);
+        console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
     })()
 */
 

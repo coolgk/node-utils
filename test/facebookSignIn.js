@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const expect = require('chai').expect;
 const config = require('../test.config.js');
 
-describe.only('FacebookSignIn Module', () => {
+describe('FacebookSignIn Module', () => {
 
     const { FacebookSignIn } = require(`../${config.sourceFolder}/facebookSignIn`);
 
@@ -40,8 +40,8 @@ describe.only('FacebookSignIn Module', () => {
 
     it('should return false is token is not valid', async () => {
         getRequest.returns(JSON.stringify({
-            is_valid: false,
             data: {
+                is_valid: false,
                 app_id: clientId
             }
         }));
@@ -54,8 +54,8 @@ describe.only('FacebookSignIn Module', () => {
 
     it('should return false is app id does not match', async () => {
         getRequest.returns(JSON.stringify({
-            is_valid: true,
             data: {
+                is_valid: true,
                 app_id: 'abc' + clientId,
                 user_id: userId
             }
@@ -69,8 +69,8 @@ describe.only('FacebookSignIn Module', () => {
 
     it('should return accoutn data', async () => {
         getRequest.onFirstCall().returns(JSON.stringify({
-            is_valid: true,
             data: {
+                is_valid: true,
                 user_id: userId,
                 app_id: clientId
             }
@@ -87,19 +87,21 @@ describe.only('FacebookSignIn Module', () => {
 
         expect(account).to.deep.equal(accountData);
 
-        expect(getRequest.calledOnceWith(
+        expect(getRequest.calledWith(
             `${FacebookSignIn._RECAPTCHA_URL}/debug_token?input_token=${token}&access_token=${clientId}|${secret}`
         )).to.be.true;
 
-        expect(getRequest.calledOnceWith(
+        expect(getRequest.calledWith(
             `${FacebookSignIn._RECAPTCHA_URL}/${userId}?access_token=${token}&fields=email`
         )).to.be.true;
+
+        expect(getRequest.calledTwice).to.be.true;
     });
 
     it('should return accoutn data with custom fields', async () => {
         getRequest.onFirstCall().returns(JSON.stringify({
-            is_valid: true,
             data: {
+                is_valid: true,
                 user_id: userId,
                 app_id: clientId
             }
@@ -117,13 +119,15 @@ describe.only('FacebookSignIn Module', () => {
 
         expect(account).to.deep.equal(accountData);
 
-        expect(getRequest.calledOnceWith(
+        expect(getRequest.calledWith(
             `${FacebookSignIn._RECAPTCHA_URL}/debug_token?input_token=${token}&access_token=${clientId}|${secret}`
         )).to.be.true;
 
-        expect(getRequest.calledOnceWith(
+        expect(getRequest.calledWith(
             `${FacebookSignIn._RECAPTCHA_URL}/${userId}?access_token=${token}&fields=${fields}`
         )).to.be.true;
+
+        expect(getRequest.calledTwice).to.be.true;
     });
 
 });
