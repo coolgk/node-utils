@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: An session handler that works without cookie (and with cookie too).
-version: 1.0.4
+version: 2.0.0
 keywords:
     - session
     - session handler
@@ -144,7 +144,7 @@ documentation: |
  *  Licensed under the MIT License.
  */
 
-import { Token, IRedisClient } from '@coolgk/token';
+import { Token, IRedisClient, ITokenValues } from '@coolgk/token';
 import { Jwt, IPayload } from '@coolgk/jwt';
 import { CookieSerializeOptions, serialize, parse } from 'cookie';
 import { ServerResponse, IncomingMessage } from 'http';
@@ -221,40 +221,53 @@ export class Session extends Token {
 
     /* tslint:disable */
     /**
-     * an alias of the start() method.
      * initialising a new session
      * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
      * @return {promise<string>} - a session token string
      */
     /* tslint:enable */
-    public init (signature: ISignature = {}): Promise<string> {
-        return this.start(signature);
+    public async init (signature: ISignature = {}): Promise<string> {
+        // return this.start(signature);
+        this._sessionToken = this._jwt.generate({ signature });
+        this.setToken(this._sessionToken);
+        await this._renewCacheAndCookie();
+        return this._sessionToken;
     }
 
     /* tslint:disable */
     /**
-     * an alias of the start() method.
-     * initialising a new session
+     * rotate a session: start a new session and transfer old session values to the new session
      * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
      * @return {promise<string>} - a session token string
      */
     /* tslint:enable */
-    public rotate (signature: ISignature = {}): Promise<string> {
-        return this.start(signature);
+    public async rotate (signature: ISignature = {}): Promise<string> {
+        // return this.start(signature);
+        const sessionValues: ITokenValues = await this.getAll();
+        await this.destroy();
+        const token = await this.init(signature);
+        for (const field in sessionValues) {
+            await this.set(field, sessionValues[field]);
+        }
+        return token;
     }
 
     /* tslint:disable */
     /**
-     * initialising a new session
+     * start session: renew the existing session or if not valid valid session, start a new one
      * @param {object} signature - addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session.
      * @return {promise<string>} - a session token string
      */
     /* tslint:enable */
     public async start (signature: ISignature = {}): Promise<string> {
-        this._sessionToken = this._jwt.generate({ signature });
-        this.setToken(this._sessionToken);
-        await this._renewCacheAndCookie();
+        if (!(await this.verifyAndRenew(signature))) {
+            return this.init(signature);
+        }
         return this._sessionToken;
+        // this._sessionToken = this._jwt.generate({ signature });
+        // this.setToken(this._sessionToken);
+        // await this._renewCacheAndCookie();
+        // return this._sessionToken;
     }
 
     /**

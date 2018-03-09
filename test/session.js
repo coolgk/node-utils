@@ -57,18 +57,41 @@ describe('Session Module', function () {
         redisClient.quit();
     });
 
-    it('start and verify session', async () => {
-        promises.push(
-            expect(session.verify()).to.eventually.be.false
-        );
+    it('should initialise a session', async () => {
+        expect(await session.verify()).to.be.false;
+        await session.init();
+        expect(await session.verify()).to.be.true;
+    });
 
-        await session.start();
+    it('start a session: start one if no valid or renew existing session', async () => {
+        expect(await session.verify()).to.be.false;
 
-        promises.push(
-            expect(session.verify()).to.eventually.be.true
-        );
+        const token = await session.start();
 
-        return Promise.all(promises);
+        expect(await session.verify()).to.be.true;
+
+        const value = Math.random();
+        await session.set('a', value);
+
+        const newToken = await session.start();
+
+        expect(token).to.equal(newToken);
+        expect(await session.get('a')).to.equal(value);
+    });
+
+    it('should rotate a session', async () => {
+        const destory = sinon.stub(session, 'destroy');
+
+        const token = await session.init();
+
+        const value = Math.random();
+        await session.set('a', value);
+
+        const newToken = await session.rotate();
+
+        expect(destory.calledOnce).to.be.true;
+        expect(token).to.not.equal(newToken);
+        expect(await session.get('a')).to.equal(value);
     });
 
     it('should verify correctly with signature', async () => {
@@ -212,7 +235,8 @@ describe('Session Module', function () {
 
     it('should work as an express middelware', async () => {
         express(
-            { ...sessionConfig, response: false, request: false }
+            // { ...sessionConfig, response: false, request: false }
+            Object.assign({}, sessionConfig, { response: false, request: false })
         )(sessionConfig.request, sessionConfig.response, () => {});
 
         expect(sessionConfig.request).to.have.property('session');

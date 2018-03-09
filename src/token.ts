@@ -1,6 +1,6 @@
 /***
 description: an expirable, revocable, renewable token with data storage
-version: 2.0.5
+version: 2.0.7
 keywords:
     - token
     - session token
@@ -109,6 +109,10 @@ export interface ITokenConfigWithCache extends IConfig {
 
 export interface ITokenConfig extends IConfig {
     readonly redisClient: ICacheClient;
+}
+
+export interface ITokenValues {
+    [field: string]: any;
 }
 
 export { ICacheClient as IRedisClient };
@@ -236,7 +240,7 @@ export class Token {
      * get the values of all data fields in the token
      * @return {promise<{}>}
      */
-    public async getAll (): Promise<{}> {
+    public async getAll (): Promise<ITokenValues> {
         if (this._token) {
             const values = await this._cache.command('hgetall', this._name);
             if (values) {
