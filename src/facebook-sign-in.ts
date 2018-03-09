@@ -1,6 +1,6 @@
 /***
 description: facebook sign in module which verifies client access token and returns account data
-version: 1.0.0
+version: 1.0.1
 keywords:
     - facebook
     - login
@@ -11,7 +11,7 @@ dependencies:
     "request-promise-native": "^1.0.5"
     "@types/request": "^2.47.0"
     "@types/request-promise-native": "^1.0.14"
-documentation: |
+example: |
     const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
     // OR
     // import { FacebookSignIn } from '@coolgk/facebook-sign-in';

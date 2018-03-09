@@ -16,10 +16,10 @@ A javascript / typescript MongoDB modelling library which enables joins in colle
 
 A simple, lightweight javascript / typescript MxC framework that helps you to create object oriented, modular and testable code.
 
+- [amqp](#coolgkamqp)
 - [array](#coolgkarray)
 - [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
-- [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
 - [csv](#coolgkcsv)
 - [email](#coolgkemail)
@@ -30,13 +30,13 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
+- [cache](#coolgkcache)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
-- [amqp](#coolgkamqp)
 
 ## @coolgk/array
 a javascript / typescript module
@@ -75,149 +75,171 @@ console.log(toArray(e)); // [ { a: 1 } ]
 | data | <code>\*</code> | any data to be type cast to array |
 
 
-## @coolgk/cache
+## @coolgk/amqp
 a javascript / typescript module
 
-`npm install @coolgk/cache`
+`npm install @coolgk/amqp`
 
-a redis wrapper
+a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { Cache } from '@coolgk/cache';
-import { createClient } from 'redis';
+import { Amqp } from '@coolgk/amqp';
 // OR
-// const { Cache } = require('@coolgk/cache');
-// const { createClient } = require('redis');
+// const { Amqp } = require('@coolgk/amqp');
 
-const client = createClient({
-    host: 'localhost',
-    port: 12869,
-    password: '----'
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
 });
 
-const cache = new Cache({
-    redisClient: client
+const message = {
+    a: 1,
+    b: 'b'
+};
+
+// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
 });
 
-cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
 
-cache.get('abc').then(console.log); // { a: 1 }
-
-setTimeout(() => {
-    cache.get('abc').then(console.log); // null
-    client.quit();
-}, 1500);
-
-cache.getSetIfNull(
-    'abc',
-    () => Promise.resolve('data'),
-    10
-).then((v) => {
-    console.log(v); // { a: 1 }
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
 });
 
-Promise.all([
-    cache.set('x', 'val x'),
-    cache.set('y', 'val y'),
-    cache.set('z', 'val z')
-]).then(
-    () => Promise.all([
-        cache.get('x').then(console.log), // val x
-        cache.get('y').then(console.log), // val y
-        cache.get('z').then(console.log) // val z
-    ])
-).then(
-    () => Promise.all([
-        cache.delete('x'),
-        cache.delete('y'),
-        cache.delete('z')
-    ])
-).then(
-    () => Promise.all([
-        cache.get('x').then(console.log), // null
-        cache.get('y').then(console.log), // null
-        cache.get('z').then(console.log) // null
-    ])
-);
+
+// example to add:
+// consume from (multiple) routes
+// round robin consumers
+// direct route + a catch all consumer
 
 ```
-<a name="Cache"></a>
+<a name="Amqp"></a>
 
-## Cache
+## Amqp
 **Kind**: global class  
 
-* [Cache](#Cache)
-    * [new Cache(options)](#new_Cache_new)
-    * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
-    * [.get(name)](#Cache+get) ⇒ <code>promise</code>
-    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
-    * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
-    * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
+* [Amqp](#Amqp)
+    * [new Amqp(options)](#new_Amqp_new)
+    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
 
-<a name="new_Cache_new"></a>
+<a name="new_Amqp_new"></a>
 
-### new Cache(options)
+### new Amqp(options)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> |  |
-| [options.redisClient] | <code>object</code> | redis client from redis.createClient() redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class |
+| options.url | <code>string</code> | connection string e.g. amqp://localhost |
+| [options.sslPem] | <code>string</code> | pem file path |
+| [options.sslCa] | <code>string</code> | sslCa file path |
+| [options.sslPass] | <code>string</code> | password |
 
-<a name="Cache+set"></a>
+<a name="Amqp+closeConnection"></a>
 
-### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
+### amqp.closeConnection() ⇒ <code>void</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+<a name="Amqp+publish"></a>
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| name | <code>string</code> |  | name of the variable |
-| value | <code>\*</code> |  | value is always JSON.stringify'ed |
-| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
-
-<a name="Cache+get"></a>
-
-### cache.get(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | name of the variable |
-
-<a name="Cache+delete"></a>
-
-### cache.delete(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
-
-<a name="Cache+getSetIfNull"></a>
-
-### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
-get the cached value, if not set, resolve "callback()" and save the value then return it
-
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| name | <code>string</code> |  | name of the variable |
-| callback | <code>function</code> |  | a callback function which returns a value or a promise |
-| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
+| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
+| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
 
-<a name="Cache+command"></a>
+<a name="Amqp+consume"></a>
 
-### cache.command(command, ...params) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
+### amqp.consume(callback, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | consumer(message) function should returns a promise |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
+| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
+
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
+
+## @coolgk/bcrypt
+a javascript / typescript module
+
+`npm install @coolgk/bcrypt`
+
+just a promise wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
+
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dd></dd>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encrypt"></a>
+
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| command | <code>string</code> | redis command to run |
-| ...params | <code>array</code> | params for the command |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
+
+<a name="verify"></a>
+
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/base64
@@ -359,185 +381,6 @@ captcha.verify(captchaResponse).then((response) => {
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
 
-
-## @coolgk/bcrypt
-a javascript / typescript module
-
-`npm install @coolgk/bcrypt`
-
-just a promise wrapper
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
-// OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
-<dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encrypt"></a>
-
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
-
-<a name="verify"></a>
-
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
-
-
-## @coolgk/email
-a javascript / typescript module
-
-`npm install @coolgk/email`
-
-a email sender wrapper class
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Email } from '@coolgk/email';
-// OR
-// const { Email } = require('@coolgk/email');
-
-const email = new Email({host: 'localhost'});
-
-email.send({
-    subject: 'hello this is email subject',
-    from: {
-            name: 'Daniel Gong',
-            email: 'daniel.k.gong@example.com'
-    },
-    to: [
-        {
-            name: 'Dan Go',
-            email: 'dan@example.com'
-        },
-        'gong@example.com'
-    ],
-    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
-    attachments: [
-        {
-            path: '/tmp/test.png',
-            name: 'screenshot.png'
-        },
-        {
-            path:"/tmp/test.png",
-            headers:{"Content-ID": "<my-image>"}
-        }
-    ]
-}).then((sentMessage) => {
-    console.log(sentMessage);
-}).catch((error) => {
-    console.log(error);
-});
-
-```
-<a name="Email"></a>
-
-## Email
-**Kind**: global class  
-**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
-
-* [Email](#Email)
-    * [new Email(options)](#new_Email_new)
-    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
-
-<a name="new_Email_new"></a>
-
-### new Email(options)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| [options.user] | <code>string</code> |  | username for logging into smtp |
-| [options.password] | <code>string</code> |  | password for logging into smtp |
-| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
-| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
-| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
-| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
-| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
-| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
-
-<a name="Email+send"></a>
-
-### email.send(options, [attachments]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Email</code>](#Email)  
-**Returns**: <code>promise</code> - - message sent  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.subject | <code>string</code> | email subject |
-| [options.message] | <code>string</code> | html email message |
-| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
-| options.to[].name | <code>string</code> | name of the recipient |
-| options.to[].email | <code>string</code> | email address of the recipient |
-| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
-| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
-| attachments.path | <code>string</code> | file path |
-| [attachments.name] | <code>string</code> | file name |
-| [attachments.type] | <code>string</code> | file mime type |
-| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
-| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
-
-
-## @coolgk/facebook-sign-in
-a javascript / typescript module
-
-`npm install @coolgk/facebook-sign-in`
-
-facebook sign in module which verifies client access token and returns account data
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
-// OR
-// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
-
-const facebookSignIn = new FacebookSignIn({
-    clientId: '...',
-    secret: '...'
-});
-
-const invalidToken = '...';
-const validToken = '...';
-
-(async () => {
-    const account1 = await facebookSignIn.verify(invalidToken);
-    console.log(account1); // false
-
-    const account2 = await facebookSignIn.verify(validToken);
-    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
-})()
 
 ## @coolgk/csv
 a javascript / typescript module
@@ -699,81 +542,6 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
 | [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
-
-## @coolgk/number
-a javascript / typescript module
-
-`npm install @coolgk/number`
-
-number utitlies
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { round } from '@coolgk/number';
-// OR
-// const { round } = require('@coolgk/number');
-
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
-
-```
-<a name="round"></a>
-
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
-## @coolgk/google-sign-in
-a javascript / typescript module
-
-`npm install @coolgk/google-sign-in`
-
-google sign in module which verifies id token and returns account data
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-const { GoogleSignIn } = require('@coolgk/google-sign-in');
-// OR
-// import { GoogleSignIn } from '@coolgk/google-sign-in';
-
-const googleSignIn = new GoogleSignIn({
-    clientId: '936046478010-98hmjf60qmhdpfeok14l4f39ptka6t48.apps.googleusercontent.com'
-});
-
-const invalidToken = '...';
-const validToken = '...';
-
-(async () => {
-    const account1 = await googleSignIn.verify(invalidToken);
-    console.log(account1); // false
-
-    const account2 = await googleSignIn.verify(validToken);
-    console.log(account2);
-    // {
-    //     azp: '...',
-    //     aud: '...',
-    //     sub: '123123123',
-    //     email: 'abc@exmaple.com',
-    //     email_verified: true,
-    //     at_hash: 'asdfasdfasdfasdfa',
-    //     exp: 1520633389,
-    //     iss: 'accounts.google.com',
-    //     jti: 'qfwfasdfasdfasdfasdfasdfasdfadsf',
-    //     iat: 1520629789,
-    //     name: 'first last',
-    //     picture: 'https://lh6.googleusercontent.com/.../photo.jpg',
-    //     given_name: 'first',
-    //     family_name: 'last',
-    //     locale: 'en-GB'
-    // }
-})()
 
 ## @coolgk/formdata
 a javascript / typescript module
@@ -1007,6 +775,261 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
+## @coolgk/facebook-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/facebook-sign-in`
+
+facebook sign in module which verifies client access token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+// OR
+// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+
+const facebookSignIn = new FacebookSignIn({
+    clientId: '...',
+    secret: '...'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await facebookSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await facebookSignIn.verify(validToken);
+    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
+})()
+
+```
+
+## @coolgk/google-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/google-sign-in`
+
+google sign in module which verifies id token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { GoogleSignIn } = require('@coolgk/google-sign-in');
+// OR
+// import { GoogleSignIn } from '@coolgk/google-sign-in';
+
+const googleSignIn = new GoogleSignIn({
+    clientId: '......'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await googleSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await googleSignIn.verify(validToken);
+    console.log(account2);
+    // {
+    //     azp: '...',
+    //     aud: '...',
+    //     sub: '123123123',
+    //     email: 'abc@exmaple.com',
+    //     email_verified: true,
+    //     at_hash: 'asdfasdfasdfasdfa',
+    //     exp: 1520633389,
+    //     iss: 'accounts.google.com',
+    //     jti: 'qfwfasdfasdfasdfasdfasdfasdfadsf',
+    //     iat: 1520629789,
+    //     name: 'first last',
+    //     picture: 'https://lh6.googleusercontent.com/.../photo.jpg',
+    //     given_name: 'first',
+    //     family_name: 'last',
+    //     locale: 'en-GB'
+    // }
+})()
+
+```
+
+## @coolgk/jwt
+a javascript / typescript module
+
+`npm install @coolgk/jwt`
+
+a simple jwt token class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Jwt } from '@coolgk/jwt';
+// OR
+// const { Jwt } = require('@coolgk/jwt');
+
+const jwt = new Jwt({secret: 'abc'});
+
+const string = 'http://example.com/a/b/c?a=1';
+
+const token = jwt.generate(string);
+
+console.log(
+    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+const token2 = jwt.generate(string, 200);
+
+console.log(
+    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+setTimeout(() => {
+    console.log(jwt.verify(token2)); // false
+}, 250);
+
+```
+<a name="Jwt"></a>
+
+## Jwt
+**Kind**: global class  
+
+* [Jwt](#Jwt)
+    * [new Jwt(options)](#new_Jwt_new)
+    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
+    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
+
+<a name="new_Jwt_new"></a>
+
+### new Jwt(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.secret | <code>string</code> | for encryption |
+
+<a name="Jwt+generate"></a>
+
+### jwt.generate(data, [expiry]) ⇒ <code>string</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
+| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
+
+<a name="Jwt+verify"></a>
+
+### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | token to verify |
+
+
+## @coolgk/email
+a javascript / typescript module
+
+`npm install @coolgk/email`
+
+a email sender wrapper class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Email } from '@coolgk/email';
+// OR
+// const { Email } = require('@coolgk/email');
+
+const email = new Email({host: 'localhost'});
+
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.k.gong@example.com'
+    },
+    to: [
+        {
+            name: 'Dan Go',
+            email: 'dan@example.com'
+        },
+        'gong@example.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/tmp/test.png',
+            name: 'screenshot.png'
+        },
+        {
+            path:"/tmp/test.png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
+});
+
+```
+<a name="Email"></a>
+
+## Email
+**Kind**: global class  
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
+
+* [Email](#Email)
+    * [new Email(options)](#new_Email_new)
+    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
+
+<a name="new_Email_new"></a>
+
+### new Email(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| [options.user] | <code>string</code> |  | username for logging into smtp |
+| [options.password] | <code>string</code> |  | password for logging into smtp |
+| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
+| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
+| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
+| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
+| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
+| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+
+<a name="Email+send"></a>
+
+### email.send(options, [attachments]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.subject | <code>string</code> | email subject |
+| [options.message] | <code>string</code> | html email message |
+| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
+| options.to[].name | <code>string</code> | name of the recipient |
+| options.to[].email | <code>string</code> | email address of the recipient |
+| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
+| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
+| attachments.path | <code>string</code> | file path |
+| [attachments.name] | <code>string</code> | file name |
+| [attachments.type] | <code>string</code> | file mime type |
+| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
+| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+
+
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1134,83 +1157,6 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/jwt
-a javascript / typescript module
-
-`npm install @coolgk/jwt`
-
-a simple jwt token class
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Jwt } from '@coolgk/jwt';
-// OR
-// const { Jwt } = require('@coolgk/jwt');
-
-const jwt = new Jwt({secret: 'abc'});
-
-const string = 'http://example.com/a/b/c?a=1';
-
-const token = jwt.generate(string);
-
-console.log(
-    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-const token2 = jwt.generate(string, 200);
-
-console.log(
-    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-setTimeout(() => {
-    console.log(jwt.verify(token2)); // false
-}, 250);
-
-```
-<a name="Jwt"></a>
-
-## Jwt
-**Kind**: global class  
-
-* [Jwt](#Jwt)
-    * [new Jwt(options)](#new_Jwt_new)
-    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
-    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
-
-<a name="new_Jwt_new"></a>
-
-### new Jwt(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.secret | <code>string</code> | for encryption |
-
-<a name="Jwt+generate"></a>
-
-### jwt.generate(data, [expiry]) ⇒ <code>string</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
-| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
-
-<a name="Jwt+verify"></a>
-
-### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | token to verify |
-
-
 ## @coolgk/queue
 a javascript / typescript module
 
@@ -1270,251 +1216,149 @@ queue(c);
 | [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
-## @coolgk/session
+## @coolgk/cache
 a javascript / typescript module
 
-`npm install @coolgk/session`
+`npm install @coolgk/cache`
 
-An session handler that works without cookie (and with cookie too).
+a redis wrapper
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-
-When working without cookie, this class reads the session token from the **"Authorization"** header.
-e.g. **Authorization : Bearer cn389ncoiwuencr...**
-#### Express Middleware Example
+## Examples
 ```javascript
-// express middleware
-const session = require('@coolgk/session');
-const app = require('express')();
+import { Cache } from '@coolgk/cache';
+import { createClient } from 'redis';
+// OR
+// const { Cache } = require('@coolgk/cache');
+// const { createClient } = require('redis');
 
-app.use(
-    session.express({
-        redisClient: require('redis').createClient({
-            host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
-            password: process.env.REDIS_PASSWORD
-        }),
-        secret: '123' // secret is required for creating the session token / id
-    })
+const client = createClient({
+    host: 'localhost',
+    port: 12869,
+    password: '----'
+});
+
+const cache = new Cache({
+    redisClient: client
+});
+
+cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
+
+cache.get('abc').then(console.log); // { a: 1 }
+
+setTimeout(() => {
+    cache.get('abc').then(console.log); // null
+    client.quit();
+}, 1500);
+
+cache.getSetIfNull(
+    'abc',
+    () => Promise.resolve('data'),
+    10
+).then((v) => {
+    console.log(v); // { a: 1 }
+});
+
+Promise.all([
+    cache.set('x', 'val x'),
+    cache.set('y', 'val y'),
+    cache.set('z', 'val z')
+]).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // val x
+        cache.get('y').then(console.log), // val y
+        cache.get('z').then(console.log) // val z
+    ])
+).then(
+    () => Promise.all([
+        cache.delete('x'),
+        cache.delete('y'),
+        cache.delete('z')
+    ])
+).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // null
+        cache.get('y').then(console.log), // null
+        cache.get('z').then(console.log) // null
+    ])
 );
 
-app.use(async (request, response, next) => {
-    // allow access if it's the login page or the request has a valid session
-    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
-        next();
-    } else { // deny access
-        response.send('Please Login');
-        // output
-        // 'Please Login'
-    }
-});
-
-app.get('/login', async (request, response, next) => {
-    // start a new session (create a new session id)
-    const accessToken = await request.session.init();
-    // set session variables
-    await request.session.set('user', { id: 1, username: 'abc' });
-    // send session token/id back
-    response.json({ accessToken });
-    // output
-    // {"accessToken":"eyJleHAiOjAsIml..."}
-});
-
-app.get('/user', async (request, response, next) => {
-    // get session variable
-    response.json(await request.session.get('user'));
-    // output
-    // {"id":1,"username":"abc"}
-});
-
-app.get('/session', async (request, response, next) => {
-    // get all session values
-    response.json(await request.session.getAll());
-    // output
-    // {"user":{"id":1,"username":"abc"}}
-});
-
-app.get('/logout', async (request, response, next) => {
-    // destroy current session
-    await request.session.destroy();
-    response.json(await request.session.getAll());
-    // output
-    // {}
-});
-
-app.listen(8888);
 ```
-#### Native Node App Example
-```javascript
-import { Session } from '@coolgk/session';
-// OR
-// const { Session } = require('@coolgk/session');
+<a name="Cache"></a>
 
-const http = require('http');
-http.createServer(async (request, response) => {
-
-    const session = new Session({
-        redisClient: require('redis').createClient({
-            host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
-            password: process.env.REDIS_PASSWORD
-        }),
-        secret: '123',
-        request,
-        response
-    });
-
-    // ... some middelware
-    // ... in some routes
-    // set sesstion
-    await session.start();
-    await session.set('user', {id: 1, username: 'user@example.com'});
-
-    // check session and renew if verified
-    const verified = await session.verifyAndRenew();
-    if (verified) {
-        // session exists, logged in, do something
-    } else {
-        // deny access or show login screen
-    }
-
-    // show session data
-    response.end(
-        JSON.stringify(
-            await session.getAll()
-        )
-    ); // {"user":{"id":1,"username":"user@example.com"}}
-
-}).listen(8888);
-```
-#### To use without cookie
-Create a session without the **"response"** property and the sessoin object will read the session id from the **"Authorization"** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
-```javascript
-const session = new Session({
-    redisClient: require('redis').createClient({
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD
-    }),
-    secret: '123',
-    request
-});
-```
-<a name="Session"></a>
-
-## Session
-This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
-
+## Cache
 **Kind**: global class  
 
-* [Session](#Session)
-    * [new Session(options)](#new_Session_new)
-    * [.init(signature)](#Session+init) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.rotate(signature)](#Session+rotate) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.start(signature)](#Session+start) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.destroy()](#Session+destroy) ⇒ <code>promise</code>
-    * [.verify(signature)](#Session+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.verifyAndRenew(signature, [expiry])](#Session+verifyAndRenew) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.renew([expiry])](#Session+renew) ⇒ <code>promise</code>
+* [Cache](#Cache)
+    * [new Cache(options)](#new_Cache_new)
+    * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
+    * [.get(name)](#Cache+get) ⇒ <code>promise</code>
+    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
+    * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
+    * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
 
-<a name="new_Session_new"></a>
+<a name="new_Cache_new"></a>
 
-### new Session(options)
+### new Cache(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| [options.redisClient] | <code>object</code> | redis client from redis.createClient() redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class |
+
+<a name="Cache+set"></a>
+
+### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
-| options.secret | <code>string</code> |  | a string for encrypting the session token |
-| options.request | <code>object</code> |  | the request object in http.createServer() or express request |
-| [options.expiry] | <code>expiry</code> | <code>3600</code> | session expiry time in seconds |
-| [options.response] | <code>object</code> |  | the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor. |
-| [options.cookie] | <code>object</code> |  | cookie options |
-| [options.cookie.domain] | <code>string</code> |  | Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain. |
-| [options.cookie.encode] | <code>function</code> | <code>encodeURIComponent</code> | Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value. |
-| [options.cookie.expires] | <code>date</code> |  | Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
-| [options.cookie.httpOnly] | <code>boolean</code> |  | Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set. |
-| [options.cookie.maxAge] | <code>number</code> |  | Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set. |
-| [options.cookie.path] | <code>string</code> | <code>&quot;&#x27;/&#x27;&quot;</code> | Specifies the value for the Path Set-Cookie attribute. |
-| [options.cookie.sameSite] | <code>string</code> \| <code>boolean</code> |  | Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute |
-| [options.cookie.secure] | <code>boolean</code> |  | Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set. |
+| name | <code>string</code> |  | name of the variable |
+| value | <code>\*</code> |  | value is always JSON.stringify'ed |
+| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
 
-<a name="Session+init"></a>
+<a name="Cache+get"></a>
 
-### session.init(signature) ⇒ <code>promise.&lt;string&gt;</code>
-initialising a new session
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+### cache.get(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+| name | <code>string</code> | name of the variable |
 
-<a name="Session+rotate"></a>
+<a name="Cache+delete"></a>
 
-### session.rotate(signature) ⇒ <code>promise.&lt;string&gt;</code>
-rotate a session: start a new session and transfer old session values to the new session
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+### cache.delete(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
 
-<a name="Session+start"></a>
+<a name="Cache+getSetIfNull"></a>
 
-### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
-start session: renew the existing session or if not valid valid session, start a new one
+### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
+get the cached value, if not set, resolve "callback()" and save the value then return it
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | <code>string</code> |  | name of the variable |
+| callback | <code>function</code> |  | a callback function which returns a value or a promise |
+| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
 
-<a name="Session+destroy"></a>
+<a name="Cache+command"></a>
 
-### session.destroy() ⇒ <code>promise</code>
-destory the current session
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-<a name="Session+verify"></a>
-
-### session.verify(signature) ⇒ <code>promise.&lt;boolean&gt;</code>
-verify the session token
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
+### cache.command(command, ...params) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
-
-<a name="Session+verifyAndRenew"></a>
-
-### session.verifyAndRenew(signature, [expiry]) ⇒ <code>promise.&lt;boolean&gt;</code>
-verify and renew token, renew only if token is valid (has a valid signature) and not expired
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. verify the session token, if valid, renew this token |
-| [expiry] | <code>number</code> | in seconds |
-
-<a name="Session+renew"></a>
-
-### session.renew([expiry]) ⇒ <code>promise</code>
-renew session optionally with a different expiry time
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [expiry] | <code>number</code> | in seconds |
+| command | <code>string</code> | redis command to run |
+| ...params | <code>array</code> | params for the command |
 
 
 ## @coolgk/string
@@ -2021,116 +1865,280 @@ a simple function to get params in a url e.g. with url: user/123, pattern: user/
 | pattern | <code>string</code> | e.g. /:userid/:name |
 
 
-## @coolgk/amqp
+## @coolgk/session
 a javascript / typescript module
 
-`npm install @coolgk/amqp`
+`npm install @coolgk/session`
 
-a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+An session handler that works without cookie (and with cookie too).
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+
+When working without cookie, this class reads the session token from the **"Authorization"** header.
+e.g. **Authorization : Bearer cn389ncoiwuencr...**
+#### Express Middleware Example
+```javascript
+// express middleware
+const session = require('@coolgk/session');
+const app = require('express')();
+
+app.use(
+    session.express({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123' // secret is required for creating the session token / id
+    })
+);
+
+app.use(async (request, response, next) => {
+    // allow access if it's the login page or the request has a valid session
+    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
+        next();
+    } else { // deny access
+        response.send('Please Login');
+        // output
+        // 'Please Login'
+    }
+});
+
+app.get('/login', async (request, response, next) => {
+    // start a new session (create a new session id)
+    const accessToken = await request.session.init();
+    // set session variables
+    await request.session.set('user', { id: 1, username: 'abc' });
+    // send session token/id back
+    response.json({ accessToken });
+    // output
+    // {"accessToken":"eyJleHAiOjAsIml..."}
+});
+
+app.get('/user', async (request, response, next) => {
+    // get session variable
+    response.json(await request.session.get('user'));
+    // output
+    // {"id":1,"username":"abc"}
+});
+
+app.get('/session', async (request, response, next) => {
+    // get all session values
+    response.json(await request.session.getAll());
+    // output
+    // {"user":{"id":1,"username":"abc"}}
+});
+
+app.get('/logout', async (request, response, next) => {
+    // destroy current session
+    await request.session.destroy();
+    response.json(await request.session.getAll());
+    // output
+    // {}
+});
+
+app.listen(8888);
+```
+#### Native Node App Example
+```javascript
+import { Session } from '@coolgk/session';
+// OR
+// const { Session } = require('@coolgk/session');
+
+const http = require('http');
+http.createServer(async (request, response) => {
+
+    const session = new Session({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123',
+        request,
+        response
+    });
+
+    // ... some middelware
+    // ... in some routes
+    // set sesstion
+    await session.start();
+    await session.set('user', {id: 1, username: 'user@example.com'});
+
+    // check session and renew if verified
+    const verified = await session.verifyAndRenew();
+    if (verified) {
+        // session exists, logged in, do something
+    } else {
+        // deny access or show login screen
+    }
+
+    // show session data
+    response.end(
+        JSON.stringify(
+            await session.getAll()
+        )
+    ); // {"user":{"id":1,"username":"user@example.com"}}
+
+}).listen(8888);
+```
+#### To use without cookie
+Create a session without the **"response"** property and the sessoin object will read the session id from the **"Authorization"** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
+```javascript
+const session = new Session({
+    redisClient: require('redis').createClient({
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD
+    }),
+    secret: '123',
+    request
+});
+```
+<a name="Session"></a>
+
+## Session
+This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
+
+**Kind**: global class  
+
+* [Session](#Session)
+    * [new Session(options)](#new_Session_new)
+    * [.init(signature)](#Session+init) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.rotate(signature)](#Session+rotate) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.start(signature)](#Session+start) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.destroy()](#Session+destroy) ⇒ <code>promise</code>
+    * [.verify(signature)](#Session+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.verifyAndRenew(signature, [expiry])](#Session+verifyAndRenew) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.renew([expiry])](#Session+renew) ⇒ <code>promise</code>
+
+<a name="new_Session_new"></a>
+
+### new Session(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
+| options.secret | <code>string</code> |  | a string for encrypting the session token |
+| options.request | <code>object</code> |  | the request object in http.createServer() or express request |
+| [options.expiry] | <code>expiry</code> | <code>3600</code> | session expiry time in seconds |
+| [options.response] | <code>object</code> |  | the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor. |
+| [options.cookie] | <code>object</code> |  | cookie options |
+| [options.cookie.domain] | <code>string</code> |  | Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain. |
+| [options.cookie.encode] | <code>function</code> | <code>encodeURIComponent</code> | Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value. |
+| [options.cookie.expires] | <code>date</code> |  | Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
+| [options.cookie.httpOnly] | <code>boolean</code> |  | Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set. |
+| [options.cookie.maxAge] | <code>number</code> |  | Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set. |
+| [options.cookie.path] | <code>string</code> | <code>&quot;&#x27;/&#x27;&quot;</code> | Specifies the value for the Path Set-Cookie attribute. |
+| [options.cookie.sameSite] | <code>string</code> \| <code>boolean</code> |  | Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute |
+| [options.cookie.secure] | <code>boolean</code> |  | Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set. |
+
+<a name="Session+init"></a>
+
+### session.init(signature) ⇒ <code>promise.&lt;string&gt;</code>
+initialising a new session
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+rotate"></a>
+
+### session.rotate(signature) ⇒ <code>promise.&lt;string&gt;</code>
+rotate a session: start a new session and transfer old session values to the new session
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+start"></a>
+
+### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
+start session: renew the existing session or if not valid valid session, start a new one
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+destroy"></a>
+
+### session.destroy() ⇒ <code>promise</code>
+destory the current session
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+<a name="Session+verify"></a>
+
+### session.verify(signature) ⇒ <code>promise.&lt;boolean&gt;</code>
+verify the session token
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+verifyAndRenew"></a>
+
+### session.verifyAndRenew(signature, [expiry]) ⇒ <code>promise.&lt;boolean&gt;</code>
+verify and renew token, renew only if token is valid (has a valid signature) and not expired
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. verify the session token, if valid, renew this token |
+| [expiry] | <code>number</code> | in seconds |
+
+<a name="Session+renew"></a>
+
+### session.renew([expiry]) ⇒ <code>promise</code>
+renew session optionally with a different expiry time
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [expiry] | <code>number</code> | in seconds |
+
+
+## @coolgk/number
+a javascript / typescript module
+
+`npm install @coolgk/number`
+
+number utitlies
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { Amqp } from '@coolgk/amqp';
+import { round } from '@coolgk/number';
 // OR
-// const { Amqp } = require('@coolgk/amqp');
+// const { round } = require('@coolgk/number');
 
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
-
-// consumer.js
-// consume message and return (send) a response back to publisher
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message); // consumer received ignore response
-                                               // consumer received { a: 1, b: 'b' }
-    return {
-        response: 'response message'
-    }
-});
-
-// publisher.js
-// publish a message, no response from consumer
-amqp.publish('ignore response');
-
-// publish a message and handle response from consumer
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-});
-
-
-// example to add:
-// consume from (multiple) routes
-// round robin consumers
-// direct route + a catch all consumer
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
 ```
-<a name="Amqp"></a>
+<a name="round"></a>
 
-## Amqp
-**Kind**: global class  
-
-* [Amqp](#Amqp)
-    * [new Amqp(options)](#new_Amqp_new)
-    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
-    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
-
-<a name="new_Amqp_new"></a>
-
-### new Amqp(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.sslPem] | <code>string</code> | pem file path |
-| [options.sslCa] | <code>string</code> | sslCa file path |
-| [options.sslPass] | <code>string</code> | password |
-
-<a name="Amqp+closeConnection"></a>
-
-### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-<a name="Amqp+publish"></a>
-
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
-| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
-<a name="Amqp+consume"></a>
-
-### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | consumer(message) function should returns a promise |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
-| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
-
-<a name="Amqp+getChannel"></a>
-
-### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  

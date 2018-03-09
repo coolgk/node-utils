@@ -1,6 +1,6 @@
 /***
 description: google sign in module which verifies id token and returns account data
-version: 1.0.0
+version: 1.0.2
 keywords:
     - google
     - login
@@ -8,13 +8,13 @@ keywords:
     - api
 dependencies:
     "google-auth-library": "^1.3.1"
-documentation: |
+example: |
     const { GoogleSignIn } = require('@coolgk/google-sign-in');
     // OR
     // import { GoogleSignIn } from '@coolgk/google-sign-in';
 
     const googleSignIn = new GoogleSignIn({
-        clientId: '936046478010-98hmjf60qmhdpfeok14l4f39ptka6t48.apps.googleusercontent.com'
+        clientId: '......'
     });
 
     const invalidToken = '...';
