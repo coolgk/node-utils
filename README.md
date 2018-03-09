@@ -16,7 +16,6 @@ A javascript / typescript MongoDB modelling library which enables joins in colle
 
 A simple, lightweight javascript / typescript MxC framework that helps you to create object oriented, modular and testable code.
 
-- [amqp](#coolgkamqp)
 - [array](#coolgkarray)
 - [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
@@ -28,129 +27,16 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [formdata](#coolgkformdata)
 - [google-sign-in](#coolgkgoogle-sign-in)
 - [jwt](#coolgkjwt)
+- [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
-- [number](#coolgknumber)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
-- [url](#coolgkurl)
 - [unit](#coolgkunit)
-
-## @coolgk/amqp
-a javascript / typescript module
-
-`npm install @coolgk/amqp`
-
-a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Amqp } from '@coolgk/amqp';
-// OR
-// const { Amqp } = require('@coolgk/amqp');
-
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
-});
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
-
-// consumer.js
-// consume message and return (send) a response back to publisher
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message); // consumer received ignore response
-                                               // consumer received { a: 1, b: 'b' }
-    return {
-        response: 'response message'
-    }
-});
-
-// publisher.js
-// publish a message, no response from consumer
-amqp.publish('ignore response');
-
-// publish a message and handle response from consumer
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-});
-
-
-// example to add:
-// consume from (multiple) routes
-// round robin consumers
-// direct route + a catch all consumer
-
-```
-<a name="Amqp"></a>
-
-## Amqp
-**Kind**: global class  
-
-* [Amqp](#Amqp)
-    * [new Amqp(options)](#new_Amqp_new)
-    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
-    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
-
-<a name="new_Amqp_new"></a>
-
-### new Amqp(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.sslPem] | <code>string</code> | pem file path |
-| [options.sslCa] | <code>string</code> | sslCa file path |
-| [options.sslPass] | <code>string</code> | password |
-
-<a name="Amqp+closeConnection"></a>
-
-### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-<a name="Amqp+publish"></a>
-
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
-| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-
-<a name="Amqp+consume"></a>
-
-### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | consumer(message) function should returns a promise |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
-| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
-
-<a name="Amqp+getChannel"></a>
-
-### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  
+- [url](#coolgkurl)
+- [amqp](#coolgkamqp)
 
 ## @coolgk/array
 a javascript / typescript module
@@ -187,82 +73,6 @@ console.log(toArray(e)); // [ { a: 1 } ]
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>\*</code> | any data to be type cast to array |
-
-
-## @coolgk/base64
-a javascript / typescript module
-
-`npm install @coolgk/base64`
-
-base64 encoded decode functions
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
-// OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
-
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
-
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
-
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encode"></a>
-
-## encode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decode"></a>
-
-## decode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | encoded hash |
-
-<a name="encodeUrl"></a>
-
-## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decodeUrl"></a>
-
-## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | base64 encoded url to decode |
 
 
 ## @coolgk/cache
@@ -410,57 +220,80 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 | ...params | <code>array</code> | params for the command |
 
 
-## @coolgk/bcrypt
+## @coolgk/base64
 a javascript / typescript module
 
-`npm install @coolgk/bcrypt`
+`npm install @coolgk/base64`
 
-just a promise wrapper
+base64 encoded decode functions
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
 // OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
 
-const password = 'abc123';
+const a = 'https://www.google.co.uk/?a=b'
+const hash = encode(a);
+const urlHash = encodeUrl(a);
 
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 
 ```
 ## Functions
 
 <dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
 <dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
 <dd></dd>
 </dl>
 
-<a name="encrypt"></a>
+<a name="encode"></a>
 
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+## encode(data) ⇒ <code>string</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
+| data | <code>string</code> | string to encode |
 
-<a name="verify"></a>
+<a name="decode"></a>
 
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+## decode(data) ⇒ <code>string</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
+| data | <code>string</code> | encoded hash |
+
+<a name="encodeUrl"></a>
+
+## encodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decodeUrl"></a>
+
+## decodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | base64 encoded url to decode |
 
 
 ## @coolgk/captcha
@@ -525,6 +358,59 @@ captcha.verify(captchaResponse).then((response) => {
 | response | <code>string</code> | repsonse from recaptcha |
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
+
+
+## @coolgk/bcrypt
+a javascript / typescript module
+
+`npm install @coolgk/bcrypt`
+
+just a promise wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { encrypt, verify } from '@coolgk/bcrypt';
+// OR
+// const { encrypt, verify } = require('@coolgk/bcrypt');
+
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dd></dd>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encrypt"></a>
+
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
+
+<a name="verify"></a>
+
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/email
@@ -624,6 +510,34 @@ email.send({
 | [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
 | [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
 
+
+## @coolgk/facebook-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/facebook-sign-in`
+
+facebook sign in module which verifies client access token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+// OR
+// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+
+const facebookSignIn = new FacebookSignIn({
+    clientId: '...',
+    secret: '...'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await facebookSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await facebookSignIn.verify(validToken);
+    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
+})()
 
 ## @coolgk/csv
 a javascript / typescript module
@@ -786,33 +700,36 @@ e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
 | [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
 
 
-## @coolgk/facebook-sign-in
+## @coolgk/number
 a javascript / typescript module
 
-`npm install @coolgk/facebook-sign-in`
+`npm install @coolgk/number`
 
-facebook sign in module which verifies client access token and returns account data
+number utitlies
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+## Examples
+```javascript
+import { round } from '@coolgk/number';
 // OR
-// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+// const { round } = require('@coolgk/number');
 
-const facebookSignIn = new FacebookSignIn({
-    clientId: '...',
-    secret: '...'
-});
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
-const invalidToken = '...';
-const validToken = '...';
+```
+<a name="round"></a>
 
-(async () => {
-    const account1 = await facebookSignIn.verify(invalidToken);
-    console.log(account1); // false
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
 
-    const account2 = await facebookSignIn.verify(validToken);
-    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
-})()
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
+
 
 ## @coolgk/google-sign-in
 a javascript / typescript module
@@ -1090,83 +1007,6 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
-## @coolgk/jwt
-a javascript / typescript module
-
-`npm install @coolgk/jwt`
-
-a simple jwt token class
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Jwt } from '@coolgk/jwt';
-// OR
-// const { Jwt } = require('@coolgk/jwt');
-
-const jwt = new Jwt({secret: 'abc'});
-
-const string = 'http://example.com/a/b/c?a=1';
-
-const token = jwt.generate(string);
-
-console.log(
-    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-const token2 = jwt.generate(string, 200);
-
-console.log(
-    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
-    jwt.verify(token+'1') // false
-);
-
-setTimeout(() => {
-    console.log(jwt.verify(token2)); // false
-}, 250);
-
-```
-<a name="Jwt"></a>
-
-## Jwt
-**Kind**: global class  
-
-* [Jwt](#Jwt)
-    * [new Jwt(options)](#new_Jwt_new)
-    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
-    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
-
-<a name="new_Jwt_new"></a>
-
-### new Jwt(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.secret | <code>string</code> | for encryption |
-
-<a name="Jwt+generate"></a>
-
-### jwt.generate(data, [expiry]) ⇒ <code>string</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
-| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
-
-<a name="Jwt+verify"></a>
-
-### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | token to verify |
-
-
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1292,6 +1132,142 @@ for full page in PDF, set height of a page in html to 842px
 | --- | --- | --- |
 | htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
+
+
+## @coolgk/jwt
+a javascript / typescript module
+
+`npm install @coolgk/jwt`
+
+a simple jwt token class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Jwt } from '@coolgk/jwt';
+// OR
+// const { Jwt } = require('@coolgk/jwt');
+
+const jwt = new Jwt({secret: 'abc'});
+
+const string = 'http://example.com/a/b/c?a=1';
+
+const token = jwt.generate(string);
+
+console.log(
+    jwt.verify(token), // { exp: 0, iat: 1512307492763, rng: 0.503008668963175, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+const token2 = jwt.generate(string, 200);
+
+console.log(
+    jwt.verify(token2), // { exp: 1512307493026, iat: 1512307492826, rng: 0.5832258275608753, data: 'http://example.com/a/b/c?a=1' }
+    jwt.verify(token+'1') // false
+);
+
+setTimeout(() => {
+    console.log(jwt.verify(token2)); // false
+}, 250);
+
+```
+<a name="Jwt"></a>
+
+## Jwt
+**Kind**: global class  
+
+* [Jwt](#Jwt)
+    * [new Jwt(options)](#new_Jwt_new)
+    * [.generate(data, [expiry])](#Jwt+generate) ⇒ <code>string</code>
+    * [.verify(token)](#Jwt+verify) ⇒ <code>boolean</code> \| <code>object</code>
+
+<a name="new_Jwt_new"></a>
+
+### new Jwt(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.secret | <code>string</code> | for encryption |
+
+<a name="Jwt+generate"></a>
+
+### jwt.generate(data, [expiry]) ⇒ <code>string</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>\*</code> |  | any data can be JSON.stringify'ed |
+| [expiry] | <code>number</code> | <code>0</code> | in milliseconds 0 = never expire |
+
+<a name="Jwt+verify"></a>
+
+### jwt.verify(token) ⇒ <code>boolean</code> \| <code>object</code>
+**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
+**Returns**: <code>boolean</code> \| <code>object</code> - - false or the payload of the token  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | token to verify |
+
+
+## @coolgk/queue
+a javascript / typescript module
+
+`npm install @coolgk/queue`
+
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+## Examples
+```javascript
+import { queue } from '@coolgk/queue';
+// OR
+// const { queue } = require('@coolgk/queue');
+
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
+
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
+
+```
+<a name="queue"></a>
+
+## queue(callback, [limit]) ⇒ <code>promise</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/session
@@ -1633,63 +1609,84 @@ use padStart instead
 | length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
-## @coolgk/queue
+## @coolgk/tmp
 a javascript / typescript module
 
-`npm install @coolgk/queue`
+`npm install @coolgk/tmp`
 
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+wrapper functions, generate tmp file or folders
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 ## Examples
 ```javascript
-import { queue } from '@coolgk/queue';
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
 // OR
-// const { queue } = require('@coolgk/queue');
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
 
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
 
 ```
-<a name="queue"></a>
+## Functions
 
-## queue(callback, [limit]) ⇒ <code>promise</code>
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+</dl>
+
+<a name="generateFile"></a>
+
+## generateFile([options]) ⇒ <code>promise</code>
 **Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateDir"></a>
+
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateTmpName"></a>
+
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
 
 
 ## @coolgk/token
@@ -1910,130 +1907,6 @@ Error Codes
 | EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
 
 
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
-
-
-## @coolgk/tmp
-a javascript / typescript module
-
-`npm install @coolgk/tmp`
-
-wrapper functions, generate tmp file or folders
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
-// OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
-
-```
-## Functions
-
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
-
-<a name="generateFile"></a>
-
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateDir"></a>
-
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-
 ## @coolgk/unit
 a javascript / typescript module
 
@@ -2104,33 +1977,160 @@ or use https://www.npmjs.com/package/filesize
 | value | <code>number</code> | number of milliseconds |
 
 
-## @coolgk/number
+## @coolgk/url
 a javascript / typescript module
 
-`npm install @coolgk/number`
+`npm install @coolgk/url`
 
-number utitlies
+a simple function for parsing parameters in a url
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { round } from '@coolgk/number';
+import { getParams } from '@coolgk/url';
 // OR
-// const { round } = require('@coolgk/number');
+// const { getParams } = require('@coolgk/url');
 
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
 
 ```
-<a name="round"></a>
+<a name="getParams"></a>
 
-## round(value, precision) ⇒ <code>number</code>
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
 **Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
+
+
+## @coolgk/amqp
+a javascript / typescript module
+
+`npm install @coolgk/amqp`
+
+a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Amqp } from '@coolgk/amqp';
+// OR
+// const { Amqp } = require('@coolgk/amqp');
+
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
+});
+
+const message = {
+    a: 1,
+    b: 'b'
+};
+
+// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
+});
+
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
+
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+});
+
+
+// example to add:
+// consume from (multiple) routes
+// round robin consumers
+// direct route + a catch all consumer
+
+```
+<a name="Amqp"></a>
+
+## Amqp
+**Kind**: global class  
+
+* [Amqp](#Amqp)
+    * [new Amqp(options)](#new_Amqp_new)
+    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
+
+<a name="new_Amqp_new"></a>
+
+### new Amqp(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.url | <code>string</code> | connection string e.g. amqp://localhost |
+| [options.sslPem] | <code>string</code> | pem file path |
+| [options.sslCa] | <code>string</code> | sslCa file path |
+| [options.sslPass] | <code>string</code> | password |
+
+<a name="Amqp+closeConnection"></a>
+
+### amqp.closeConnection() ⇒ <code>void</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+<a name="Amqp+publish"></a>
+
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
+| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
+| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
 
+<a name="Amqp+consume"></a>
+
+### amqp.consume(callback, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | consumer(message) function should returns a promise |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
+| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
+
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
