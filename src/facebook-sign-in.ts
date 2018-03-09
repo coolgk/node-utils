@@ -1,6 +1,6 @@
 /***
 description: facebook sign in module which verifies client access token and returns account data
-version: 1.0.1
+version: 1.0.2
 keywords:
     - facebook
     - login
@@ -50,6 +50,10 @@ export interface IAccountData {
     [field: string]: any;
 }
 
+/**
+ * @export
+ * @class FacebookSignIn
+ */
 export class FacebookSignIn {
 
     public static readonly _RECAPTCHA_URL = 'https://graph.facebook.com';
