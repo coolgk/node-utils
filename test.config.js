@@ -18,6 +18,10 @@ module.exports = {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: process.env.REDIS_PORT
+    },
+    facebook: {
+        clientId: process.env.FACEBOOK_CLIENT_ID,
+        secret: process.env.FACEBOOK_CLIENT_SECRET
     }
     // ,
     // mongo: {
