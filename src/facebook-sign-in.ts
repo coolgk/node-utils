@@ -1,5 +1,5 @@
 /***
-description: facebook sign in module: verifies client access token and returns user data
+description: facebook sign in module which verifies client access token and returns account data
 version: 1.0.0
 keywords:
     - facebook
@@ -12,9 +12,9 @@ dependencies:
     "@types/request": "^2.47.0"
     "@types/request-promise-native": "^1.0.14"
 documentation: |
-    const { FacebookSignIn } = require('@coolgk/facebookSignIn');
+    const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
     // OR
-    // import { FacebookSignIn } from '@coolgk/facebookSignIn';
+    // import { FacebookSignIn } from '@coolgk/facebook-sign-in';
 
     const facebookSignIn = new FacebookSignIn({
         clientId: '...',

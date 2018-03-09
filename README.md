@@ -2,7 +2,7 @@
 
 `npm install @coolgk/utils`
 
-you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below
+You can install and use the modules below as standalone packages. If you wish to use @coolgk/utils as an all-in-one package, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below. 
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 
@@ -21,20 +21,173 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
 - [cache](#coolgkcache)
+- [captcha](#coolgkcaptcha)
+- [csv](#coolgkcsv)
 - [email](#coolgkemail)
+- [facebook-sign-in](#coolgkfacebook-sign-in)
 - [formdata](#coolgkformdata)
+- [google-sign-in](#coolgkgoogle-sign-in)
 - [jwt](#coolgkjwt)
-- [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
-- [csv](#coolgkcsv)
+- [number](#coolgknumber)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
-- [unit](#coolgkunit)
 - [url](#coolgkurl)
-- [captcha](#coolgkcaptcha)
+- [unit](#coolgkunit)
+
+## @coolgk/amqp
+a javascript / typescript module
+
+`npm install @coolgk/amqp`
+
+a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Amqp } from '@coolgk/amqp';
+// OR
+// const { Amqp } = require('@coolgk/amqp');
+
+const amqp = new Amqp({
+    url: 'amqp://localhost/vhost'
+});
+
+const message = {
+    a: 1,
+    b: 'b'
+};
+
+// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
+
+// consumer.js
+// consume message and return (send) a response back to publisher
+amqp.consume(({rawMessage, message}) => {
+    console.log('consumer received', message); // consumer received ignore response
+                                               // consumer received { a: 1, b: 'b' }
+    return {
+        response: 'response message'
+    }
+});
+
+// publisher.js
+// publish a message, no response from consumer
+amqp.publish('ignore response');
+
+// publish a message and handle response from consumer
+amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
+    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
+});
+
+
+// example to add:
+// consume from (multiple) routes
+// round robin consumers
+// direct route + a catch all consumer
+
+```
+<a name="Amqp"></a>
+
+## Amqp
+**Kind**: global class  
+
+* [Amqp](#Amqp)
+    * [new Amqp(options)](#new_Amqp_new)
+    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
+    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
+    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
+
+<a name="new_Amqp_new"></a>
+
+### new Amqp(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.url | <code>string</code> | connection string e.g. amqp://localhost |
+| [options.sslPem] | <code>string</code> | pem file path |
+| [options.sslCa] | <code>string</code> | sslCa file path |
+| [options.sslPass] | <code>string</code> | password |
+
+<a name="Amqp+closeConnection"></a>
+
+### amqp.closeConnection() ⇒ <code>void</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+<a name="Amqp+publish"></a>
+
+### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
+| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+
+<a name="Amqp+consume"></a>
+
+### amqp.consume(callback, [options]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | consumer(message) function should returns a promise |
+| [options] | <code>object</code> |  |  |
+| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
+| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
+| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
+| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
+| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
+| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
+
+<a name="Amqp+getChannel"></a>
+
+### amqp.getChannel() ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+**Returns**: <code>promise</code> - - promise<channel>  
+
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
 
 ## @coolgk/base64
 a javascript / typescript module
@@ -110,96 +263,6 @@ console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>string</code> | base64 encoded url to decode |
-
-
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
-
-
-## @coolgk/bcrypt
-a javascript / typescript module
-
-`npm install @coolgk/bcrypt`
-
-just a promise wrapper
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { encrypt, verify } from '@coolgk/bcrypt';
-// OR
-// const { encrypt, verify } = require('@coolgk/bcrypt');
-
-const password = 'abc123';
-
-encrypt(password).then((hash) => {
-    verify(password, hash).then(console.log); // true
-    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
-    verify('invalidpass', hash).then(console.log); // false
-});
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
-<dd></dd>
-<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encrypt"></a>
-
-## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to encrypt |
-| salt | <code>string</code> | salt |
-
-<a name="verify"></a>
-
-## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to check |
-| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/cache
@@ -347,119 +410,122 @@ get the cached value, if not set, resolve "callback()" and save the value then r
 | ...params | <code>array</code> | params for the command |
 
 
-## @coolgk/amqp
+## @coolgk/bcrypt
 a javascript / typescript module
 
-`npm install @coolgk/amqp`
+`npm install @coolgk/bcrypt`
 
-a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
+just a promise wrapper
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { Amqp } from '@coolgk/amqp';
+import { encrypt, verify } from '@coolgk/bcrypt';
 // OR
-// const { Amqp } = require('@coolgk/amqp');
+// const { encrypt, verify } = require('@coolgk/bcrypt');
 
-const amqp = new Amqp({
-    url: 'amqp://localhost/vhost'
+const password = 'abc123';
+
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
 });
-
-const message = {
-    a: 1,
-    b: 'b'
-};
-
-// CONSUMER MUST BE STARTED FIRST BEFORE PUSHLISHING ANY MESSAGE
-
-// consumer.js
-// consume message and return (send) a response back to publisher
-amqp.consume(({rawMessage, message}) => {
-    console.log('consumer received', message); // consumer received ignore response
-                                               // consumer received { a: 1, b: 'b' }
-    return {
-        response: 'response message'
-    }
-});
-
-// publisher.js
-// publish a message, no response from consumer
-amqp.publish('ignore response');
-
-// publish a message and handle response from consumer
-amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
-    console.log('response from consumer', responseMessage); // response from consumer { response: 'response message' }
-});
-
-
-// example to add:
-// consume from (multiple) routes
-// round robin consumers
-// direct route + a catch all consumer
 
 ```
-<a name="Amqp"></a>
+## Functions
 
-## Amqp
+<dl>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
+<dd></dd>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encrypt"></a>
+
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
+
+<a name="verify"></a>
+
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
+
+
+## @coolgk/captcha
+a javascript / typescript module
+
+`npm install @coolgk/captcha`
+
+recapcha wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { verify } = require('@coolgk/captcha');
+const secret = '-------';
+
+verify(secret, captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+});
+
+// OR
+
+import { Captcha } from '@coolgk/captcha';
+// OR
+// const { Captcha } = require('@coolgk/captcha');
+
+const captcha = new Captcha({ secret });
+
+const captchaResponse = '---------';
+
+captcha.verify(captchaResponse).then((response) => {
+    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
+                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
+});
+
+```
+<a name="Captcha"></a>
+
+## Captcha
 **Kind**: global class  
 
-* [Amqp](#Amqp)
-    * [new Amqp(options)](#new_Amqp_new)
-    * [.closeConnection()](#Amqp+closeConnection) ⇒ <code>void</code>
-    * [.publish(message, [callback], [options])](#Amqp+publish) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-    * [.consume(callback, [options])](#Amqp+consume) ⇒ <code>promise</code>
-    * [.getChannel()](#Amqp+getChannel) ⇒ <code>promise</code>
+* [Captcha](#Captcha)
+    * [new Captcha(options)](#new_Captcha_new)
+    * [.verify(response, [remoteip])](#Captcha+verify)
 
-<a name="new_Amqp_new"></a>
+<a name="new_Captcha_new"></a>
 
-### new Amqp(options)
+### new Captcha(options)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> |  |
-| options.url | <code>string</code> | connection string e.g. amqp://localhost |
-| [options.sslPem] | <code>string</code> | pem file path |
-| [options.sslCa] | <code>string</code> | sslCa file path |
-| [options.sslPass] | <code>string</code> | password |
+| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
 
-<a name="Amqp+closeConnection"></a>
+<a name="Captcha+verify"></a>
 
-### amqp.closeConnection() ⇒ <code>void</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-<a name="Amqp+publish"></a>
+### captcha.verify(response, [remoteip])
+**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
 
-### amqp.publish(message, [callback], [options]) ⇒ <code>promise.&lt;Array.&lt;boolean&gt;&gt;</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
+| Param | Type | Description |
+| --- | --- | --- |
+| response | <code>string</code> | repsonse from recaptcha |
+| [remoteip] | <code>string</code> | ip address |
+|  | <code>promise</code> |  |
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| message | <code>\*</code> |  | message any type that can be JSON.stringify'ed |
-| [callback] | <code>function</code> |  | callback(message) for processing response from consumers |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | route names |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-
-<a name="Amqp+consume"></a>
-
-### amqp.consume(callback, [options]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | consumer(message) function should returns a promise |
-| [options] | <code>object</code> |  |  |
-| [options.routes] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;[&#x27;#&#x27;]&quot;</code> | exchange routes |
-| [options.queueName] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | queue name for processing messages. consumers with the same queue name process messages in round robin style |
-| [options.exchangeName] | <code>string</code> | <code>&quot;&#x27;defaultExchange&#x27;&quot;</code> | exchange name |
-| [options.exchangeType] | <code>string</code> | <code>&quot;&#x27;topic&#x27;&quot;</code> | exchange type |
-| [options.priority] | <code>number</code> | <code>0</code> | priority, larger numbers indicate higher priority |
-| [options.prefetch] | <code>number</code> | <code>1</code> | 1 or 0, if to process request one at a time |
-
-<a name="Amqp+getChannel"></a>
-
-### amqp.getChannel() ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Amqp</code>](#Amqp)  
-**Returns**: <code>promise</code> - - promise<channel>  
 
 ## @coolgk/email
 a javascript / typescript module
@@ -558,6 +624,239 @@ email.send({
 | [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
 | [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
 
+
+## @coolgk/csv
+a javascript / typescript module
+
+`npm install @coolgk/csv`
+
+read and write csv files
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Csv } from '@coolgk/csv';
+// OR
+// const { Csv } = require('@coolgk/csv');
+
+const csv = new Csv({
+    tmpConfig: { dir: '/tmp/csv' } // optional
+});
+
+const arrayData = [
+    [1,2,3,4,5],
+    [6,7,7,8,9],
+    [0,5,8,90,65]
+];
+
+const objectData = [
+    {col1: 'ab', col2: 'cd', col3: 'ef'},
+    {col1: '2ab', col2: '2cd', col3: '2ef'},
+    {col1: '3ab', col2: '3cd', col3: '3ef'}
+];
+
+csv.createFile(
+    arrayData,
+    {
+        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
+        formatter: (row) => {
+            return row.map((value) => 'formatted-' + value);
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
+    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
+});
+
+csv.createFile(
+    objectData,
+    {
+        columns: ['col1', 'col2', 'col3'],
+        formatter: (row) => {
+            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
+        }
+    }
+).then((csvFilePath) => {
+    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
+    read(csvFilePath, ['col1', 'col2', 'col3']);
+});
+
+function read (file, columns) {
+    // with columns/headers
+    // read lines as object
+    const lines = csv.readFile(file, {columns: columns});
+    lines.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index);
+            // {
+                // 'column 1': 'formatted-1',
+                // 'column 2': 'formatted-2',
+                // 'column 3': 'formatted-3',
+                // h4: 'formatted-4',
+                // h5: 'formatted-5'
+            // } 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+
+    // without columns/headers
+    // read lines as array
+    const lines2 = csv.readFile(file);
+    lines2.forEach(
+        (lineArray, index) => {
+            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
+        },
+        (total) => {
+            console.log('read done, total:', total); // read done, total: 4
+        }
+    );
+}
+
+```
+<a name="Csv"></a>
+
+## Csv
+**Kind**: global class  
+
+* [Csv](#Csv)
+    * [new Csv([options])](#new_Csv_new)
+    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
+    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
+    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+
+<a name="new_Csv_new"></a>
+
+### new Csv([options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
+| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
+| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+<a name="Csv+parse"></a>
+
+### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
+parse a string as csv data and returns an array promise
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>string</code> |  | a csv string |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+readFile"></a>
+
+### csv.readFile(file, [options]) ⇒ <code>object</code>
+read a csv file. the return value can ONLY be used in a forEach() loop
+e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
+
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| file | <code>string</code> |  | file path |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
+| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+
+<a name="Csv+createFile"></a>
+
+### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
+**Kind**: instance method of [<code>Csv</code>](#Csv)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
+| [options] | <code>object</code> |  |  |
+| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
+| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
+| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
+| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
+
+
+## @coolgk/facebook-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/facebook-sign-in`
+
+facebook sign in module which verifies client access token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+// OR
+// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+
+const facebookSignIn = new FacebookSignIn({
+    clientId: '...',
+    secret: '...'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await facebookSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await facebookSignIn.verify(validToken);
+    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
+})()
+
+## @coolgk/google-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/google-sign-in`
+
+google sign in module which verifies id token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+const { GoogleSignIn } = require('@coolgk/google-sign-in');
+// OR
+// import { GoogleSignIn } from '@coolgk/google-sign-in';
+
+const googleSignIn = new GoogleSignIn({
+    clientId: '936046478010-98hmjf60qmhdpfeok14l4f39ptka6t48.apps.googleusercontent.com'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await googleSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await googleSignIn.verify(validToken);
+    console.log(account2);
+    // {
+    //     azp: '...',
+    //     aud: '...',
+    //     sub: '123123123',
+    //     email: 'abc@exmaple.com',
+    //     email_verified: true,
+    //     at_hash: 'asdfasdfasdfasdfa',
+    //     exp: 1520633389,
+    //     iss: 'accounts.google.com',
+    //     jti: 'qfwfasdfasdfasdfasdfasdfasdfadsf',
+    //     iat: 1520629789,
+    //     name: 'first last',
+    //     picture: 'https://lh6.googleusercontent.com/.../photo.jpg',
+    //     given_name: 'first',
+    //     family_name: 'last',
+    //     locale: 'en-GB'
+    // }
+})()
 
 ## @coolgk/formdata
 a javascript / typescript module
@@ -868,37 +1167,6 @@ setTimeout(() => {
 | token | <code>string</code> | token to verify |
 
 
-## @coolgk/number
-a javascript / typescript module
-
-`npm install @coolgk/number`
-
-number utitlies
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { round } from '@coolgk/number';
-// OR
-// const { round } = require('@coolgk/number');
-
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
-
-```
-<a name="round"></a>
-
-## round(value, precision) ⇒ <code>number</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
-
-
 ## @coolgk/pdf
 a javascript / typescript module
 
@@ -1026,224 +1294,251 @@ for full page in PDF, set height of a page in html to 842px
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
 
 
-## @coolgk/queue
+## @coolgk/session
 a javascript / typescript module
 
-`npm install @coolgk/queue`
+`npm install @coolgk/session`
 
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-## Examples
-```javascript
-import { queue } from '@coolgk/queue';
-// OR
-// const { queue } = require('@coolgk/queue');
-
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
-
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
-
-```
-<a name="queue"></a>
-
-## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
-
-
-## @coolgk/csv
-a javascript / typescript module
-
-`npm install @coolgk/csv`
-
-read and write csv files
+An session handler that works without cookie (and with cookie too).
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
+
+When working without cookie, this class reads the session token from the **"Authorization"** header.
+e.g. **Authorization : Bearer cn389ncoiwuencr...**
+#### Express Middleware Example
 ```javascript
-import { Csv } from '@coolgk/csv';
-// OR
-// const { Csv } = require('@coolgk/csv');
+// express middleware
+const session = require('@coolgk/session');
+const app = require('express')();
 
-const csv = new Csv({
-    tmpConfig: { dir: '/tmp/csv' } // optional
-});
+app.use(
+    session.express({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123' // secret is required for creating the session token / id
+    })
+);
 
-const arrayData = [
-    [1,2,3,4,5],
-    [6,7,7,8,9],
-    [0,5,8,90,65]
-];
-
-const objectData = [
-    {col1: 'ab', col2: 'cd', col3: 'ef'},
-    {col1: '2ab', col2: '2cd', col3: '2ef'},
-    {col1: '3ab', col2: '3cd', col3: '3ef'}
-];
-
-csv.createFile(
-    arrayData,
-    {
-        columns: ['column 1', 'column 2', 'column 3', 'h4', 'h5'],
-        formatter: (row) => {
-            return row.map((value) => 'formatted-' + value);
-        }
+app.use(async (request, response, next) => {
+    // allow access if it's the login page or the request has a valid session
+    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
+        next();
+    } else { // deny access
+        response.send('Please Login');
+        // output
+        // 'Please Login'
     }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255018910356N9qKqUgrpzG2.csv
-    read(csvFilePath, ['column 1', 'column 2', 'column 3', 'h4', 'h5']);
 });
 
-csv.createFile(
-    objectData,
-    {
-        columns: ['col1', 'col2', 'col3'],
-        formatter: (row) => {
-            return [row.col1 + '+format', row.col2 + '+format', row.col3 + '+format'];
-        }
-    }
-).then((csvFilePath) => {
-    console.log(csvFilePath); // /tmp/csv/151229255019910356AlO9kbzkdqjq.csv
-    read(csvFilePath, ['col1', 'col2', 'col3']);
+app.get('/login', async (request, response, next) => {
+    // start a new session (create a new session id)
+    const accessToken = await request.session.init();
+    // set session variables
+    await request.session.set('user', { id: 1, username: 'abc' });
+    // send session token/id back
+    response.json({ accessToken });
+    // output
+    // {"accessToken":"eyJleHAiOjAsIml..."}
 });
 
-function read (file, columns) {
-    // with columns/headers
-    // read lines as object
-    const lines = csv.readFile(file, {columns: columns});
-    lines.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index);
-            // {
-                // 'column 1': 'formatted-1',
-                // 'column 2': 'formatted-2',
-                // 'column 3': 'formatted-3',
-                // h4: 'formatted-4',
-                // h5: 'formatted-5'
-            // } 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
+app.get('/user', async (request, response, next) => {
+    // get session variable
+    response.json(await request.session.get('user'));
+    // output
+    // {"id":1,"username":"abc"}
+});
 
-    // without columns/headers
-    // read lines as array
-    const lines2 = csv.readFile(file);
-    lines2.forEach(
-        (lineArray, index) => {
-            console.log(lineArray, index); // [ 'formatted-1', 'formatted-2', 'formatted-3', 'formatted-4', 'formatted-5' ] 1
-        },
-        (total) => {
-            console.log('read done, total:', total); // read done, total: 4
-        }
-    );
-}
+app.get('/session', async (request, response, next) => {
+    // get all session values
+    response.json(await request.session.getAll());
+    // output
+    // {"user":{"id":1,"username":"abc"}}
+});
 
+app.get('/logout', async (request, response, next) => {
+    // destroy current session
+    await request.session.destroy();
+    response.json(await request.session.getAll());
+    // output
+    // {}
+});
+
+app.listen(8888);
 ```
-<a name="Csv"></a>
+#### Native Node App Example
+```javascript
+import { Session } from '@coolgk/session';
+// OR
+// const { Session } = require('@coolgk/session');
 
-## Csv
+const http = require('http');
+http.createServer(async (request, response) => {
+
+    const session = new Session({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123',
+        request,
+        response
+    });
+
+    // ... some middelware
+    // ... in some routes
+    // set sesstion
+    await session.start();
+    await session.set('user', {id: 1, username: 'user@example.com'});
+
+    // check session and renew if verified
+    const verified = await session.verifyAndRenew();
+    if (verified) {
+        // session exists, logged in, do something
+    } else {
+        // deny access or show login screen
+    }
+
+    // show session data
+    response.end(
+        JSON.stringify(
+            await session.getAll()
+        )
+    ); // {"user":{"id":1,"username":"user@example.com"}}
+
+}).listen(8888);
+```
+#### To use without cookie
+Create a session without the **"response"** property and the sessoin object will read the session id from the **"Authorization"** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
+```javascript
+const session = new Session({
+    redisClient: require('redis').createClient({
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD
+    }),
+    secret: '123',
+    request
+});
+```
+<a name="Session"></a>
+
+## Session
+This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
+
 **Kind**: global class  
 
-* [Csv](#Csv)
-    * [new Csv([options])](#new_Csv_new)
-    * [.parse(value, [options])](#Csv+parse) ⇒ <code>promise.&lt;array&gt;</code>
-    * [.readFile(file, [options])](#Csv+readFile) ⇒ <code>object</code>
-    * [.createFile(data, [options])](#Csv+createFile) ⇒ <code>promise.&lt;string&gt;</code>
+* [Session](#Session)
+    * [new Session(options)](#new_Session_new)
+    * [.init(signature)](#Session+init) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.rotate(signature)](#Session+rotate) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.start(signature)](#Session+start) ⇒ <code>promise.&lt;string&gt;</code>
+    * [.destroy()](#Session+destroy) ⇒ <code>promise</code>
+    * [.verify(signature)](#Session+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.verifyAndRenew(signature, [expiry])](#Session+verifyAndRenew) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.renew([expiry])](#Session+renew) ⇒ <code>promise</code>
 
-<a name="new_Csv_new"></a>
+<a name="new_Session_new"></a>
 
-### new Csv([options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.tmpConfig] | <code>object</code> |  | config for the generated file |
-| [options.tmpConfig.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.tmpConfig.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix |
-| [options.tmpConfig.dir] | <code>string</code> | <code>&quot;os.tmpdir()&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-<a name="Csv+parse"></a>
-
-### csv.parse(value, [options]) ⇒ <code>promise.&lt;array&gt;</code>
-parse a string as csv data and returns an array promise
-
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
+### new Session(options)
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| value | <code>string</code> |  | a csv string |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', ...] if headers is defined, the row value will be objects |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+| options | <code>object</code> |  |  |
+| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
+| options.secret | <code>string</code> |  | a string for encrypting the session token |
+| options.request | <code>object</code> |  | the request object in http.createServer() or express request |
+| [options.expiry] | <code>expiry</code> | <code>3600</code> | session expiry time in seconds |
+| [options.response] | <code>object</code> |  | the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor. |
+| [options.cookie] | <code>object</code> |  | cookie options |
+| [options.cookie.domain] | <code>string</code> |  | Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain. |
+| [options.cookie.encode] | <code>function</code> | <code>encodeURIComponent</code> | Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value. |
+| [options.cookie.expires] | <code>date</code> |  | Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
+| [options.cookie.httpOnly] | <code>boolean</code> |  | Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set. |
+| [options.cookie.maxAge] | <code>number</code> |  | Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set. |
+| [options.cookie.path] | <code>string</code> | <code>&quot;&#x27;/&#x27;&quot;</code> | Specifies the value for the Path Set-Cookie attribute. |
+| [options.cookie.sameSite] | <code>string</code> \| <code>boolean</code> |  | Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute |
+| [options.cookie.secure] | <code>boolean</code> |  | Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set. |
 
-<a name="Csv+readFile"></a>
+<a name="Session+init"></a>
 
-### csv.readFile(file, [options]) ⇒ <code>object</code>
-read a csv file. the return value can ONLY be used in a forEach() loop
-e.g. readFile('abc.csv').forEach((row, index) => { console.log(row, index) })
+### session.init(signature) ⇒ <code>promise.&lt;string&gt;</code>
+initialising a new session
 
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>object</code> - - { forEach: ((row, index) => void, (totalCount) => void) => void }  
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| file | <code>string</code> |  | file path |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g ['id', 'name', ...] if defined, rows become objects instead of arrays |
-| [options.limit] | <code>number</code> | <code>0</code> | number of rows to read, 0 = unlimited |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | csv delimiter |
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
 
-<a name="Csv+createFile"></a>
+<a name="Session+rotate"></a>
 
-### csv.createFile(data, [options]) ⇒ <code>promise.&lt;string&gt;</code>
-**Kind**: instance method of [<code>Csv</code>](#Csv)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - file path of the csv file generated  
+### session.rotate(signature) ⇒ <code>promise.&lt;string&gt;</code>
+rotate a session: start a new session and transfer old session values to the new session
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>array</code> \| <code>cursor</code> |  | mongo cursor or array of data |
-| [options] | <code>object</code> |  |  |
-| [options.columns] | <code>Array.&lt;string&gt;</code> |  | array of headers e.g. ['id', 'name', 'email'] |
-| [options.formatter] | <code>function</code> |  | callback for formatting row data. It takes one row from data as parameter and should return an array e.g. (rowData) => [rowData.id, rowData.name, 'formatted data'], |
-| [options.delimiter] | <code>string</code> | <code>&quot;&#x27;,&#x27;&quot;</code> | Set the field delimiter, one character only, defaults to a comma. |
-| [options.filepath] | <code>string</code> |  | file path is automatically generated if empty |
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+start"></a>
+
+### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
+start session: renew the existing session or if not valid valid session, start a new one
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+destroy"></a>
+
+### session.destroy() ⇒ <code>promise</code>
+destory the current session
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+<a name="Session+verify"></a>
+
+### session.verify(signature) ⇒ <code>promise.&lt;boolean&gt;</code>
+verify the session token
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+
+<a name="Session+verifyAndRenew"></a>
+
+### session.verifyAndRenew(signature, [expiry]) ⇒ <code>promise.&lt;boolean&gt;</code>
+verify and renew token, renew only if token is valid (has a valid signature) and not expired
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. verify the session token, if valid, renew this token |
+| [expiry] | <code>number</code> | in seconds |
+
+<a name="Session+renew"></a>
+
+### session.renew([expiry]) ⇒ <code>promise</code>
+renew session optionally with a different expiry time
+
+**Kind**: instance method of [<code>Session</code>](#Session)  
+**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [expiry] | <code>number</code> | in seconds |
 
 
 ## @coolgk/string
@@ -1338,154 +1633,63 @@ use padStart instead
 | length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
 
 
-## @coolgk/tmp
+## @coolgk/queue
 a javascript / typescript module
 
-`npm install @coolgk/tmp`
+`npm install @coolgk/queue`
 
-wrapper functions, generate tmp file or folders
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
-// OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
-
-```
-## Functions
-
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
-
-<a name="generateFile"></a>
-
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateDir"></a>
-
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
 ## Examples
 ```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
+import { queue } from '@coolgk/queue';
 // OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+// const { queue } = require('@coolgk/queue');
 
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
 
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
 
 ```
-## Functions
+<a name="queue"></a>
 
-<dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
-</dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="bytesToString"></a>
-
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
-
+## queue(callback, [limit]) ⇒ <code>promise</code>
 **Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
-
-<a name="millisecondsToString"></a>
-
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/token
@@ -1750,313 +1954,183 @@ a simple function to get params in a url e.g. with url: user/123, pattern: user/
 | pattern | <code>string</code> | e.g. /:userid/:name |
 
 
-## @coolgk/captcha
+## @coolgk/tmp
 a javascript / typescript module
 
-`npm install @coolgk/captcha`
+`npm install @coolgk/tmp`
 
-recapcha wrapper
+wrapper functions, generate tmp file or folders
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-const { verify } = require('@coolgk/captcha');
-const secret = '-------';
-
-verify(secret, captchaResponse).then((response) => {
-    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
-                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
-});
-
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
 // OR
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
 
-import { Captcha } from '@coolgk/captcha';
-// OR
-// const { Captcha } = require('@coolgk/captcha');
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
 
-const captcha = new Captcha({ secret });
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
 
-const captchaResponse = '---------';
-
-captcha.verify(captchaResponse).then((response) => {
-    console.log(response); // { success: true, challenge_ts: '2017-12-03T08:19:48Z', hostname: 'www.google.com' }
-                           // { success: false, 'error-codes': [ 'invalid-input-response' ] }
-});
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
 
 ```
-<a name="Captcha"></a>
+## Functions
 
-## Captcha
-**Kind**: global class  
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+</dl>
 
-* [Captcha](#Captcha)
-    * [new Captcha(options)](#new_Captcha_new)
-    * [.verify(response, [remoteip])](#Captcha+verify)
+<a name="generateFile"></a>
 
-<a name="new_Captcha_new"></a>
-
-### new Captcha(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.secret | <code>object</code> | google captcha secret https://www.google.com/recaptcha/admin#site/337294176 |
-
-<a name="Captcha+verify"></a>
-
-### captcha.verify(response, [remoteip])
-**Kind**: instance method of [<code>Captcha</code>](#Captcha)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| response | <code>string</code> | repsonse from recaptcha |
-| [remoteip] | <code>string</code> | ip address |
-|  | <code>promise</code> |  |
-
-
-## @coolgk/session
-a javascript / typescript module
-
-`npm install @coolgk/session`
-
-An session handler that works without cookie (and with cookie too).
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-
-When working without cookie, this class reads the session token from the **"Authorization"** header.
-e.g. **Authorization : Bearer cn389ncoiwuencr...**
-#### Express Middleware Example
-```javascript
-// express middleware
-const session = require('@coolgk/session');
-const app = require('express')();
-
-app.use(
-    session.express({
-        redisClient: require('redis').createClient({
-            host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
-            password: process.env.REDIS_PASSWORD
-        }),
-        secret: '123' // secret is required for creating the session token / id
-    })
-);
-
-app.use(async (request, response, next) => {
-    // allow access if it's the login page or the request has a valid session
-    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
-        next();
-    } else { // deny access
-        response.send('Please Login');
-        // output
-        // 'Please Login'
-    }
-});
-
-app.get('/login', async (request, response, next) => {
-    // start a new session (create a new session id)
-    const accessToken = await request.session.init();
-    // set session variables
-    await request.session.set('user', { id: 1, username: 'abc' });
-    // send session token/id back
-    response.json({ accessToken });
-    // output
-    // {"accessToken":"eyJleHAiOjAsIml..."}
-});
-
-app.get('/user', async (request, response, next) => {
-    // get session variable
-    response.json(await request.session.get('user'));
-    // output
-    // {"id":1,"username":"abc"}
-});
-
-app.get('/session', async (request, response, next) => {
-    // get all session values
-    response.json(await request.session.getAll());
-    // output
-    // {"user":{"id":1,"username":"abc"}}
-});
-
-app.get('/logout', async (request, response, next) => {
-    // destroy current session
-    await request.session.destroy();
-    response.json(await request.session.getAll());
-    // output
-    // {}
-});
-
-app.listen(8888);
-```
-#### Native Node App Example
-```javascript
-import { Session } from '@coolgk/session';
-// OR
-// const { Session } = require('@coolgk/session');
-
-const http = require('http');
-http.createServer(async (request, response) => {
-
-    const session = new Session({
-        redisClient: require('redis').createClient({
-            host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
-            password: process.env.REDIS_PASSWORD
-        }),
-        secret: '123',
-        request,
-        response
-    });
-
-    // ... some middelware
-    // ... in some routes
-    // set sesstion
-    await session.start();
-    await session.set('user', {id: 1, username: 'user@example.com'});
-
-    // check session and renew if verified
-    const verified = await session.verifyAndRenew();
-    if (verified) {
-        // session exists, logged in, do something
-    } else {
-        // deny access or show login screen
-    }
-
-    // show session data
-    response.end(
-        JSON.stringify(
-            await session.getAll()
-        )
-    ); // {"user":{"id":1,"username":"user@example.com"}}
-
-}).listen(8888);
-```
-#### To use without cookie
-Create a session without the **"response"** property and the sessoin object will read the session id from the **"Authorization"** header i.e. **Authorization : Bearer cn389ncoiwuencr...**
-```javascript
-const session = new Session({
-    redisClient: require('redis').createClient({
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD
-    }),
-    secret: '123',
-    request
-});
-```
-<a name="Session"></a>
-
-## Session
-This class extends @coolgk/token see set(), get(), delete(), getAll() in @coolgk/token
-
-**Kind**: global class  
-
-* [Session](#Session)
-    * [new Session(options)](#new_Session_new)
-    * [.init(signature)](#Session+init) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.rotate(signature)](#Session+rotate) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.start(signature)](#Session+start) ⇒ <code>promise.&lt;string&gt;</code>
-    * [.destroy()](#Session+destroy) ⇒ <code>promise</code>
-    * [.verify(signature)](#Session+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.verifyAndRenew(signature, [expiry])](#Session+verifyAndRenew) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.renew([expiry])](#Session+renew) ⇒ <code>promise</code>
-
-<a name="new_Session_new"></a>
-
-### new Session(options)
+## generateFile([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
-| options.secret | <code>string</code> |  | a string for encrypting the session token |
-| options.request | <code>object</code> |  | the request object in http.createServer() or express request |
-| [options.expiry] | <code>expiry</code> | <code>3600</code> | session expiry time in seconds |
-| [options.response] | <code>object</code> |  | the response object in http.createServer() or express response. cookie will be set if the response property is set in the constructor. |
-| [options.cookie] | <code>object</code> |  | cookie options |
-| [options.cookie.domain] | <code>string</code> |  | Specifies the value for the Domain Set-Cookie attribute. By default, no domain is set, and most clients will consider the cookie to apply to only the current domain. |
-| [options.cookie.encode] | <code>function</code> | <code>encodeURIComponent</code> | Specifies a function that will be used to encode a cookie's value. Since value of a cookie has a limited character set (and must be a simple string), this function can be used to encode a value into a string suited for a cookie's value. |
-| [options.cookie.expires] | <code>date</code> |  | Specifies the Date object to be the value for the Expires Set-Cookie attribute. By default, no expiration is set, and most clients will consider this a "non-persistent cookie" and will delete it on a condition like exiting a web browser application. |
-| [options.cookie.httpOnly] | <code>boolean</code> |  | Specifies the boolean value for the [HttpOnly Set-Cookie attribute][rfc-6266-5.2.6]. When truthy, the HttpOnly attribute is set, otherwise it is not. By default, the HttpOnly attribute is not set. |
-| [options.cookie.maxAge] | <code>number</code> |  | Specifies the number (in seconds) to be the value for the Max-Age Set-Cookie attribute. The given number will be converted to an integer by rounding down. By default, no maximum age is set. |
-| [options.cookie.path] | <code>string</code> | <code>&quot;&#x27;/&#x27;&quot;</code> | Specifies the value for the Path Set-Cookie attribute. |
-| [options.cookie.sameSite] | <code>string</code> \| <code>boolean</code> |  | Specifies the boolean or string to be the value for the SameSite Set-Cookie attribute |
-| [options.cookie.secure] | <code>boolean</code> |  | Specifies the boolean value for the [Secure Set-Cookie attribute][rfc-6266-5.2.5]. When truthy, the Secure attribute is set, otherwise it is not. By default, the Secure attribute is not set. |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
 
-<a name="Session+init"></a>
+<a name="generateDir"></a>
 
-### session.init(signature) ⇒ <code>promise.&lt;string&gt;</code>
-initialising a new session
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateTmpName"></a>
+
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+
+## @coolgk/unit
+a javascript / typescript module
+
+`npm install @coolgk/unit`
+
+unit conversion
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+
+```
+## Functions
+
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+| value | <code>number</code> | value in byte |
 
-<a name="Session+rotate"></a>
+<a name="millisecondsToString"></a>
 
-### session.rotate(signature) ⇒ <code>promise.&lt;string&gt;</code>
-rotate a session: start a new session and transfer old session values to the new session
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+| value | <code>number</code> | number of milliseconds |
 
-<a name="Session+start"></a>
 
-### session.start(signature) ⇒ <code>promise.&lt;string&gt;</code>
-start session: renew the existing session or if not valid valid session, start a new one
+## @coolgk/number
+a javascript / typescript module
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise.&lt;string&gt;</code> - - a session token string  
+`npm install @coolgk/number`
 
-| Param | Type | Description |
-| --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
+number utitlies
 
-<a name="Session+destroy"></a>
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { round } from '@coolgk/number';
+// OR
+// const { round } = require('@coolgk/number');
 
-### session.destroy() ⇒ <code>promise</code>
-destory the current session
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-<a name="Session+verify"></a>
+```
+<a name="round"></a>
 
-### session.verify(signature) ⇒ <code>promise.&lt;boolean&gt;</code>
-verify the session token
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
 
-**Kind**: instance method of [<code>Session</code>](#Session)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. |
-
-<a name="Session+verifyAndRenew"></a>
-
-### session.verifyAndRenew(signature, [expiry]) ⇒ <code>promise.&lt;boolean&gt;</code>
-verify and renew token, renew only if token is valid (has a valid signature) and not expired
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| signature | <code>object</code> | addtional data for verifying session token e.g. an IP address. you can pass the IP address of an request to the verify() method and it will return false if the IP is different from the IP used for initialisng the session. verify the session token, if valid, renew this token |
-| [expiry] | <code>number</code> | in seconds |
-
-<a name="Session+renew"></a>
-
-### session.renew([expiry]) ⇒ <code>promise</code>
-renew session optionally with a different expiry time
-
-**Kind**: instance method of [<code>Session</code>](#Session)  
-**Returns**: <code>promise</code> - - false if session has not been started or has a invalid token string  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [expiry] | <code>number</code> | in seconds |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 

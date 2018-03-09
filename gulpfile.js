@@ -246,7 +246,7 @@ function generateRootReadme (folder) {
 
             readmeWriteStream.write(`\n\n`);
             readmeWriteStream.write('`npm install @coolgk/utils`' + `\n\n`);
-            readmeWriteStream.write('you can either use the standalone modules or @coolgk/utils as an all-in-one package. To use @coolgk/utils, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below' + `\n\n`);
+            readmeWriteStream.write('You can install and use the modules below as standalone packages. If you wish to use @coolgk/utils as an all-in-one package, replace @coolgk/[module] with @coolgk/**utils**/[module] in the require() or import statements in the examples below. ' + `\n\n`);
             readmeWriteStream.write(`Report bugs here: [${packageJson.bugs.url}](${packageJson.bugs.url})` + `\n\n`);
 
             readmeWriteStream.write(`Also see:` + `\n\n`);
@@ -298,9 +298,9 @@ function generateIndexFile () {
             files.forEach((file) => {
                 const filename = file.replace('.ts', '');
                 if (!['index', 'test', 'globals.d'].includes(filename)) {
-                    // const module = filename[0].toUpperCase() + filename.substr(1);
-                    writeStream.write(`import * as _${filename} from './${filename}';\n`);
-                    writeStream.write(`export const ${filename} = _${filename}; // tslint:disable-line\n`);
+                    const packageName = filename.split('-').map((text, index) => index ? text[0].toUpperCase() + text.substr(1) : text).join('');
+                    writeStream.write(`import * as _${packageName} from './${filename}';\n`);
+                    writeStream.write(`export const ${packageName} = _${packageName}; // tslint:disable-line\n`);
                 }
             });
             writeStream.end();

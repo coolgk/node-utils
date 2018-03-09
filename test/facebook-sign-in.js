@@ -6,7 +6,7 @@ const config = require('../test.config.js');
 
 describe('FacebookSignIn Module', () => {
 
-    const { FacebookSignIn } = require(`../${config.sourceFolder}/facebookSignIn`);
+    const { FacebookSignIn } = require(`../${config.sourceFolder}/facebook-sign-in`);
 
     let facebookSignIn;
     let getRequest;

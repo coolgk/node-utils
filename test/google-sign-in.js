@@ -6,7 +6,7 @@ const config = require('../test.config.js');
 
 describe('GoogleSignIn Module', () => {
 
-    const { GoogleSignIn } = require(`../${config.sourceFolder}/googleSignIn`);
+    const { GoogleSignIn } = require(`../${config.sourceFolder}/google-sign-in`);
 
     let googleSignIn;
     let oAuth2Client;
