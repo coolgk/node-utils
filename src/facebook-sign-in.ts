@@ -1,13 +1,13 @@
 /***
 description: facebook sign in module which verifies client access token and returns account data
-version: 1.0.2
+version: 1.0.3
 keywords:
     - facebook
     - login
     - sign in
     - api
 dependencies:
-    "request": "^2.83.0"
+    "request": "^2.85.0"
     "request-promise-native": "^1.0.5"
     "@types/request": "^2.47.0"
     "@types/request-promise-native": "^1.0.14"
