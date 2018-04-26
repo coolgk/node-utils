@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: read and write csv files
-version: 2.0.5
+version: 2.0.6
 keywords:
     - csv
     - csv parser
@@ -10,8 +10,8 @@ dependencies:
     "@types/mongodb": "^3"
     "@types/csv-parse": "^1.1.11"
     "@types/csv-stringify": "^1.4.1"
-    "csv-parse": "^2.0.4"
-    "csv-stringify": "^2.0.4"
+    "csv-parse": "^2.2"
+    "csv-stringify": "^2.1"
     "@coolgk/queue": "^2"
     "@coolgk/tmp": "^2"
 example: |

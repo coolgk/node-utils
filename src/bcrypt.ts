@@ -1,6 +1,6 @@
 /***
 description: just a promise wrapper
-version: 2.0.4
+version: 2.0.5
 keywords:
     - bcrypt
 dependencies:
@@ -37,7 +37,7 @@ import { compare, hash } from 'bcrypt-nodejs';
 export function encrypt (value: string, salt: string = ''): Promise<string> {
     return new Promise(
         (resolve, reject) => hash(
-            value, salt, () => null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
+            String(value), salt, () => null, (error, hashedString) => error ? reject(error) : resolve(hashedString)
         )
     );
 }
@@ -50,7 +50,7 @@ export function encrypt (value: string, salt: string = ''): Promise<string> {
 export function verify (value: string, hashedString: string): Promise<boolean> {
     return new Promise(
         (resolve, reject) => compare(
-            value, hashedString, (error, result) => error ? reject(error) : resolve(result)
+            String(value), String(hashedString), (error, result) => error ? reject(error) : resolve(result)
         )
     );
 }

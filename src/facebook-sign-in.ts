@@ -1,13 +1,13 @@
 /***
 description: facebook sign in module which verifies client access token and returns account data
-version: 1.0.1
+version: 1.0.3
 keywords:
     - facebook
     - login
     - sign in
     - api
 dependencies:
-    "request": "^2.83.0"
+    "request": "^2.85.0"
     "request-promise-native": "^1.0.5"
     "@types/request": "^2.47.0"
     "@types/request-promise-native": "^1.0.14"
@@ -50,6 +50,10 @@ export interface IAccountData {
     [field: string]: any;
 }
 
+/**
+ * @export
+ * @class FacebookSignIn
+ */
 export class FacebookSignIn {
 
     public static readonly _RECAPTCHA_URL = 'https://graph.facebook.com';

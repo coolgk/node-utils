@@ -1,13 +1,13 @@
 /***
 description: google sign in module which verifies id token and returns account data
-version: 1.0.2
+version: 1.0.4
 keywords:
     - google
     - login
     - sign in
     - api
 dependencies:
-    "google-auth-library": "^1.3.1"
+    "google-auth-library": "^1.4"
 example: |
     const { GoogleSignIn } = require('@coolgk/google-sign-in');
     // OR
@@ -62,16 +62,31 @@ export interface IAccountData {
     [field: string]: any;
 }
 
+/**
+ * @export
+ * @class GoogleSignIn
+ */
 export class GoogleSignIn {
 
     private _clientId: string;
     private _oAuth2Client: any;
 
+    /**
+     * @param {object} options
+     * @param {string} options.clientId - google client id
+     * @memberof GoogleSignIn
+     */
     constructor (options: IOptions) {
         this._clientId = options.clientId;
         this._oAuth2Client = options.oAuth2Client || new OAuth2Client(this._clientId);
     }
 
+    /**
+     *
+     * @param {string} token - google id token string
+     * @returns {(Promise<boolean | object>)} - false if id token is invalid otherwise returns account data
+     * @memberof GoogleSignIn
+     */
     public async verify (token: string): Promise<boolean | IAccountData> {
         try {
             const ticket = await this._oAuth2Client.verifyIdToken({

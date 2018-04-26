@@ -18,8 +18,9 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 
 - [amqp](#coolgkamqp)
 - [array](#coolgkarray)
-- [base64](#coolgkbase64)
 - [bcrypt](#coolgkbcrypt)
+- [base64](#coolgkbase64)
+- [cache](#coolgkcache)
 - [captcha](#coolgkcaptcha)
 - [csv](#coolgkcsv)
 - [email](#coolgkemail)
@@ -30,50 +31,12 @@ A simple, lightweight javascript / typescript MxC framework that helps you to cr
 - [number](#coolgknumber)
 - [pdf](#coolgkpdf)
 - [queue](#coolgkqueue)
-- [cache](#coolgkcache)
 - [session](#coolgksession)
 - [string](#coolgkstring)
 - [tmp](#coolgktmp)
 - [token](#coolgktoken)
 - [unit](#coolgkunit)
 - [url](#coolgkurl)
-
-## @coolgk/array
-a javascript / typescript module
-
-`npm install @coolgk/array`
-
-array utilities
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { toArray } from '@coolgk/array';
-// OR
-// const { toArray } = require('@coolgk/array');
-
-const a = undefined;
-const b = false;
-const c = '';
-const d = [1,2,3];
-const e = {a:1};
-
-console.log(toArray(a)); // []
-console.log(toArray(b)); // [ false ]
-console.log(toArray(c)); // [ '' ]
-console.log(toArray(d)); // [ 1, 2, 3 ]
-console.log(toArray(e)); // [ { a: 1 } ]
-
-```
-<a name="toArray"></a>
-
-## toArray(data) ⇒ <code>array</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>\*</code> | any data to be type cast to array |
-
 
 ## @coolgk/amqp
 a javascript / typescript module
@@ -189,6 +152,151 @@ amqp.publish(message, ({rawResponseMessage, responseMessage}) => {
 **Kind**: instance method of [<code>Amqp</code>](#Amqp)  
 **Returns**: <code>promise</code> - - promise<channel>  
 
+## @coolgk/cache
+a javascript / typescript module
+
+`npm install @coolgk/cache`
+
+a redis wrapper
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Cache } from '@coolgk/cache';
+import { createClient } from 'redis';
+// OR
+// const { Cache } = require('@coolgk/cache');
+// const { createClient } = require('redis');
+
+const client = createClient({
+    host: 'localhost',
+    port: 12869,
+    password: '----'
+});
+
+const cache = new Cache({
+    redisClient: client
+});
+
+cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
+
+cache.get('abc').then(console.log); // { a: 1 }
+
+setTimeout(() => {
+    cache.get('abc').then(console.log); // null
+    client.quit();
+}, 1500);
+
+cache.getSetIfNull(
+    'abc',
+    () => Promise.resolve('data'),
+    10
+).then((v) => {
+    console.log(v); // { a: 1 }
+});
+
+Promise.all([
+    cache.set('x', 'val x'),
+    cache.set('y', 'val y'),
+    cache.set('z', 'val z')
+]).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // val x
+        cache.get('y').then(console.log), // val y
+        cache.get('z').then(console.log) // val z
+    ])
+).then(
+    () => Promise.all([
+        cache.delete('x'),
+        cache.delete('y'),
+        cache.delete('z')
+    ])
+).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // null
+        cache.get('y').then(console.log), // null
+        cache.get('z').then(console.log) // null
+    ])
+);
+
+```
+<a name="Cache"></a>
+
+## Cache
+**Kind**: global class  
+
+* [Cache](#Cache)
+    * [new Cache(options)](#new_Cache_new)
+    * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
+    * [.get(name)](#Cache+get) ⇒ <code>promise</code>
+    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
+    * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
+    * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
+
+<a name="new_Cache_new"></a>
+
+### new Cache(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| [options.redisClient] | <code>object</code> | redis client from redis.createClient() redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class |
+
+<a name="Cache+set"></a>
+
+### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | <code>string</code> |  | name of the variable |
+| value | <code>\*</code> |  | value is always JSON.stringify'ed |
+| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
+
+<a name="Cache+get"></a>
+
+### cache.get(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | name of the variable |
+
+<a name="Cache+delete"></a>
+
+### cache.delete(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
+
+<a name="Cache+getSetIfNull"></a>
+
+### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
+get the cached value, if not set, resolve "callback()" and save the value then return it
+
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | <code>string</code> |  | name of the variable |
+| callback | <code>function</code> |  | a callback function which returns a value or a promise |
+| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
+
+<a name="Cache+command"></a>
+
+### cache.command(command, ...params) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | redis command to run |
+| ...params | <code>array</code> | params for the command |
+
+
 ## @coolgk/bcrypt
 a javascript / typescript module
 
@@ -240,82 +348,6 @@ encrypt(password).then((hash) => {
 | --- | --- | --- |
 | value | <code>string</code> | string to check |
 | hashedString | <code>string</code> | encrypted hash |
-
-
-## @coolgk/base64
-a javascript / typescript module
-
-`npm install @coolgk/base64`
-
-base64 encoded decode functions
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
-// OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
-
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
-
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
-
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
-
-```
-## Functions
-
-<dl>
-<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="encode"></a>
-
-## encode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decode"></a>
-
-## decode(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | encoded hash |
-
-<a name="encodeUrl"></a>
-
-## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decodeUrl"></a>
-
-## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | base64 encoded url to decode |
 
 
 ## @coolgk/captcha
@@ -380,6 +412,176 @@ captcha.verify(captchaResponse).then((response) => {
 | response | <code>string</code> | repsonse from recaptcha |
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
+
+
+## @coolgk/email
+a javascript / typescript module
+
+`npm install @coolgk/email`
+
+a email sender wrapper class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Email } from '@coolgk/email';
+// OR
+// const { Email } = require('@coolgk/email');
+
+const email = new Email({host: 'localhost'});
+
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.k.gong@example.com'
+    },
+    to: [
+        {
+            name: 'Dan Go',
+            email: 'dan@example.com'
+        },
+        'gong@example.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/tmp/test.png',
+            name: 'screenshot.png'
+        },
+        {
+            path:"/tmp/test.png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
+});
+
+```
+<a name="Email"></a>
+
+## Email
+**Kind**: global class  
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
+
+* [Email](#Email)
+    * [new Email(options)](#new_Email_new)
+    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
+
+<a name="new_Email_new"></a>
+
+### new Email(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| [options.user] | <code>string</code> |  | username for logging into smtp |
+| [options.password] | <code>string</code> |  | password for logging into smtp |
+| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
+| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
+| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
+| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
+| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
+| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+
+<a name="Email+send"></a>
+
+### email.send(options, [attachments]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.subject | <code>string</code> | email subject |
+| [options.message] | <code>string</code> | html email message |
+| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
+| options.to[].name | <code>string</code> | name of the recipient |
+| options.to[].email | <code>string</code> | email address of the recipient |
+| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
+| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
+| attachments.path | <code>string</code> | file path |
+| [attachments.name] | <code>string</code> | file name |
+| [attachments.type] | <code>string</code> | file mime type |
+| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
+| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+
+
+## @coolgk/facebook-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/facebook-sign-in`
+
+facebook sign in module which verifies client access token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+// OR
+// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+
+const facebookSignIn = new FacebookSignIn({
+    clientId: '...',
+    secret: '...'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await facebookSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await facebookSignIn.verify(validToken);
+    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
+})()
+
+```
+<a name="FacebookSignIn"></a>
+
+## FacebookSignIn
+**Kind**: global class  
+**Export**:   
+
+* [FacebookSignIn](#FacebookSignIn)
+    * _instance_
+        * [.verify(token, [fields])](#FacebookSignIn+verify) ⇒ <code>Promise.&lt;(false\|object)&gt;</code>
+    * _static_
+        * [.FacebookSignIn](#FacebookSignIn.FacebookSignIn)
+            * [new FacebookSignIn(options)](#new_FacebookSignIn.FacebookSignIn_new)
+
+<a name="FacebookSignIn+verify"></a>
+
+### facebookSignIn.verify(token, [fields]) ⇒ <code>Promise.&lt;(false\|object)&gt;</code>
+verify access token from clients and return false or account data
+
+**Kind**: instance method of [<code>FacebookSignIn</code>](#FacebookSignIn)  
+**Returns**: <code>Promise.&lt;(false\|object)&gt;</code> - - false if access token is invalid otherwise returns account data  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| token | <code>string</code> |  | facebook user's token string |
+| [fields] | <code>string</code> | <code>&quot;&#x27;email&#x27;&quot;</code> | fields to fetch from user's facebook account. comma separated value e.g. id,name,email |
+
+<a name="FacebookSignIn.FacebookSignIn"></a>
+
+### FacebookSignIn.FacebookSignIn
+**Kind**: static class of [<code>FacebookSignIn</code>](#FacebookSignIn)  
+<a name="new_FacebookSignIn.FacebookSignIn_new"></a>
+
+#### new FacebookSignIn(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.clientId | <code>string</code> | facebook app id |
+| options.secret | <code>string</code> | facebook app secret |
 
 
 ## @coolgk/csv
@@ -775,86 +977,6 @@ the return value contains all normal post fields and the file upload fields that
 | [options.requestFieldName] | <code>object</code> | <code>&#x27;formdata&#x27;</code> | field name to be assigned to the request object. by default it assigns to request.formdata |
 
 
-## @coolgk/facebook-sign-in
-a javascript / typescript module
-
-`npm install @coolgk/facebook-sign-in`
-
-facebook sign in module which verifies client access token and returns account data
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
-// OR
-// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
-
-const facebookSignIn = new FacebookSignIn({
-    clientId: '...',
-    secret: '...'
-});
-
-const invalidToken = '...';
-const validToken = '...';
-
-(async () => {
-    const account1 = await facebookSignIn.verify(invalidToken);
-    console.log(account1); // false
-
-    const account2 = await facebookSignIn.verify(validToken);
-    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
-})()
-
-```
-
-## @coolgk/google-sign-in
-a javascript / typescript module
-
-`npm install @coolgk/google-sign-in`
-
-google sign in module which verifies id token and returns account data
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-const { GoogleSignIn } = require('@coolgk/google-sign-in');
-// OR
-// import { GoogleSignIn } from '@coolgk/google-sign-in';
-
-const googleSignIn = new GoogleSignIn({
-    clientId: '......'
-});
-
-const invalidToken = '...';
-const validToken = '...';
-
-(async () => {
-    const account1 = await googleSignIn.verify(invalidToken);
-    console.log(account1); // false
-
-    const account2 = await googleSignIn.verify(validToken);
-    console.log(account2);
-    // {
-    //     azp: '...',
-    //     aud: '...',
-    //     sub: '123123123',
-    //     email: 'abc@exmaple.com',
-    //     email_verified: true,
-    //     at_hash: 'asdfasdfasdfasdfa',
-    //     exp: 1520633389,
-    //     iss: 'accounts.google.com',
-    //     jti: 'qfwfasdfasdfasdfasdfasdfasdfadsf',
-    //     iat: 1520629789,
-    //     name: 'first last',
-    //     picture: 'https://lh6.googleusercontent.com/.../photo.jpg',
-    //     given_name: 'first',
-    //     family_name: 'last',
-    //     locale: 'en-GB'
-    // }
-})()
-
-```
-
 ## @coolgk/jwt
 a javascript / typescript module
 
@@ -932,102 +1054,94 @@ setTimeout(() => {
 | token | <code>string</code> | token to verify |
 
 
-## @coolgk/email
+## @coolgk/number
 a javascript / typescript module
 
-`npm install @coolgk/email`
+`npm install @coolgk/number`
 
-a email sender wrapper class
+number utitlies
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { Email } from '@coolgk/email';
+import { round } from '@coolgk/number';
 // OR
-// const { Email } = require('@coolgk/email');
+// const { round } = require('@coolgk/number');
 
-const email = new Email({host: 'localhost'});
-
-email.send({
-    subject: 'hello this is email subject',
-    from: {
-            name: 'Daniel Gong',
-            email: 'daniel.k.gong@example.com'
-    },
-    to: [
-        {
-            name: 'Dan Go',
-            email: 'dan@example.com'
-        },
-        'gong@example.com'
-    ],
-    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
-    attachments: [
-        {
-            path: '/tmp/test.png',
-            name: 'screenshot.png'
-        },
-        {
-            path:"/tmp/test.png",
-            headers:{"Content-ID": "<my-image>"}
-        }
-    ]
-}).then((sentMessage) => {
-    console.log(sentMessage);
-}).catch((error) => {
-    console.log(error);
-});
+console.log(round(1.3923, 2)); // 1.39
+console.log(round(100, 2)); // 100
+console.log(round(100.1264, 2)); // 100.13
+console.log(round(100.958747, 4)); // 100.9587
 
 ```
-<a name="Email"></a>
+<a name="round"></a>
 
-## Email
-**Kind**: global class  
-**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
-
-* [Email](#Email)
-    * [new Email(options)](#new_Email_new)
-    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
-
-<a name="new_Email_new"></a>
-
-### new Email(options)
+## round(value, precision) ⇒ <code>number</code>
+**Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| [options.user] | <code>string</code> |  | username for logging into smtp |
-| [options.password] | <code>string</code> |  | password for logging into smtp |
-| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
-| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
-| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
-| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
-| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
-| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+| value | <code>number</code> |  | number to round |
+| precision | <code>number</code> | <code>2</code> | precision |
 
-<a name="Email+send"></a>
 
-### email.send(options, [attachments]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Email</code>](#Email)  
-**Returns**: <code>promise</code> - - message sent  
+## @coolgk/queue
+a javascript / typescript module
 
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| options.subject | <code>string</code> | email subject |
-| [options.message] | <code>string</code> | html email message |
-| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
-| options.to[].name | <code>string</code> | name of the recipient |
-| options.to[].email | <code>string</code> | email address of the recipient |
-| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
-| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
-| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
-| attachments.path | <code>string</code> | file path |
-| [attachments.name] | <code>string</code> | file name |
-| [attachments.type] | <code>string</code> | file mime type |
-| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
-| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+`npm install @coolgk/queue`
+
+This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+1. Put async functions in a queue and limit the number of async functions that run concurrently.
+2. Run async functions in order
+3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
+## Examples
+```javascript
+import { queue } from '@coolgk/queue';
+// OR
+// const { queue } = require('@coolgk/queue');
+
+function a (x) {
+    console.log('start a');
+    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
+}
+
+function b (x) {
+    console.log('start b');
+    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
+}
+
+function c (x) {
+    console.log('start c');
+    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
+}
+
+// call a, b, c in order i.e. b does not start until a resolves
+queue(a);
+queue(b);
+queue(c);
+
+// call a 5 times, each waits until the previous call resolves
+[1,2,3,4,5].forEach(() => {
+    queue(a)
+});
+
+// run 3 jobs at a time
+[1,2,3,4,5,6,7,8,9,10].forEach(() => {
+    queue(a, 3)
+});
+
+```
+<a name="queue"></a>
+
+## queue(callback, [limit]) ⇒ <code>promise</code>
+**Kind**: global function  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| callback | <code>function</code> |  | callback function that returns a promise or any other types |
+| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
 
 
 ## @coolgk/pdf
@@ -1155,714 +1269,6 @@ for full page in PDF, set height of a page in html to 842px
 | --- | --- | --- |
 | htmlString | <code>string</code> | html code e.g. &lt;h1&gt;header 1&lt;/h1&gt; |
 | [options] | <code>object</code> | see options in createFromHtmlFile() |
-
-
-## @coolgk/queue
-a javascript / typescript module
-
-`npm install @coolgk/queue`
-
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-## Examples
-```javascript
-import { queue } from '@coolgk/queue';
-// OR
-// const { queue } = require('@coolgk/queue');
-
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
-
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
-});
-
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
-});
-
-```
-<a name="queue"></a>
-
-## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
-
-
-## @coolgk/cache
-a javascript / typescript module
-
-`npm install @coolgk/cache`
-
-a redis wrapper
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Cache } from '@coolgk/cache';
-import { createClient } from 'redis';
-// OR
-// const { Cache } = require('@coolgk/cache');
-// const { createClient } = require('redis');
-
-const client = createClient({
-    host: 'localhost',
-    port: 12869,
-    password: '----'
-});
-
-const cache = new Cache({
-    redisClient: client
-});
-
-cache.set('abc', {a: 1}, 1).then(console.log); // 'OK'
-
-cache.get('abc').then(console.log); // { a: 1 }
-
-setTimeout(() => {
-    cache.get('abc').then(console.log); // null
-    client.quit();
-}, 1500);
-
-cache.getSetIfNull(
-    'abc',
-    () => Promise.resolve('data'),
-    10
-).then((v) => {
-    console.log(v); // { a: 1 }
-});
-
-Promise.all([
-    cache.set('x', 'val x'),
-    cache.set('y', 'val y'),
-    cache.set('z', 'val z')
-]).then(
-    () => Promise.all([
-        cache.get('x').then(console.log), // val x
-        cache.get('y').then(console.log), // val y
-        cache.get('z').then(console.log) // val z
-    ])
-).then(
-    () => Promise.all([
-        cache.delete('x'),
-        cache.delete('y'),
-        cache.delete('z')
-    ])
-).then(
-    () => Promise.all([
-        cache.get('x').then(console.log), // null
-        cache.get('y').then(console.log), // null
-        cache.get('z').then(console.log) // null
-    ])
-);
-
-```
-<a name="Cache"></a>
-
-## Cache
-**Kind**: global class  
-
-* [Cache](#Cache)
-    * [new Cache(options)](#new_Cache_new)
-    * [.set(name, value, [expiry])](#Cache+set) ⇒ <code>promise</code>
-    * [.get(name)](#Cache+get) ⇒ <code>promise</code>
-    * [.delete(name)](#Cache+delete) ⇒ <code>promise</code>
-    * [.getSetIfNull(name, callback, [expiry])](#Cache+getSetIfNull) ⇒ <code>promise</code>
-    * [.command(command, ...params)](#Cache+command) ⇒ <code>promise</code>
-
-<a name="new_Cache_new"></a>
-
-### new Cache(options)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> |  |
-| [options.redisClient] | <code>object</code> | redis client from redis.createClient() redisClient needs to be passed in so the same connection can be used elsewhere and get closed outside this class |
-
-<a name="Cache+set"></a>
-
-### cache.set(name, value, [expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| name | <code>string</code> |  | name of the variable |
-| value | <code>\*</code> |  | value is always JSON.stringify'ed |
-| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
-
-<a name="Cache+get"></a>
-
-### cache.get(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | name of the variable |
-
-<a name="Cache+delete"></a>
-
-### cache.delete(name) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
-
-<a name="Cache+getSetIfNull"></a>
-
-### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
-get the cached value, if not set, resolve "callback()" and save the value then return it
-
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-**Returns**: <code>promise</code> - - cached value  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| name | <code>string</code> |  | name of the variable |
-| callback | <code>function</code> |  | a callback function which returns a value or a promise |
-| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
-
-<a name="Cache+command"></a>
-
-### cache.command(command, ...params) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Cache</code>](#Cache)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>string</code> | redis command to run |
-| ...params | <code>array</code> | params for the command |
-
-
-## @coolgk/string
-a javascript / typescript module
-
-`npm install @coolgk/string`
-
-string utility functions
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
-// OR
-// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
-
-const str = '<h1>test</h1><script>alert(1)</script>'
-
-console.log(stripTags(str)); //  test alert(1)
-console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
-console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
-
-console.log(prepad0(7, 2)); // 07
-console.log(prepad0(70, 3)); // 070
-console.log(prepad0(70, 4)); // 0070
-console.log(prepad0(1, 4)); // 0001
-console.log(prepad0(1000, 2)); // 1000
-
-```
-## Functions
-
-<dl>
-<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
-<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
-</dd>
-<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
-<dd><p>escaping user input e.g. html code in a message box</p>
-</dd>
-<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
-<dd><p>unescaping strings escaped by escapeHtml()</p>
-</dd>
-<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
-<dd><p>use padStart instead</p>
-</dd>
-</dl>
-
-<a name="stripTags"></a>
-
-## stripTags(a) ⇒ <code>string</code>
-strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
-
-**Kind**: global function  
-**Returns**: <code>string</code> - - string with tags stripped  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| a | <code>string</code> | string |
-
-<a name="escapeHtml"></a>
-
-## escapeHtml(value) ⇒ <code>string</code>
-escaping user input e.g. html code in a message box
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | string to escape |
-
-<a name="unescapeHtml"></a>
-
-## unescapeHtml(string) ⇒ <code>string</code>
-unescaping strings escaped by escapeHtml()
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| string | <code>string</code> | string to unescape |
-
-<a name="prepad0"></a>
-
-## prepad0(value, length) ⇒ <code>string</code>
-use padStart instead
-
-**Kind**: global function  
-**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>number</code> |  | an integer in string or number format |
-| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
-
-
-## @coolgk/tmp
-a javascript / typescript module
-
-`npm install @coolgk/tmp`
-
-wrapper functions, generate tmp file or folders
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
-// OR
-// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
-
-generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
-    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
-
-generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
-    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
-
-generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
-    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
-
-```
-## Functions
-
-<dl>
-<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
-<dd></dd>
-</dl>
-
-<a name="generateFile"></a>
-
-## generateFile([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateDir"></a>
-
-## generateDir([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
-
-<a name="generateTmpName"></a>
-
-## generateTmpName([options]) ⇒ <code>promise</code>
-**Kind**: global function  
-**Returns**: <code>promise</code> - - { path: ... }  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>object</code> |  |  |
-| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
-| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
-| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
-| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
-
-
-## @coolgk/token
-a javascript / typescript module
-
-`npm install @coolgk/token`
-
-an expirable, revocable, renewable token with data storage
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { Token } from '@coolgk/token';
-import { createClient } from 'redis';
-// OR
-// const { Token } = require('@coolgk/token');
-// const createClient = require('redis').createClient;
-
-(async () => {
-
-    const redisClient = createClient({
-        host: 'localhost',
-        port: 6379,
-        password: '----'
-    });
-
-    const token = new Token({
-        redisClient: redisClient,
-        expiry: 5,
-        token: 'abcde'
-    });
-
-    console.log(
-        await token.verify()
-    ) // false
-
-    await token.renew();
-
-    console.log(
-        await token.verify()
-    ) // true
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    await token.set('var1', {a: 'var1', b: false});
-
-    console.log(
-        await token.get('var1');
-    ); // {a: 'var1', b: false}
-
-    await token.set('var2', 'string var 2');
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
-
-    await token.delete('var2');
-
-    console.log(
-        await token.get('var2');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // { var1: { a: 'var1', b: false } }
-
-    await token.destroy();
-
-    console.log(
-        await token.verify()
-    ) // false
-
-    console.log(
-        await token.get('var1');
-    ); // null
-
-    console.log(
-        await token.getAll()
-    ); // {}
-
-    redisClient.quit();
-})()
-
-```
-## Classes
-
-<dl>
-<dt><a href="#Token">Token</a></dt>
-<dd></dd>
-</dl>
-
-## Constants
-
-<dl>
-<dt><a href="#TokenError">TokenError</a> : <code>object</code></dt>
-<dd><p>Error Codes</p>
-</dd>
-</dl>
-
-<a name="Token"></a>
-
-## Token
-**Kind**: global class  
-
-* [Token](#Token)
-    * [new Token(options)](#new_Token_new)
-    * [.renew([expiry])](#Token+renew) ⇒ <code>promise</code>
-    * [.set(name, value)](#Token+set) ⇒ <code>promise</code>
-    * [.verify()](#Token+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
-    * [.get(name)](#Token+get) ⇒ <code>promise</code>
-    * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
-    * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
-    * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
-    * [.setToken(token)](#Token+setToken)
-
-<a name="new_Token_new"></a>
-
-### new Token(options)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| options | <code>object</code> |  |  |
-| options.token | <code>string</code> |  | token string for creating a token object |
-| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
-| [options.prefix] | <code>string</code> | <code>&quot;&#x27;token&#x27;&quot;</code> | prefix used in redis e.g. token:[TOKEN_STRING...] |
-| [options.expiry] | <code>number</code> | <code>0</code> | in seconds. 0 = never expire |
-
-<a name="Token+renew"></a>
-
-### token.renew([expiry]) ⇒ <code>promise</code>
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [expiry] | <code>number</code> | in seconds |
-
-<a name="Token+set"></a>
-
-### token.set(name, value) ⇒ <code>promise</code>
-set a data field value
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | field name |
-| value | <code>\*</code> | anything can be JSON.stringify'ed |
-
-<a name="Token+verify"></a>
-
-### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
-verify if token has expired
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+get"></a>
-
-### token.get(name) ⇒ <code>promise</code>
-get the value of a data field
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | data field name |
-
-<a name="Token+destroy"></a>
-
-### token.destroy() ⇒ <code>promise</code>
-delete the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+delete"></a>
-
-### token.delete(name) ⇒ <code>promise</code>
-delete a data field in the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | data field name |
-
-<a name="Token+getAll"></a>
-
-### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
-get the values of all data fields in the token
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-<a name="Token+setToken"></a>
-
-### token.setToken(token)
-set a new token string
-
-**Kind**: instance method of [<code>Token</code>](#Token)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>string</code> | new token string |
-
-<a name="TokenError"></a>
-
-## TokenError : <code>object</code>
-Error Codes
-
-**Kind**: global constant  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| INVALID_TOKEN | <code>string</code> | invalid token string |
-| RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
-| EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
-
-
-## @coolgk/unit
-a javascript / typescript module
-
-`npm install @coolgk/unit`
-
-unit conversion
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { bytesToString, millisecondsToString } from '@coolgk/unit';
-// OR
-// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
-
-console.log(
-    bytesToString(500), // 500B
-    bytesToString(5000), // 4.88KB
-    bytesToString(5000000), // 4.77MB
-    bytesToString(5000000000), // 4.66GB
-    bytesToString(5000000000000), // 4.55TB
-    bytesToString(5000000000000000), // 4547.47TB
-    bytesToString(5000000000000000000) // 4547473.51TB
-);
-
-console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
-console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
-console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
-console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
-console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
-console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
-console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
-console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
-console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
-console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
-console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
-
-```
-## Functions
-
-<dl>
-<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
-<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
-</dd>
-<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-</dl>
-
-<a name="bytesToString"></a>
-
-## bytesToString(value) ⇒ <code>string</code>
-or use https://www.npmjs.com/package/filesize
-
-**Kind**: global function  
-**Returns**: <code>string</code> - value in KB, MB, GB or TB  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | value in byte |
-
-<a name="millisecondsToString"></a>
-
-## millisecondsToString(value) ⇒ <code>string</code>
-**Kind**: global function  
-**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>number</code> | number of milliseconds |
-
-
-## @coolgk/url
-a javascript / typescript module
-
-`npm install @coolgk/url`
-
-a simple function for parsing parameters in a url
-
-Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-## Examples
-```javascript
-import { getParams } from '@coolgk/url';
-// OR
-// const { getParams } = require('@coolgk/url');
-
-const url = '/123';
-const pattern = '/:id';
-
-console.log(getParams(url, pattern)); // { id: '123' }
-
-const url2 = '/123/abc/456';
-const pattern2 = '/:id/abc/:value';
-
-console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
-
-const url3 = '/123/456';
-const pattern3 = ':id/:value';
-
-console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
-
-```
-<a name="getParams"></a>
-
-## getParams(url, pattern) ⇒ <code>object</code>
-a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
-
-**Kind**: global function  
-**Returns**: <code>object</code> - - e.g. {userid: 123}  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
-| pattern | <code>string</code> | e.g. /:userid/:name |
 
 
 ## @coolgk/session
@@ -2112,33 +1518,703 @@ renew session optionally with a different expiry time
 | [expiry] | <code>number</code> | in seconds |
 
 
-## @coolgk/number
+## @coolgk/string
 a javascript / typescript module
 
-`npm install @coolgk/number`
+`npm install @coolgk/string`
 
-number utitlies
+string utility functions
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { round } from '@coolgk/number';
+import { stripTags, escapeHtml, unescapeHtml, prepad0 } from '@coolgk/string';
 // OR
-// const { round } = require('@coolgk/number');
+// const { stripTags, escapeHtml, unescapeHtml, prepad0 } = require('@coolgk/string');
 
-console.log(round(1.3923, 2)); // 1.39
-console.log(round(100, 2)); // 100
-console.log(round(100.1264, 2)); // 100.13
-console.log(round(100.958747, 4)); // 100.9587
+const str = '<h1>test</h1><script>alert(1)</script>'
+
+console.log(stripTags(str)); //  test alert(1)
+console.log(escapeHtml(str)); // &lt;h1&gt;test&lt;/h1&gt;&lt;script&gt;alert(1)&lt;/script&gt;
+console.log(unescapeHtml(escapeHtml(str))); // <h1>test</h1><script>alert(1)</script>
+
+console.log(prepad0(7, 2)); // 07
+console.log(prepad0(70, 3)); // 070
+console.log(prepad0(70, 4)); // 0070
+console.log(prepad0(1, 4)); // 0001
+console.log(prepad0(1000, 2)); // 1000
 
 ```
-<a name="round"></a>
+## Functions
 
-## round(value, precision) ⇒ <code>number</code>
+<dl>
+<dt><a href="#stripTags">stripTags(a)</a> ⇒ <code>string</code></dt>
+<dd><p>strip html tags e.g. &quot;&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;&quot; becomes &quot;header message&quot;</p>
+</dd>
+<dt><a href="#escapeHtml">escapeHtml(value)</a> ⇒ <code>string</code></dt>
+<dd><p>escaping user input e.g. html code in a message box</p>
+</dd>
+<dt><a href="#unescapeHtml">unescapeHtml(string)</a> ⇒ <code>string</code></dt>
+<dd><p>unescaping strings escaped by escapeHtml()</p>
+</dd>
+<dt><a href="#prepad0">prepad0(value, length)</a> ⇒ <code>string</code></dt>
+<dd><p>use padStart instead</p>
+</dd>
+</dl>
+
+<a name="stripTags"></a>
+
+## stripTags(a) ⇒ <code>string</code>
+strip html tags e.g. "&lt;h1&gt;header&lt;/h1&gt;&lt;p&gt;message&lt;/p&gt;" becomes "header message"
+
 **Kind**: global function  
+**Returns**: <code>string</code> - - string with tags stripped  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>string</code> | string |
+
+<a name="escapeHtml"></a>
+
+## escapeHtml(value) ⇒ <code>string</code>
+escaping user input e.g. html code in a message box
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | string to escape |
+
+<a name="unescapeHtml"></a>
+
+## unescapeHtml(string) ⇒ <code>string</code>
+unescaping strings escaped by escapeHtml()
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| string | <code>string</code> | string to unescape |
+
+<a name="prepad0"></a>
+
+## prepad0(value, length) ⇒ <code>string</code>
+use padStart instead
+
+**Kind**: global function  
+**See**: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| value | <code>number</code> |  | number to round |
-| precision | <code>number</code> | <code>2</code> | precision |
+| value | <code>number</code> |  | an integer in string or number format |
+| length | <code>number</code> | <code>2</code> | length of the output e.g. length = 2, 8 becomes 08. length = 3, 70 = 070. |
+
+
+## @coolgk/tmp
+a javascript / typescript module
+
+`npm install @coolgk/tmp`
+
+wrapper functions, generate tmp file or folders
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { generateFile, generateDir, generateTmpName } from '@coolgk/tmp';
+// OR
+// const { generateFile, generateDir, generateTmpName } = require('@coolgk/tmp');
+
+generateFile({dir: '/tmp/test'}).then((r) => console.log('file', r));
+    // file { path: '/tmp/test/1512307052908140480ZZj6J0LOIJb.tmp' }
+
+generateDir({dir: '/tmp/test'}).then((r) => console.log('dir',r));
+    // dir { path: '/tmp/test/1512307052918140484Pnv1m95ZS2b' }
+
+generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
+    // name { path: '/tmp/test/151230705292114048hb3XIds0FO9Y' }
+
+```
+## Functions
+
+<dl>
+<dt><a href="#generateFile">generateFile([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateDir">generateDir([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+<dt><a href="#generateTmpName">generateTmpName([options])</a> ⇒ <code>promise</code></dt>
+<dd></dd>
+</dl>
+
+<a name="generateFile"></a>
+
+## generateFile([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateDir"></a>
+
+## generateDir([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ..., cleanupCallback: ... } calling cleanupCallback() removes the generated file  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+| [options.keep] | <code>boolean</code> | <code>false</code> | if to keep the file |
+
+<a name="generateTmpName"></a>
+
+## generateTmpName([options]) ⇒ <code>promise</code>
+**Kind**: global function  
+**Returns**: <code>promise</code> - - { path: ... }  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>object</code> |  |  |
+| [options.mode] | <code>number</code> | <code>0600</code> | the file mode to create with, defaults to 0600 on file and 0700 on directory |
+| [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
+| [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
+| [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+
+## @coolgk/google-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/google-sign-in`
+
+google sign in module which verifies id token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { GoogleSignIn } = require('@coolgk/google-sign-in');
+// OR
+// import { GoogleSignIn } from '@coolgk/google-sign-in';
+
+const googleSignIn = new GoogleSignIn({
+    clientId: '......'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await googleSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await googleSignIn.verify(validToken);
+    console.log(account2);
+    // {
+    //     azp: '...',
+    //     aud: '...',
+    //     sub: '123123123',
+    //     email: 'abc@exmaple.com',
+    //     email_verified: true,
+    //     at_hash: 'asdfasdfasdfasdfa',
+    //     exp: 1520633389,
+    //     iss: 'accounts.google.com',
+    //     jti: 'qfwfasdfasdfasdfasdfasdfasdfadsf',
+    //     iat: 1520629789,
+    //     name: 'first last',
+    //     picture: 'https://lh6.googleusercontent.com/.../photo.jpg',
+    //     given_name: 'first',
+    //     family_name: 'last',
+    //     locale: 'en-GB'
+    // }
+})()
+
+```
+<a name="GoogleSignIn"></a>
+
+## GoogleSignIn
+**Kind**: global class  
+**Export**:   
+
+* [GoogleSignIn](#GoogleSignIn)
+    * _instance_
+        * [.verify(token)](#GoogleSignIn+verify) ⇒ <code>Promise.&lt;(boolean\|object)&gt;</code>
+    * _static_
+        * [.GoogleSignIn](#GoogleSignIn.GoogleSignIn)
+            * [new GoogleSignIn(options)](#new_GoogleSignIn.GoogleSignIn_new)
+
+<a name="GoogleSignIn+verify"></a>
+
+### googleSignIn.verify(token) ⇒ <code>Promise.&lt;(boolean\|object)&gt;</code>
+**Kind**: instance method of [<code>GoogleSignIn</code>](#GoogleSignIn)  
+**Returns**: <code>Promise.&lt;(boolean\|object)&gt;</code> - - false if id token is invalid otherwise returns account data  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | google id token string |
+
+<a name="GoogleSignIn.GoogleSignIn"></a>
+
+### GoogleSignIn.GoogleSignIn
+**Kind**: static class of [<code>GoogleSignIn</code>](#GoogleSignIn)  
+<a name="new_GoogleSignIn.GoogleSignIn_new"></a>
+
+#### new GoogleSignIn(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.clientId | <code>string</code> | google client id |
+
+
+## @coolgk/array
+a javascript / typescript module
+
+`npm install @coolgk/array`
+
+array utilities
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { toArray } from '@coolgk/array';
+// OR
+// const { toArray } = require('@coolgk/array');
+
+const a = undefined;
+const b = false;
+const c = '';
+const d = [1,2,3];
+const e = {a:1};
+
+console.log(toArray(a)); // []
+console.log(toArray(b)); // [ false ]
+console.log(toArray(c)); // [ '' ]
+console.log(toArray(d)); // [ 1, 2, 3 ]
+console.log(toArray(e)); // [ { a: 1 } ]
+
+```
+<a name="toArray"></a>
+
+## toArray(data) ⇒ <code>array</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>\*</code> | any data to be type cast to array |
+
+
+## @coolgk/base64
+a javascript / typescript module
+
+`npm install @coolgk/base64`
+
+base64 encoded decode functions
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+// OR
+// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
+
+const a = 'https://www.google.co.uk/?a=b'
+const hash = encode(a);
+const urlHash = encodeUrl(a);
+
+console.log(a); // https://www.google.co.uk/?a=b
+console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
+console.log(decode(hash)); // https://www.google.co.uk/?a=b
+
+console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
+console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+
+```
+## Functions
+
+<dl>
+<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="encode"></a>
+
+## encode(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decode"></a>
+
+## decode(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | encoded hash |
+
+<a name="encodeUrl"></a>
+
+## encodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | string to encode |
+
+<a name="decodeUrl"></a>
+
+## decodeUrl(data) ⇒ <code>string</code>
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>string</code> | base64 encoded url to decode |
+
+
+## @coolgk/token
+a javascript / typescript module
+
+`npm install @coolgk/token`
+
+an expirable, revocable, renewable token with data storage
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Token } from '@coolgk/token';
+import { createClient } from 'redis';
+// OR
+// const { Token } = require('@coolgk/token');
+// const createClient = require('redis').createClient;
+
+(async () => {
+
+    const redisClient = createClient({
+        host: 'localhost',
+        port: 6379,
+        password: '----'
+    });
+
+    const token = new Token({
+        redisClient: redisClient,
+        expiry: 5,
+        token: 'abcde'
+    });
+
+    console.log(
+        await token.verify()
+    ) // false
+
+    await token.renew();
+
+    console.log(
+        await token.verify()
+    ) // true
+
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    await token.set('var1', {a: 'var1', b: false});
+
+    console.log(
+        await token.get('var1');
+    ); // {a: 'var1', b: false}
+
+    await token.set('var2', 'string var 2');
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false }, var2: 'string var 2' }
+
+    await token.delete('var2');
+
+    console.log(
+        await token.get('var2');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // { var1: { a: 'var1', b: false } }
+
+    await token.destroy();
+
+    console.log(
+        await token.verify()
+    ) // false
+
+    console.log(
+        await token.get('var1');
+    ); // null
+
+    console.log(
+        await token.getAll()
+    ); // {}
+
+    redisClient.quit();
+})()
+
+```
+## Classes
+
+<dl>
+<dt><a href="#Token">Token</a></dt>
+<dd></dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#TokenError">TokenError</a> : <code>object</code></dt>
+<dd><p>Error Codes</p>
+</dd>
+</dl>
+
+<a name="Token"></a>
+
+## Token
+**Kind**: global class  
+
+* [Token](#Token)
+    * [new Token(options)](#new_Token_new)
+    * [.renew([expiry])](#Token+renew) ⇒ <code>promise</code>
+    * [.set(name, value)](#Token+set) ⇒ <code>promise</code>
+    * [.verify()](#Token+verify) ⇒ <code>promise.&lt;boolean&gt;</code>
+    * [.get(name)](#Token+get) ⇒ <code>promise</code>
+    * [.destroy()](#Token+destroy) ⇒ <code>promise</code>
+    * [.delete(name)](#Token+delete) ⇒ <code>promise</code>
+    * [.getAll()](#Token+getAll) ⇒ <code>promise.&lt;{}&gt;</code>
+    * [.setToken(token)](#Token+setToken)
+
+<a name="new_Token_new"></a>
+
+### new Token(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| options.token | <code>string</code> |  | token string for creating a token object |
+| options.redisClient | <code>object</code> |  | redis client from redis.createClient() |
+| [options.prefix] | <code>string</code> | <code>&quot;&#x27;token&#x27;&quot;</code> | prefix used in redis e.g. token:[TOKEN_STRING...] |
+| [options.expiry] | <code>number</code> | <code>0</code> | in seconds. 0 = never expire |
+
+<a name="Token+renew"></a>
+
+### token.renew([expiry]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [expiry] | <code>number</code> | in seconds |
+
+<a name="Token+set"></a>
+
+### token.set(name, value) ⇒ <code>promise</code>
+set a data field value
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | field name |
+| value | <code>\*</code> | anything can be JSON.stringify'ed |
+
+<a name="Token+verify"></a>
+
+### token.verify() ⇒ <code>promise.&lt;boolean&gt;</code>
+verify if token has expired
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+get"></a>
+
+### token.get(name) ⇒ <code>promise</code>
+get the value of a data field
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | data field name |
+
+<a name="Token+destroy"></a>
+
+### token.destroy() ⇒ <code>promise</code>
+delete the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+delete"></a>
+
+### token.delete(name) ⇒ <code>promise</code>
+delete a data field in the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | data field name |
+
+<a name="Token+getAll"></a>
+
+### token.getAll() ⇒ <code>promise.&lt;{}&gt;</code>
+get the values of all data fields in the token
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+<a name="Token+setToken"></a>
+
+### token.setToken(token)
+set a new token string
+
+**Kind**: instance method of [<code>Token</code>](#Token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | new token string |
+
+<a name="TokenError"></a>
+
+## TokenError : <code>object</code>
+Error Codes
+
+**Kind**: global constant  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| INVALID_TOKEN | <code>string</code> | invalid token string |
+| RESERVED_NAME | <code>string</code> | reserved names are used when setting token variables e.g. _timestamp |
+| EXPIRED_TOKEN | <code>string</code> | token expired or renew() has not been called |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
+
+
+## @coolgk/unit
+a javascript / typescript module
+
+`npm install @coolgk/unit`
+
+unit conversion
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { bytesToString, millisecondsToString } from '@coolgk/unit';
+// OR
+// const { bytesToString, millisecondsToString } = require('@coolgk/unit');
+
+console.log(
+    bytesToString(500), // 500B
+    bytesToString(5000), // 4.88KB
+    bytesToString(5000000), // 4.77MB
+    bytesToString(5000000000), // 4.66GB
+    bytesToString(5000000000000), // 4.55TB
+    bytesToString(5000000000000000), // 4547.47TB
+    bytesToString(5000000000000000000) // 4547473.51TB
+);
+
+console.log('1 sec', millisecondsToString(1 * 1000)); // 1 second
+console.log('1 min', millisecondsToString(60 * 1000)); // 1 minute
+console.log('100 sec', millisecondsToString(100 * 1000)); // 1 minute
+console.log('3 hrs', millisecondsToString(60 * 60 * 3 * 1000)); // 3 hour
+console.log('1.5 days', millisecondsToString(60 * 60 * 24 * 1.5 * 1000)); // 1 day
+console.log('65 days', millisecondsToString(60 * 60 * 24 * 65 * 1000)); // 2 month
+console.log('365 days', millisecondsToString(60 * 60 * 24 * 365 * 1000)); // 1 year
+console.log('500 days', millisecondsToString(60 * 60 * 24 * 500 * 1000)); // 1 year
+console.log('900 days', millisecondsToString(60 * 60 * 24 * 900 * 1000));// 2 year
+console.log('1900 days', millisecondsToString(60 * 60 * 24 * 1900 * 1000)); // 5 year
+console.log('365001 days', millisecondsToString(60 * 60 * 24 * 365001 * 1000)); // 1013 year
+
+```
+## Functions
+
+<dl>
+<dt><a href="#bytesToString">bytesToString(value)</a> ⇒ <code>string</code></dt>
+<dd><p>or use <a href="https://www.npmjs.com/package/filesize">https://www.npmjs.com/package/filesize</a></p>
+</dd>
+<dt><a href="#millisecondsToString">millisecondsToString(value)</a> ⇒ <code>string</code></dt>
+<dd></dd>
+</dl>
+
+<a name="bytesToString"></a>
+
+## bytesToString(value) ⇒ <code>string</code>
+or use https://www.npmjs.com/package/filesize
+
+**Kind**: global function  
+**Returns**: <code>string</code> - value in KB, MB, GB or TB  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | value in byte |
+
+<a name="millisecondsToString"></a>
+
+## millisecondsToString(value) ⇒ <code>string</code>
+**Kind**: global function  
+**Returns**: <code>string</code> - value in second, minute, hour, day, month or year  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>number</code> | number of milliseconds |
 
