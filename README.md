@@ -161,6 +161,30 @@ console.log(toArray(c)); // [ '' ]
 console.log(toArray(d)); // [ 1, 2, 3 ]
 console.log(toArray(e)); // [ { a: 1 } ]
 
+Promise.all([
+    cache.set('x', 'val x'),
+    cache.set('y', 'val y'),
+    cache.set('z', 'val z')
+]).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // val x
+        cache.get('y').then(console.log), // val y
+        cache.get('z').then(console.log) // val z
+    ])
+).then(
+    () => Promise.all([
+        cache.delete('x'),
+        cache.delete('y'),
+        cache.delete('z')
+    ])
+).then(
+    () => Promise.all([
+        cache.get('x').then(console.log), // null
+        cache.get('y').then(console.log), // null
+        cache.get('z').then(console.log) // null
+    ])
+);
+
 ```
 <a name="toArray"></a>
 
@@ -171,81 +195,91 @@ console.log(toArray(e)); // [ { a: 1 } ]
 | --- | --- | --- |
 | data | <code>\*</code> | any data to be type cast to array |
 
+<a name="Cache+delete"></a>
 
-## @coolgk/base64
+### cache.delete(name) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> \| <code>Array.&lt;string&gt;</code> | name(s) of the variable |
+
+<a name="Cache+getSetIfNull"></a>
+
+### cache.getSetIfNull(name, callback, [expiry]) ⇒ <code>promise</code>
+get the cached value, if not set, resolve "callback()" and save the value then return it
+
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+**Returns**: <code>promise</code> - - cached value  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | <code>string</code> |  | name of the variable |
+| callback | <code>function</code> |  | a callback function which returns a value or a promise |
+| [expiry] | <code>number</code> | <code>0</code> | expire time in seconds. 0 = never expire |
+
+<a name="Cache+command"></a>
+
+### cache.command(command, ...params) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Cache</code>](#Cache)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | redis command to run |
+| ...params | <code>array</code> | params for the command |
+
+
+## @coolgk/bcrypt
 a javascript / typescript module
 
-`npm install @coolgk/base64`
+`npm install @coolgk/bcrypt`
 
-base64 encoded decode functions
+just a promise wrapper
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
 ## Examples
 ```javascript
-import { encode, decode, encodeUrl, decodeUrl } from '@coolgk/base64';
+import { encrypt, verify } from '@coolgk/bcrypt';
 // OR
-// const { encode, decode, encodeUrl, decodeUrl } = require('@coolgk/base64');
+// const { encrypt, verify } = require('@coolgk/bcrypt');
 
-const a = 'https://www.google.co.uk/?a=b'
-const hash = encode(a);
-const urlHash = encodeUrl(a);
+const password = 'abc123';
 
-console.log(a); // https://www.google.co.uk/?a=b
-console.log(hash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI=
-console.log(decode(hash)); // https://www.google.co.uk/?a=b
-
-console.log(urlHash); // aHR0cHM6Ly93d3cuZ29vZ2xlLmNvLnVrLz9hPWI
-console.log(decodeUrl(urlHash)); // https://www.google.co.uk/?a=b
+encrypt(password).then((hash) => {
+    verify(password, hash).then(console.log); // true
+    verify(password, 'invalidhash').then(console.log, console.error); // Not a valid BCrypt hash.
+    verify('invalidpass', hash).then(console.log); // false
+});
 
 ```
 ## Functions
 
 <dl>
-<dt><a href="#encode">encode(data)</a> ⇒ <code>string</code></dt>
+<dt><a href="#encrypt">encrypt(value, salt)</a> ⇒ <code>promise.&lt;string&gt;</code></dt>
 <dd></dd>
-<dt><a href="#decode">decode(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#encodeUrl">encodeUrl(data)</a> ⇒ <code>string</code></dt>
-<dd></dd>
-<dt><a href="#decodeUrl">decodeUrl(data)</a> ⇒ <code>string</code></dt>
+<dt><a href="#verify">verify(value, hashedString)</a> ⇒ <code>promise.&lt;boolean&gt;</code></dt>
 <dd></dd>
 </dl>
 
-<a name="encode"></a>
+<a name="encrypt"></a>
 
-## encode(data) ⇒ <code>string</code>
+## encrypt(value, salt) ⇒ <code>promise.&lt;string&gt;</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>string</code> | string to encode |
+| value | <code>string</code> | string to encrypt |
+| salt | <code>string</code> | salt |
 
-<a name="decode"></a>
+<a name="verify"></a>
 
-## decode(data) ⇒ <code>string</code>
+## verify(value, hashedString) ⇒ <code>promise.&lt;boolean&gt;</code>
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| data | <code>string</code> | encoded hash |
-
-<a name="encodeUrl"></a>
-
-## encodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | string to encode |
-
-<a name="decodeUrl"></a>
-
-## decodeUrl(data) ⇒ <code>string</code>
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>string</code> | base64 encoded url to decode |
+| value | <code>string</code> | string to check |
+| hashedString | <code>string</code> | encrypted hash |
 
 
 ## @coolgk/cache
@@ -455,6 +489,176 @@ captcha.verify(captchaResponse).then((response) => {
 | response | <code>string</code> | repsonse from recaptcha |
 | [remoteip] | <code>string</code> | ip address |
 |  | <code>promise</code> |  |
+
+
+## @coolgk/email
+a javascript / typescript module
+
+`npm install @coolgk/email`
+
+a email sender wrapper class
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { Email } from '@coolgk/email';
+// OR
+// const { Email } = require('@coolgk/email');
+
+const email = new Email({host: 'localhost'});
+
+email.send({
+    subject: 'hello this is email subject',
+    from: {
+            name: 'Daniel Gong',
+            email: 'daniel.k.gong@example.com'
+    },
+    to: [
+        {
+            name: 'Dan Go',
+            email: 'dan@example.com'
+        },
+        'gong@example.com'
+    ],
+    message: '<html><body><h1>test</h1>some message here <img src="cid:my-image" width="500" height="250"></body></html>',
+    attachments: [
+        {
+            path: '/tmp/test.png',
+            name: 'screenshot.png'
+        },
+        {
+            path:"/tmp/test.png",
+            headers:{"Content-ID": "<my-image>"}
+        }
+    ]
+}).then((sentMessage) => {
+    console.log(sentMessage);
+}).catch((error) => {
+    console.log(error);
+});
+
+```
+<a name="Email"></a>
+
+## Email
+**Kind**: global class  
+**See**: https://www.npmjs.com/package/emailjs#emailserverconnectoptions  
+
+* [Email](#Email)
+    * [new Email(options)](#new_Email_new)
+    * [.send(options, [attachments])](#Email+send) ⇒ <code>promise</code>
+
+<a name="new_Email_new"></a>
+
+### new Email(options)
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  |  |
+| [options.user] | <code>string</code> |  | username for logging into smtp |
+| [options.password] | <code>string</code> |  | password for logging into smtp |
+| [options.host] | <code>string</code> | <code>&quot;&#x27;localhost&#x27;&quot;</code> | smtp host |
+| [options.port] | <code>string</code> |  | smtp port (if null a standard port number will be used) |
+| [options.ssl] | <code>boolean</code> |  | boolean (if true or object, ssl connection will be made) |
+| [options.tls] | <code>boolean</code> |  | boolean (if true or object, starttls will be initiated) |
+| [options.domain] | <code>string</code> |  | domain to greet smtp with (defaults to os.hostname) |
+| [options.authentication] | <code>Array.&lt;string&gt;</code> |  | authentication methods |
+
+<a name="Email+send"></a>
+
+### email.send(options, [attachments]) ⇒ <code>promise</code>
+**Kind**: instance method of [<code>Email</code>](#Email)  
+**Returns**: <code>promise</code> - - message sent  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.subject | <code>string</code> | email subject |
+| [options.message] | <code>string</code> | html email message |
+| options.to | <code>Array.&lt;(string\|object)&gt;</code> | to email address |
+| options.to[].name | <code>string</code> | name of the recipient |
+| options.to[].email | <code>string</code> | email address of the recipient |
+| [options.from] | <code>string</code> \| <code>object</code> | see options.to |
+| [options.cc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [options.bcc] | <code>Array.&lt;(string\|object)&gt;</code> | see options.to |
+| [attachments] | <code>Array.&lt;object&gt;</code> | email attachments |
+| attachments.path | <code>string</code> | file path |
+| [attachments.name] | <code>string</code> | file name |
+| [attachments.type] | <code>string</code> | file mime type |
+| [attachments.method] | <code>string</code> | method to send attachment as (used by calendar invites) |
+| [attachments.headers] | <code>object</code> | attachment headers, header: value pairs, e.g. {"Content-ID":"<my-image>"} |
+
+
+## @coolgk/facebook-sign-in
+a javascript / typescript module
+
+`npm install @coolgk/facebook-sign-in`
+
+facebook sign in module which verifies client access token and returns account data
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+const { FacebookSignIn } = require('@coolgk/facebook-sign-in');
+// OR
+// import { FacebookSignIn } from '@coolgk/facebook-sign-in';
+
+const facebookSignIn = new FacebookSignIn({
+    clientId: '...',
+    secret: '...'
+});
+
+const invalidToken = '...';
+const validToken = '...';
+
+(async () => {
+    const account1 = await facebookSignIn.verify(invalidToken);
+    console.log(account1); // false
+
+    const account2 = await facebookSignIn.verify(validToken);
+    console.log(account2); // { email: 'abc@example.com', id: '123123123123123123' }
+})()
+
+```
+<a name="FacebookSignIn"></a>
+
+## FacebookSignIn
+**Kind**: global class  
+**Export**:   
+
+* [FacebookSignIn](#FacebookSignIn)
+    * _instance_
+        * [.verify(token, [fields])](#FacebookSignIn+verify) ⇒ <code>Promise.&lt;(false\|object)&gt;</code>
+    * _static_
+        * [.FacebookSignIn](#FacebookSignIn.FacebookSignIn)
+            * [new FacebookSignIn(options)](#new_FacebookSignIn.FacebookSignIn_new)
+
+<a name="FacebookSignIn+verify"></a>
+
+### facebookSignIn.verify(token, [fields]) ⇒ <code>Promise.&lt;(false\|object)&gt;</code>
+verify access token from clients and return false or account data
+
+**Kind**: instance method of [<code>FacebookSignIn</code>](#FacebookSignIn)  
+**Returns**: <code>Promise.&lt;(false\|object)&gt;</code> - - false if access token is invalid otherwise returns account data  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| token | <code>string</code> |  | facebook user's token string |
+| [fields] | <code>string</code> | <code>&quot;&#x27;email&#x27;&quot;</code> | fields to fetch from user's facebook account. comma separated value e.g. id,name,email |
+
+<a name="FacebookSignIn.FacebookSignIn"></a>
+
+### FacebookSignIn.FacebookSignIn
+**Kind**: static class of [<code>FacebookSignIn</code>](#FacebookSignIn)  
+<a name="new_FacebookSignIn.FacebookSignIn_new"></a>
+
+#### new FacebookSignIn(options)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> |  |
+| options.clientId | <code>string</code> | facebook app id |
+| options.secret | <code>string</code> | facebook app secret |
 
 
 ## @coolgk/csv
@@ -1118,64 +1322,99 @@ pdf.createFromHtmlString(htmlCode).then((pdfFile) => {
 
 ```
 
-## @coolgk/queue
+## @coolgk/session
 a javascript / typescript module
 
-`npm install @coolgk/queue`
+`npm install @coolgk/session`
 
-This is a super lightweight function that limits the number of async functions run concurrently and run them in order.
+An session handler that works without cookie (and with cookie too).
 
 Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
-1. Put async functions in a queue and limit the number of async functions that run concurrently.
-2. Run async functions in order
-3. Run x number of functions in parallel per batch in order. similar to async / await when the second parameter is 1.
-## Examples
+
+When working without cookie, this class reads the session token from the **"Authorization"** header.
+e.g. **Authorization : Bearer cn389ncoiwuencr...**
+#### Express Middleware Example
 ```javascript
-import { queue } from '@coolgk/queue';
-// OR
-// const { queue } = require('@coolgk/queue');
+// express middleware
+const session = require('@coolgk/session');
+const app = require('express')();
 
-function a (x) {
-    console.log('start a');
-    return new Promise((resolve) => setTimeout(() => { console.log('end a', x); resolve('a') }, 1300));
-}
+app.use(
+    session.express({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123' // secret is required for creating the session token / id
+    })
+);
 
-function b (x) {
-    console.log('start b');
-    return new Promise((resolve) => setTimeout(() => { console.log('end b', x); resolve('b') }, 1200));
-}
-
-function c (x) {
-    console.log('start c');
-    return new Promise((resolve) => setTimeout(() => { console.log('end c', x); resolve('c') }, 100));
-}
-
-// call a, b, c in order i.e. b does not start until a resolves
-queue(a);
-queue(b);
-queue(c);
-
-// call a 5 times, each waits until the previous call resolves
-[1,2,3,4,5].forEach(() => {
-    queue(a)
+app.use(async (request, response, next) => {
+    // allow access if it's the login page or the request has a valid session
+    if ('/login' === request.url || await request.session.verifyAndRenew()) { // if session is verified, renew session
+        next();
+    } else { // deny access
+        response.send('Please Login');
+        // output
+        // 'Please Login'
+    }
 });
 
-// run 3 jobs at a time
-[1,2,3,4,5,6,7,8,9,10].forEach(() => {
-    queue(a, 3)
+app.get('/login', async (request, response, next) => {
+    // start a new session (create a new session id)
+    const accessToken = await request.session.init();
+    // set session variables
+    await request.session.set('user', { id: 1, username: 'abc' });
+    // send session token/id back
+    response.json({ accessToken });
+    // output
+    // {"accessToken":"eyJleHAiOjAsIml..."}
 });
 
+app.get('/user', async (request, response, next) => {
+    // get session variable
+    response.json(await request.session.get('user'));
+    // output
+    // {"id":1,"username":"abc"}
+});
+
+app.get('/session', async (request, response, next) => {
+    // get all session values
+    response.json(await request.session.getAll());
+    // output
+    // {"user":{"id":1,"username":"abc"}}
+});
+
+app.get('/logout', async (request, response, next) => {
+    // destroy current session
+    await request.session.destroy();
+    response.json(await request.session.getAll());
+    // output
+    // {}
+});
+
+app.listen(8888);
 ```
-<a name="queue"></a>
+#### Native Node App Example
+```javascript
+import { Session } from '@coolgk/session';
+// OR
+// const { Session } = require('@coolgk/session');
 
-## queue(callback, [limit]) ⇒ <code>promise</code>
-**Kind**: global function  
+const http = require('http');
+http.createServer(async (request, response) => {
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| callback | <code>function</code> |  | callback function that returns a promise or any other types |
-| [limit] | <code>number</code> | <code>1</code> | number of callback to run at the same time, by default one callback at a time |
-
+    const session = new Session({
+        redisClient: require('redis').createClient({
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
+        }),
+        secret: '123',
+        request,
+        response
+    });
 
 ## @coolgk/string
 a javascript / typescript module
@@ -1560,6 +1799,50 @@ generateTmpName({dir: '/tmp/test'}).then((r) => console.log('name', r));
 | [options.prefix] | <code>string</code> | <code>&quot;Date.now()&quot;</code> | the optional prefix, fallbacks to tmp- if not provided |
 | [options.postfix] | <code>string</code> | <code>&quot;&#x27;.tmp&#x27;&quot;</code> | the optional postfix, fallbacks to .tmp on file creation |
 | [options.dir] | <code>string</code> | <code>&quot;/tmp&quot;</code> | the optional temporary directory, fallbacks to system default |
+
+
+## @coolgk/url
+a javascript / typescript module
+
+`npm install @coolgk/url`
+
+a simple function for parsing parameters in a url
+
+Report bugs here: [https://github.com/coolgk/node-utils/issues](https://github.com/coolgk/node-utils/issues)
+## Examples
+```javascript
+import { getParams } from '@coolgk/url';
+// OR
+// const { getParams } = require('@coolgk/url');
+
+const url = '/123';
+const pattern = '/:id';
+
+console.log(getParams(url, pattern)); // { id: '123' }
+
+const url2 = '/123/abc/456';
+const pattern2 = '/:id/abc/:value';
+
+console.log(getParams(url2, pattern2)); // { id: '123', value: '456' }
+
+const url3 = '/123/456';
+const pattern3 = ':id/:value';
+
+console.log(getParams(url3, pattern3)); // { id: '123', value: '456' }
+
+```
+<a name="getParams"></a>
+
+## getParams(url, pattern) ⇒ <code>object</code>
+a simple function to get params in a url e.g. with url: user/123, pattern: user/:id returns {id: 123}
+
+**Kind**: global function  
+**Returns**: <code>object</code> - - e.g. {userid: 123}  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | url after the domain name e.g. http://abc.com/user/:id url should be /user/:id |
+| pattern | <code>string</code> | e.g. /:userid/:name |
 
 
 ## @coolgk/unit
