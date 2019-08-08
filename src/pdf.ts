@@ -75,8 +75,7 @@ example: |
 
 // callback is missing in @types/phantom
 declare module 'phantom' {
-    interface PhantomJS {
-        // tslint:disable-line
+    interface PhantomJS { // tslint:disable-line
         callback: (data: any) => any;
     }
 }
