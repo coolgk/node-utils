@@ -1,6 +1,6 @@
 /***
 description: html to PDF module. create PDF files from html string or file.
-version: 2.0.4
+version: 2.0.5
 keywords:
     - pdf
     - html to pdf

@@ -1,6 +1,6 @@
 /***
 description: number utitlies
-version: 2.0.4
+version: 2.0.5
 keywords:
     - number utitlies
     - round

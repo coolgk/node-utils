@@ -125,7 +125,7 @@ gulp.task('test', ['pre-test'], () => {
 
 gulp.task('generate-sub-packages', generateSubPackages);
 gulp.task('package', gulp.series('generate-sub-packages', generateRootPackage));
-gulp.task('dependencyCheck', gulp.series('package', dependencyCheck));
+gulp.task('audit', gulp.series('package', audit));
 gulp.task('generate-all-packages', gulp.series('generate-sub-packages', generateRootPackage));
 gulp.task('publish', gulp.series('generate-all-packages', () => {
     return execCommand(`cd ${packageFolder}/utils && npm publish --access=public`);
@@ -487,12 +487,12 @@ function createLicence (packageFolder) {
     });
 }
 
-function dependencyCheck () {
+function audit () {
     const promises = [];
     fs.readdir(packageFolder, (error, folders) => {
         for (const folder of folders) {
             promises.push(
-                execCommand(`nsp check ${packageFolder}/${folder}`)
+                execCommand(`cd ${packageFolder}/${folder} && npm audit && cd --`)
             );
         }
     });

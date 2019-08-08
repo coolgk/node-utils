@@ -1,7 +1,6 @@
 /***
 description: a simple function for parsing parameters in a url
-version: 2.0.6
-keywords:
+version: 2.0.7
     - url
     - parser
 example: |

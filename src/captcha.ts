@@ -1,6 +1,6 @@
 /***
 description: recapcha wrapper
-version: 2.1.2
+version: 2.1.3
 keywords:
     - recapcha
 dependencies:
