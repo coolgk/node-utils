@@ -1,6 +1,6 @@
 /***
 description: facebook sign in module which verifies client access token and returns account data
-version: 1.0.3
+version: 1.0.4
 keywords:
     - facebook
     - login

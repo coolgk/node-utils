@@ -1,6 +1,6 @@
 /***
 description: google sign in module which verifies id token and returns account data
-version: 1.0.4
+version: 1.0.5
 keywords:
     - google
     - login
