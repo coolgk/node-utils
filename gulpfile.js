@@ -121,8 +121,13 @@ gulp.task('test', ['pre-test'], () => {
             process.exit(1);
         });
 });
- */
-gulp.task('publish', ['generate-all-packages'], () => {
+*/
+
+gulp.task('generate-sub-packages', generateSubPackages);
+gulp.task('package', gulp.series('generate-sub-packages', generateRootPackage));
+gulp.task('dependencyCheck', gulp.series('package', dependencyCheck));
+gulp.task('generate-all-packages', gulp.series('generate-sub-packages', generateRootPackage));
+gulp.task('publish', gulp.series('generate-all-packages', () => {
     return execCommand(`cd ${packageFolder}/utils && npm publish --access=public`);
     /* return new Promise((resolve) => {
         fs.readdir(packageFolder, (error, folders) => {
@@ -133,13 +138,7 @@ gulp.task('publish', ['generate-all-packages'], () => {
             resolve(Promise.all(promises));
         });
     }); */
-});
-
-gulp.task('dependencyCheck', ['package'], dependencyCheck);
-
-gulp.task('generate-all-packages', ['generate-sub-packages'], generateRootPackage);
-gulp.task('package', ['generate-sub-packages'], generateRootPackage);
-gulp.task('generate-sub-packages', generateSubPackages);
+}));
 
 function generateSubPackages () {
     return del([`${distFolder}/**`, `${packageFolder}/**`])
@@ -550,6 +549,6 @@ function unitTest (reporter = 'spec') {
  */
 process.on('unhandledRejection', consoleLogError);
 
-gulp.task('watch', ['ts-dev'], () => {
-    gulp.watch('src/*.ts', ['ts-dev']);
-});
+// gulp.task('watch', ['ts-dev'], () => {
+//     gulp.watch('src/*.ts', ['ts-dev']);
+// });
