@@ -5,7 +5,7 @@ keywords:
     - redis
     - cache
 dependencies:
-    "@types/redis": "^2.8.3"
+    "@types/redis": "^2.8.6"
 example: |
     import { Cache } from '@coolgk/cache';
     import { createClient } from 'redis';

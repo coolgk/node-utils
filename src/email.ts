@@ -5,7 +5,7 @@ keywords:
     - email
     - smtp sender
 dependencies:
-    "mime-types": "^2.1.17"
+    "mime-types": "^2.1.18"
     "emailjs": "^2.0.0"
     "@coolgk/string": "^2"
     "@coolgk/array": "^2"
@@ -95,7 +95,7 @@ export interface IEmailAttachment {
     name?: string;
     type?: string;
     method?: string;
-    headers?: {[propName: string]: string};
+    headers?: { [propName: string]: string };
 }
 
 export interface ISendOptions {
@@ -126,9 +126,10 @@ export class Email {
      * @param {string[]} [options.authentication] - authentication methods
      * @see https://www.npmjs.com/package/emailjs#emailserverconnectoptions
      */
-    public constructor (options: (IEmailOptions | IEmailConfigWithClient) = {host: 'localhost'}) {
-        this._emailClient = (options as IEmailConfigWithClient).emailClient ?
-            (options as IEmailConfigWithClient).emailClient : emailjs.server.connect(options as IEmailOptions);
+    public constructor (options: IEmailOptions | IEmailConfigWithClient = { host: 'localhost' }) {
+        this._emailClient = (options as IEmailConfigWithClient).emailClient
+            ? (options as IEmailConfigWithClient).emailClient
+            : emailjs.server.connect(options as IEmailOptions);
         this._stripTags = options.stripTags || stripTags;
         this._getMimeType = options.getMimeType || lookup;
     }
@@ -203,7 +204,7 @@ export class Email {
         const formattedEmails: (string | IEmailAddress)[] = [];
         emails.forEach((email: string | IEmailAddress) => {
             if (typeof email === 'string') {
-                email = {email};
+                email = { email };
             }
             formattedEmails.push(`"${email.name || email.email}" <${email.email}>`);
         });

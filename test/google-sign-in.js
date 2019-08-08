@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const expect = require('chai').expect;
 const config = require('../test.config.js');
 
-describe('GoogleSignIn Module', () => {
+describe.skip('GoogleSignIn Module', () => {
 
     const { GoogleSignIn } = require(`../${config.sourceFolder}/google-sign-in`);
 

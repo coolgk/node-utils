@@ -9,7 +9,7 @@ keywords:
 dependencies:
     "@types/mongodb": "^3"
     "@types/csv-parse": "^1.1.11"
-    "@types/csv-stringify": "^1.4.1"
+    "@types/csv-stringify": "^1.4.2"
     "csv-parse": "^2.2"
     "csv-stringify": "^2.1"
     "@coolgk/queue": "^2"
@@ -127,18 +127,14 @@ export interface ICsvWriteConfig {
     columns?: string[];
     delimiter?: string;
     filepath?: string;
-    formatter?: (data: {[propName: string]: any} | any[]) => string[];
+    formatter?: (data: { [propName: string]: any } | any[]) => string[];
 }
 
 export interface IReadFileResponse {
-    forEach: (
-        callback: (row: any, index: number) => void,
-        endCallback: (rowCount: number) => void
-    ) => void;
+    forEach: (callback: (row: any, index: number) => void, endCallback: (rowCount: number) => void) => void;
 }
 
 export class Csv {
-
     private _csvParse: typeof csvParse; // DI for test
     private _csvStringify: typeof csvStringify; // DI for test
     private _generateFile: typeof generateFile; // DI for test
@@ -172,10 +168,8 @@ export class Csv {
      */
     /* tslint:enable */
     public parse (value: string, options: ICsvReadConfig = {}): Promise<any[]> {
-        return new Promise(
-            (resolve, reject) => this._csvParse(
-                value, options, (error, output) => error ? reject(error) : resolve(output)
-            )
+        return new Promise((resolve, reject) =>
+            this._csvParse(value, options, (error, output) => (error ? reject(error) : resolve(output)))
         );
     }
 
@@ -199,23 +193,16 @@ export class Csv {
         return {
             forEach: (callback, endCallback) => {
                 let index = 0;
-                readline.on(
-                    'line',
-                    (line: string) => {
-                        if (!options.limit || index < options.limit) {
-                            ((callbackIndex) => {
-                                queue(
-                                    () => this.parse(line, options).then(
-                                        ([row]) => callback(row, callbackIndex)
-                                    )
-                                );
-                            })(index++);
-                        } else {
-                            readline.close();
-                            fileStream.destroy();
-                        }
+                readline.on('line', (line: string) => {
+                    if (!options.limit || index < options.limit) {
+                        ((callbackIndex) => {
+                            queue(() => this.parse(line, options).then(([row]) => callback(row, callbackIndex)));
+                        })(index++);
+                    } else {
+                        readline.close();
+                        fileStream.destroy();
                     }
-                );
+                });
                 readline.on('close', () => endCallback && endCallback(index));
             }
         };
@@ -233,13 +220,14 @@ export class Csv {
      */
     /* tslint:enable */
     public createFile (data: any[] | Cursor, options: ICsvWriteConfig = {}): Promise<string> {
-        return (
-            options.filepath ? Promise.resolve({path: options.filepath}) : this._generateFile({
-                ...this._tmpConfig,
-                keep: true,
-                postfix: '.csv'
-            })
-        ).then(({path}) => {
+        return (options.filepath
+            ? Promise.resolve({ path: options.filepath })
+            : this._generateFile({
+                  ...this._tmpConfig,
+                  keep: true,
+                  postfix: '.csv'
+              })
+        ).then(({ path }) => {
             const fileStream = createWriteStream(path);
             const fileStreamPromise = new Promise((resolve, reject) => {
                 fileStream.on('error', (error) => {
@@ -250,31 +238,31 @@ export class Csv {
                 });
             });
 
-            return (
-                options.columns ? this._writeCsvStream(fileStream, options.columns, options, true) : Promise.resolve()
-            ).then(
-                () => new Promise((resolve, reject) => {
-                    if (data instanceof Array) {
-                        resolve(
-                            Promise.all(
-                                data.map((row) => this._writeCsvStream(fileStream, row, options))
-                            )
-                        );
-                    } else {
-                        const promises: Promise<any>[] = [];
-                        data.forEach(
-                            (row) => promises.push(this._writeCsvStream(fileStream, row, options)),
-                            () => resolve(Promise.all(promises))
-                        );
-                    }
-                })
-            ).then(
-                () => new Promise((resolve, reject) => {
-                    fileStream.end(() => resolve(fileStreamPromise));
-                })
-            ).then(
-                () => path
-            );
+            return (options.columns
+                ? this._writeCsvStream(fileStream, options.columns, options, true)
+                : Promise.resolve()
+            )
+                .then(
+                    () =>
+                        new Promise((resolve, reject) => {
+                            if (data instanceof Array) {
+                                resolve(Promise.all(data.map((row) => this._writeCsvStream(fileStream, row, options))));
+                            } else {
+                                const promises: Promise<any>[] = [];
+                                data.forEach(
+                                    (row) => promises.push(this._writeCsvStream(fileStream, row, options)),
+                                    () => resolve(Promise.all(promises))
+                                );
+                            }
+                        })
+                )
+                .then(
+                    () =>
+                        new Promise((resolve, reject) => {
+                            fileStream.end(() => resolve(fileStreamPromise));
+                        })
+                )
+                .then(() => path);
         });
     }
 
@@ -299,19 +287,25 @@ export class Csv {
     ): Promise<void> {
         // write onece at a time
         return queue(
-            () => new Promise((resolve, reject) =>
-                Promise.resolve(rowData).then( // for cursor version of findAll()
-                    (data) => this._csvStringify(
-                        [options.formatter && !isHeader ? options.formatter(data) : data],
-                        options,
-                        (error, csvRow) => error ? reject(error) : (
-                            // If a call to stream.write(chunk) returns false, the 'drain' event will be emitted
-                            // when it is appropriate to resume writing data to the stream.
-                            writableStream.write(csvRow) ? resolve() : writableStream.once('drain', resolve)
-                        )
+            () =>
+                new Promise((resolve, reject) =>
+                    Promise.resolve(rowData).then(
+                        // for cursor version of findAll()
+                        (data) =>
+                            this._csvStringify(
+                                [options.formatter && !isHeader ? options.formatter(data) : data],
+                                options,
+                                (error, csvRow) =>
+                                    error
+                                        ? reject(error)
+                                        : // If a call to stream.write(chunk) returns false, the 'drain' event will be emitted
+                                        // when it is appropriate to resume writing data to the stream.
+                                        writableStream.write(csvRow)
+                                        ? resolve()
+                                        : writableStream.once('drain', resolve)
+                            )
                     )
                 )
-            )
         );
     }
 }

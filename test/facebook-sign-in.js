@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const expect = require('chai').expect;
 const config = require('../test.config.js');
 
-describe('FacebookSignIn Module', () => {
+describe.skip('FacebookSignIn Module', () => {
 
     const { FacebookSignIn } = require(`../${config.sourceFolder}/facebook-sign-in`);
 
