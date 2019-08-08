@@ -1,12 +1,12 @@
 /***
 description: html to PDF module. create PDF files from html string or file.
-version: 2.0.4
+version: 2.0.5
 keywords:
     - pdf
     - html to pdf
 dependencies:
-    "@types/phantom": "^3.2.3"
-    "phantom": "^4.0.9"
+    "@types/phantom": "^3.2.4"
+    "phantom": "^4.0.12"
     "@coolgk/tmp": "^2"
 example: |
     // for "error while loading shared libraries: libfontconfig.so" run "sudo apt-get -y install libfontconfig"
@@ -109,19 +109,21 @@ export interface ICreateConfig {
     readonly delay?: number;
     readonly orientation?: Orientation;
     readonly format?: Format;
-    readonly margin?: number | string | {
-        top: number | string,
-        left: number | string,
-        bottom: number | string,
-        right: number | string
-    };
-    readonly header?: string | { height: string, contents: string };
-    readonly footer?: string | { height: string, contents: string };
+    readonly margin?:
+        | number
+        | string
+        | {
+              top: number | string;
+              left: number | string;
+              bottom: number | string;
+              right: number | string;
+          };
+    readonly header?: string | { height: string; contents: string };
+    readonly footer?: string | { height: string; contents: string };
     readonly dpi?: number;
 }
 
 export class Pdf {
-
     private _phantom: typeof phantom;
     private _tmp: typeof tmp;
     private _tmpConfig: tmp.ITmpConfig;
@@ -175,7 +177,7 @@ export class Pdf {
         }: ICreateConfig = {}
     ): Promise<string> {
         if (!pdfFilePath) {
-            pdfFilePath = (await this._tmp.generateFile({...this._tmpConfig, keep: true, postfix: '.pdf'})).path;
+            pdfFilePath = (await this._tmp.generateFile({ ...this._tmpConfig, keep: true, postfix: '.pdf' })).path;
         }
 
         const phantomInstance = await this._phantom.create();
@@ -202,7 +204,7 @@ export class Pdf {
             }
         });
 
-        await page.render(pdfFilePath, {format: 'pdf'});
+        await page.render(pdfFilePath, { format: 'pdf' });
 
         await page.close();
         phantomInstance.exit();
@@ -210,9 +212,9 @@ export class Pdf {
         return pdfFilePath;
 
         // return new Promise<string>(async (resolve) => {
-            // await page.render(pdfFilePath, {format: 'pdf'});
-            // phantomInstance.exit();
-            // resolve(pdfFilePath);
+        // await page.render(pdfFilePath, {format: 'pdf'});
+        // phantomInstance.exit();
+        // resolve(pdfFilePath);
         // });
     }
 
@@ -222,25 +224,20 @@ export class Pdf {
      * @param {object} [options] - see options in createFromHtmlFile()
      * @return {promise} - filepath of the generated PDF
      */
-    public async createFromHtmlString (
-        htmlString: string,
-        options: ICreateConfig = {}
-    ): Promise<string> {
-        const {path, cleanupCallback} = await this._tmp.generateFile({
+    public async createFromHtmlString (htmlString: string, options: ICreateConfig = {}): Promise<string> {
+        const { path, cleanupCallback } = await this._tmp.generateFile({
             ...this._tmpConfig,
             keep: true,
             postfix: '.html'
         });
         const fileStream = createWriteStream(path);
-        return new Promise(
-            (resolve, reject) => fileStream.write(htmlString) ? resolve() : fileStream.once('drain', resolve)
-        ).then(
-            async () => {
-                const pdfFilePath = await this.createFromHtmlFile(path, options);
-                cleanupCallback(); // remove tmp html file
-                return pdfFilePath;
-            }
-        );
+        return new Promise((resolve, reject) =>
+            fileStream.write(htmlString) ? resolve() : fileStream.once('drain', resolve)
+        ).then(async () => {
+            const pdfFilePath = await this.createFromHtmlFile(path, options);
+            cleanupCallback(); // remove tmp html file
+            return pdfFilePath;
+        });
     }
 
     /**
@@ -253,9 +250,9 @@ export class Pdf {
         return new Function(
             'pageNumber',
             'numberOfPages',
-            "return '"
-            + (html.replace(/'/g, "\\'") || '')
-            + "'.replace(/\\${pageNumber}/g, pageNumber).replace(/\\${numberOfPages}/g, numberOfPages)" // tslint:disable-line
+            "return '" +
+                (html.replace(/'/g, "\\'") || '') +
+                "'.replace(/\\${pageNumber}/g, pageNumber).replace(/\\${numberOfPages}/g, numberOfPages)" // tslint:disable-line
         ) as () => string;
     }
 }

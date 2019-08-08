@@ -2,7 +2,7 @@
 
 // const sinon = require('sinon');
 const chai = require('chai');
-chai.use(require("chai-as-promised"));
+chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 
 const config = require('../test.config.js');
@@ -60,7 +60,7 @@ describe('PDF Module', function () {
     });
 
     after(() => {
-        require('del')([ tmpDir ], { force: true });
+        require('del')([tmpDir], { force: true });
     });
 
     it('should create PDF from file', (done) => {

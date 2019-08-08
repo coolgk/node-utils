@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: A http request form data parser (large file friendly) for 'application/json', 'application/x-www-form-urlencoded' and 'multipart/form-data'. It only parses form data when you ask for it.
-version: 2.0.4
+version: 2.0.5
 documentation: |
     #### Example Form
     ```html

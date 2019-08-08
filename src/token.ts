@@ -1,6 +1,6 @@
 /***
 description: an expirable, revocable, renewable token with data storage
-version: 2.0.7
+version: 2.0.8
 keywords:
     - token
     - session token

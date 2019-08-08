@@ -1,6 +1,6 @@
 /***
 description: base64 encoded decode functions
-version: 2.0.4
+version: 2.0.5
 keywords:
     - base64
     - encode

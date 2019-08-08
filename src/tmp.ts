@@ -1,6 +1,6 @@
 /***
 description: wrapper functions, generate tmp file or folders
-version: 2.0.5
+version: 2.0.6
 keywords:
     - temp
     - tmp

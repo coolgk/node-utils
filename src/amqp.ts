@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: a simple RabbitMQ (amqp wrapper) class for publishing and consuming messages
-version: 2.0.5
+version: 2.0.6
 keywords:
     - ampq
     - rabbitmq

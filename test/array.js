@@ -19,13 +19,13 @@ describe('Array Module', () => {
         });
 
         it('should convert boolean, string, object values to array', () => {
-            expect(toArray(false)).to.deep.equal([ false ]);
-            expect(toArray('')).to.deep.equal([ '' ]);
-            expect(toArray({ a: 1 })).to.deep.equal([ { a: 1 } ]);
+            expect(toArray(false)).to.deep.equal([false]);
+            expect(toArray('')).to.deep.equal(['']);
+            expect(toArray({ a: 1 })).to.deep.equal([{ a: 1 }]);
         });
 
         it('should keep array as is', () => {
-            expect(toArray([1,2,3])).to.deep.equal([1,2,3]);
+            expect(toArray([1, 2, 3])).to.deep.equal([1, 2, 3]);
         });
 
     });

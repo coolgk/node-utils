@@ -1,10 +1,10 @@
 /***
 description: recapcha wrapper
-version: 2.1.2
+version: 2.1.3
 keywords:
     - recapcha
 dependencies:
-    "request": "^2.83.0"
+    "request": "^2.85.0"
     "@types/request": "^2.47.0"
 example: |
     const { verify } = require('@coolgk/captcha');
@@ -49,7 +49,6 @@ export interface IResult {
 }
 
 export class Captcha {
-
     public static readonly _RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     protected _secret: string;

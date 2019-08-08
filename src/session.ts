@@ -1,7 +1,7 @@
 /* tslint:disable */
 /***
 description: An session handler that works without cookie (and with cookie too).
-version: 2.0.0
+version: 2.0.1
 keywords:
     - session
     - session handler
