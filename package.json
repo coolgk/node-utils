@@ -76,7 +76,7 @@
         "csv-parse": "^2.2.0",
         "csv-stringify": "^2.1.0",
         "emailjs": "^2.0.0",
-        "google-auth-library": "^1.4.0",
+        "google-auth-library": "^6.0.0",
         "mime-types": "^2.1.18",
         "phantom": "^4.0.12",
         "redis": "^2.8.0",
