@@ -78,10 +78,10 @@
         "emailjs": "^2.0.0",
         "google-auth-library": "^1.4.0",
         "mime-types": "^2.1.18",
-        "phantom": "^4.0.12",
+        "phantom": "^6.3.0",
         "redis": "^2.8.0",
-        "request": "^2.85.0",
-        "request-promise-native": "^1.0.5",
+        "request": "^2.88.2",
+        "request-promise-native": "^1.0.9",
         "tmp": "0.0.33",
         "uuid": "^3.2.1"
     },
