@@ -72,7 +72,7 @@
         "amqplib": "^0.5.2",
         "bcrypt-nodejs": "0.0.3",
         "busboy": "^0.2.14",
-        "cookie": "^0.3.1",
+        "cookie": "^0.7.0",
         "csv-parse": "^2.2.0",
         "csv-stringify": "^2.1.0",
         "emailjs": "^2.0.0",
